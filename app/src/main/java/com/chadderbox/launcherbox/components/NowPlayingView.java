@@ -54,6 +54,7 @@ public final class NowPlayingView {
         mBtnPlayPause = mActivity.findViewById(R.id.btn_play_pause);
         mBtnNext = mActivity.findViewById(R.id.btn_next);
 
+        mContainer.setVisibility(View.GONE);
         setupMediaController();
     }
 
