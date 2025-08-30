@@ -1,0 +1,31 @@
+<resources>
+    <style name="Base.Theme.Launcherbox" parent="Theme.Material3.DayNight.NoActionBar">
+<!--        <item name="android:windowBackground">@android:color/transparent</item>-->
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <item name="android:textColorPrimary">?attr/colorOnBackground</item>
+        <item name="android:textColorSecondary">?attr/colorSecondary</item>
+    </style>
+
+    <style name="Theme.Launcherbox.Launcher" parent="Base.Theme.Launcherbox">
+        <item name="textAppearanceHeadline6">@style/TextAppearance.Material3.HeadlineMedium</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.Material3.BodyMedium</item>
+
+        <item name="selectableItemBackground">@android:attr/selectableItemBackground</item>
+        <item name="selectableItemBackgroundBorderless">@android:attr/selectableItemBackgroundBorderless</item>
+    </style>
+
+    <style name="Theme.Launcherbox.Settings" parent="Base.Theme.Launcherbox">
+        <item name="android:windowBackground">?attr/colorSurface</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
+
+        <item name="textAppearanceHeadline6">@style/TextAppearance.Material3.HeadlineMedium</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.Material3.BodyMedium</item>
+    </style>
+</resources>

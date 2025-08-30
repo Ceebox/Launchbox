@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Launcherbox</string>
+    <string name="pause">Pause</string>
+    <string name="skip">Skip</string>
+    <string name="previous">previous</string>
+    <string name="song_art">Song Art</string>
+    <string name="settings">Settings</string>
+    <string name="search_prompt">Search…</string>
+</resources>

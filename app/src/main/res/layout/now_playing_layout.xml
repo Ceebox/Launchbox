@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/now_playing"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:orientation="horizontal"
+    android:layout_margin="16dp"
+    android:padding="8dp"
+    android:gravity="center_vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ImageView
+        android:id="@+id/song_art"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="8dp"
+        android:contentDescription="@string/song_art"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:paddingStart="8dp"
+        android:paddingEnd="0dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content">
+        <com.chadderbox.launcherbox.components.FontTextView
+            android:id="@+id/song_title"
+            android:textColor="#fff"
+            android:textSize="16sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <com.chadderbox.launcherbox.components.FontTextView
+            android:id="@+id/song_artist"
+            android:textColor="#ccc"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/btn_prev"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/previous"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_skip_previous"/>
+
+    <ImageButton
+        android:id="@+id/btn_play_pause"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/pause"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_play_arrow"/>
+
+    <ImageButton
+        android:id="@+id/btn_next"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/skip"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_skip_next" />
+</LinearLayout>
