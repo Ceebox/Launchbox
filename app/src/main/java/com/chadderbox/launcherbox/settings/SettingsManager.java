@@ -28,7 +28,7 @@ public final class SettingsManager {
 
     @Nullable
     public static String getIconPack() {
-        return sPrefs.getString(KEY_ICON_PACK, null);
+        return sPrefs.getString(KEY_ICON_PACK, "System Default");
     }
 
     public static boolean isUsingSystemIcons() {
@@ -40,7 +40,7 @@ public final class SettingsManager {
     }
 
     public static String getFont() {
-        return sPrefs.getString(KEY_FONT, "system");
+        return sPrefs.getString(KEY_FONT, "System Default");
     }
 
     public static void setFavourites(Set<String> newFavourites) {
