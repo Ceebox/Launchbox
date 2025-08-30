@@ -60,7 +60,7 @@
         android:background="?android:attr/colorBackground"
         android:elevation="16dp"
         app:behavior_hideable="true"
-        app:behavior_peekHeight="48dp"
+        app:behavior_peekHeight="0dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <!-- Handle bar -->

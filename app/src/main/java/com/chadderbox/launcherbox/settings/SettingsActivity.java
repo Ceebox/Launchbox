@@ -38,7 +38,6 @@ public final class SettingsActivity extends AppCompatActivity {
         }
 
         buildOptions();
-        setupOptions();
     }
 
     @Override
@@ -75,6 +74,8 @@ public final class SettingsActivity extends AppCompatActivity {
                 (ctx) -> "More coming soon",
                 (ctx) -> Toast.makeText(ctx, "Not implemented yet", Toast.LENGTH_SHORT).show()
         ));
+
+        setupOptions();
     }
 
     private void setupOptions() {
@@ -129,7 +130,6 @@ public final class SettingsActivity extends AppCompatActivity {
                 IconPackLoader.clearCache();
 
                 buildOptions();
-                setupOptions();
             })
             .show();
     }
@@ -147,9 +147,7 @@ public final class SettingsActivity extends AppCompatActivity {
                 .setItems(fonts, (dialog, which) -> {
                     var chosenFont = fonts[which];
                     SettingsManager.setFont(chosenFont);
-                    Toast.makeText(this,
-                            "Font applied: " + chosenFont,
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Font applied: " + chosenFont, Toast.LENGTH_SHORT).show();
 
                     buildOptions();
                 })
@@ -171,10 +169,7 @@ public final class SettingsActivity extends AppCompatActivity {
                     SettingsManager.setTheme(chosenMode);
                     AppCompatDelegate.setDefaultNightMode(chosenMode);
                     getDelegate().applyDayNight();
-                    Toast.makeText(this,
-                            "Theme applied: " + themes[which],
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Toast.makeText(this, "Theme applied: " + themes[which], Toast.LENGTH_SHORT).show();
 
                     buildOptions();
                 })

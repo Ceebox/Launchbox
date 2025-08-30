@@ -346,6 +346,11 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                     EditText input = findViewById(R.id.search_input);
                     input.requestFocus();
                 }
+
+                // Prevent weird "peeking", it kinda stays open
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    mSearchSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
             }
 
             @Override
@@ -357,6 +362,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         onBackPressedDispatcher.addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                // NOTE: Don't call super on this to prevent weird back animation
                 if (mSearchSheet.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                     closeSearchSheet();
 
@@ -364,11 +370,6 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                     input.clearFocus();
                     var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-                } else {
-                    // If search is not open, let the system handle back
-                    setEnabled(false);
-                    onBackPressedDispatcher.onBackPressed();
-                    setEnabled(true);
                 }
             }
         });
