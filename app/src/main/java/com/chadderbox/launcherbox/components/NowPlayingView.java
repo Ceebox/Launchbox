@@ -3,6 +3,7 @@ package com.chadderbox.launcherbox.components;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -59,6 +60,13 @@ public final class NowPlayingView {
     }
 
     private void setupMediaController() {
+
+        if (!hasNotificationAccess(mActivity)) {
+            Log.w("NowPlayingView", "Notification access missing.");
+            requestNotificationAccess(mActivity);
+            return;
+        }
+
         try {
             mSessionManager = (MediaSessionManager) mActivity.getSystemService(Context.MEDIA_SESSION_SERVICE);
 
@@ -102,6 +110,7 @@ public final class NowPlayingView {
         }
 
         var md = mController.getMetadata();
+
         if (md != null) {
             mContainer.setVisibility(View.VISIBLE);
             var title = md.getString(MediaMetadata.METADATA_KEY_TITLE);
@@ -149,5 +158,19 @@ public final class NowPlayingView {
                 mController.getTransportControls().skipToPrevious();
             }
         });
+    }
+
+    private boolean hasNotificationAccess(Context context) {
+        String enabledListeners = android.provider.Settings.Secure.getString(
+            context.getContentResolver(),
+            "enabled_notification_listeners"
+        );
+        return enabledListeners != null &&
+            enabledListeners.contains(context.getPackageName());
+    }
+
+    private void requestNotificationAccess(Activity activity) {
+        Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+        activity.startActivity(intent);
     }
 }
