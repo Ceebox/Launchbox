@@ -27,6 +27,8 @@ import com.chadderbox.launcherbox.components.AlphabetIndexView;
 import com.chadderbox.launcherbox.components.NowPlayingView;
 import com.chadderbox.launcherbox.data.AppInfo;
 import com.chadderbox.launcherbox.data.ListItem;
+import com.chadderbox.launcherbox.search.AppSearchProvider;
+import com.chadderbox.launcherbox.search.ISearchProvider;
 import com.chadderbox.launcherbox.search.SearchManager;
 import com.chadderbox.launcherbox.settings.SettingsActivity;
 import com.chadderbox.launcherbox.settings.SettingsManager;
@@ -46,7 +48,8 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
-    private final SearchManager mSearchManager = new SearchManager(new ArrayList<>());
+    private SearchManager mSearchManager;
+    private AppSearchProvider mAppSearchProvider;
     private RecyclerView mAppsView;
     private AlphabetIndexView mIndexView;
     private CombinedAdapter mAppsAdapter;
@@ -72,6 +75,11 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         mIconPackLoader = new IconPackLoader(getApplicationContext(), mLastIconPack);
         mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler);
+
+        var searchProviders = new ArrayList<ISearchProvider>();
+        mAppSearchProvider = new AppSearchProvider(new ArrayList<>());
+        searchProviders.add(mAppSearchProvider);
+        mSearchManager = new SearchManager(searchProviders);
 
         AppCompatDelegate.setDefaultNightMode(SettingsManager.getTheme());
 
@@ -257,7 +265,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
     private List<ListItem> buildCombinedList(Set<String> favourites) {
         var apps = mAppLoader.loadInstalledApps();
-        mSearchManager.setAllApps(apps);
+        mAppSearchProvider.setAllApps(apps);
 
         var favApps = new ArrayList<AppInfo>();
         var otherApps = new ArrayList<AppInfo>();

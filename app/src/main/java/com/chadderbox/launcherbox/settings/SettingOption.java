@@ -4,20 +4,12 @@ import android.content.Context;
 
 public final class SettingOption {
     private final String mTitle;
-    private final SubtitleProvider mSubtitleProvider;
-    private final ClickAction mClickAction;
-
-    public interface SubtitleProvider {
-        String getSubtitle(Context context);
-    }
-
-    public interface ClickAction {
-        void onClick(Context context);
-    }
+    private final ISubtitleProvider mSubtitleProvider;
+    private final IClickAction mClickAction;
 
     public SettingOption(String title,
-                         SubtitleProvider subtitleProvider,
-                         ClickAction clickAction) {
+                         ISubtitleProvider subtitleProvider,
+                         IClickAction clickAction) {
         mTitle = title;
         mSubtitleProvider = subtitleProvider;
         mClickAction = clickAction;
