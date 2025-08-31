@@ -32,9 +32,11 @@ import com.chadderbox.launcherbox.data.AppInfo;
 import com.chadderbox.launcherbox.data.AppItem;
 import com.chadderbox.launcherbox.data.HeaderItem;
 import com.chadderbox.launcherbox.data.ListItem;
+import com.chadderbox.launcherbox.data.SettingItem;
 import com.chadderbox.launcherbox.search.AppSearchProvider;
 import com.chadderbox.launcherbox.search.ISearchProvider;
 import com.chadderbox.launcherbox.search.SearchManager;
+import com.chadderbox.launcherbox.search.SettingsSearchProvider;
 import com.chadderbox.launcherbox.search.WebSearchProvider;
 import com.chadderbox.launcherbox.search.WebSuggestionProvider;
 import com.chadderbox.launcherbox.settings.SettingsActivity;
@@ -106,11 +108,14 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         mIconPackLoader = new IconPackLoader(getApplicationContext(), mLastIconPack);
         mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler);
 
-        var searchProviders = new ArrayList<ISearchProvider>();
         mAppSearchProvider = new AppSearchProvider(new ArrayList<>());
-        searchProviders.add(mAppSearchProvider);
-        searchProviders.add(new WebSearchProvider());
-        searchProviders.add(new WebSuggestionProvider());
+        var searchProviders = List.of(
+            mAppSearchProvider,
+            new WebSearchProvider(),
+            new WebSuggestionProvider(),
+            new SettingsSearchProvider(this.getApplicationContext())
+        );
+
         mSearchManager = new SearchManager(searchProviders);
 
         AppCompatDelegate.setDefaultNightMode(SettingsManager.getTheme());
@@ -123,7 +128,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         mAppsView = findViewById(R.id.recyclerview_apps);
         mAppsView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
-        mAppsAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::onAppLongPressed, this::openWebQuery, mIconPackLoader);
+        mAppsAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::onAppLongPressed, this::openWebQuery, this::openSetting, mIconPackLoader);
         mAppsView.setAdapter(mAppsAdapter);
         mIndexView = findViewById(R.id.alphabet_index);
 
@@ -274,6 +279,10 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         startActivity(intent);
     }
 
+    private void openSetting(SettingItem settingItem) {
+        startActivity(settingItem.getIntent());
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     private void onAppLongPressed(AppInfo app) {
         var options = new String[] {
@@ -387,7 +396,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         mSearchResultsView = sheet.findViewById(R.id.search_results);
         mSearchResultsView.setLayoutManager(new LinearLayoutManager(this));
-        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::onAppLongPressed, this::openWebQuery, mIconPackLoader);
+        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::onAppLongPressed, this::openWebQuery, this::openSetting, mIconPackLoader);
         mSearchResultsView.setAdapter(mSearchAdapter);
 
         mSearchInput = sheet.findViewById(R.id.search_input);

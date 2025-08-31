@@ -17,6 +17,7 @@ import com.chadderbox.launcherbox.data.AppInfo;
 import com.chadderbox.launcherbox.data.AppItem;
 import com.chadderbox.launcherbox.data.HeaderItem;
 import com.chadderbox.launcherbox.data.ListItem;
+import com.chadderbox.launcherbox.data.SettingItem;
 import com.chadderbox.launcherbox.data.SuggestionItem;
 import com.chadderbox.launcherbox.data.WebItem;
 import com.chadderbox.launcherbox.settings.SettingsManager;
@@ -24,6 +25,7 @@ import com.chadderbox.launcherbox.utils.FontHelper;
 import com.chadderbox.launcherbox.utils.IconPackLoader;
 import com.chadderbox.launcherbox.viewholders.AppViewHolder;
 import com.chadderbox.launcherbox.viewholders.HeaderViewHolder;
+import com.chadderbox.launcherbox.viewholders.SettingViewHolder;
 import com.chadderbox.launcherbox.viewholders.SuggestionViewHolder;
 import com.chadderbox.launcherbox.viewholders.WebViewHolder;
 
@@ -37,11 +39,13 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int TYPE_APP = 1;
     private static final int TYPE_WEB = 2;
     private static final int TYPE_SUGGESTION = 3;
+    private static final int TYPE_SETTING = 4;
 
     private final List<ListItem> mItems;
     private final Consumer<AppInfo> mAppShortPressListener;
     private final Consumer<AppInfo> mAppLongPressListener;
     private final Consumer<String> mWebShortPressListener;
+    private final Consumer<SettingItem> mSettingsShortPressListener;
     private final IconPackLoader mIconPackLoader;
 
     public CombinedAdapter(
@@ -49,12 +53,14 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             Consumer<AppInfo> appShortPressListener,
             Consumer<AppInfo> appLongPressListener,
             Consumer<String> webShortPressListener,
+            Consumer<SettingItem> settingsShortPressListener,
             IconPackLoader iconPackLoader
     ) {
         mItems = items;
         mAppShortPressListener = appShortPressListener;
         mAppLongPressListener = appLongPressListener;
         mWebShortPressListener = webShortPressListener;
+        mSettingsShortPressListener = settingsShortPressListener;
         mIconPackLoader = iconPackLoader;
     }
 
@@ -66,6 +72,7 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case APP -> TYPE_APP;
             case WEB -> TYPE_WEB;
             case SUGGESTION -> TYPE_SUGGESTION;
+            case SETTING -> TYPE_SETTING;
         };
     }
 
@@ -119,6 +126,9 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else if (viewType == TYPE_SUGGESTION) {
             var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
             return new SuggestionViewHolder(view, mWebShortPressListener);
+        } else if (viewType == TYPE_SETTING) {
+            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
+            return new SettingViewHolder(view, mSettingsShortPressListener);
         }
 
         // Idk
@@ -147,6 +157,11 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         else if (holder instanceof SuggestionViewHolder suggestionHolder) {
             if (item instanceof SuggestionItem suggestionItem) {
                 suggestionHolder.bind(suggestionItem.getSuggestion());
+            }
+        }
+        else if (holder instanceof SettingViewHolder settingHolder) {
+            if (item instanceof SettingItem settingItem) {
+                settingHolder.bind(settingItem);
             }
         }
     }
