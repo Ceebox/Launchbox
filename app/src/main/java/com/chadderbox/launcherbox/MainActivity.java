@@ -1,8 +1,11 @@
 package com.chadderbox.launcherbox;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -64,6 +67,25 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     private CombinedAdapter mSearchAdapter;
     private EditText mSearchInput;
     private AppLoader mAppLoader;
+
+    private final BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            var action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+
+            // If our apps have changed, we should probably show that!
+            switch (action) {
+                case Intent.ACTION_PACKAGE_ADDED:
+                case Intent.ACTION_PACKAGE_REMOVED:
+                case Intent.ACTION_PACKAGE_CHANGED:
+                    loadAppsAsync();
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,6 +187,24 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        var filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        filter.addDataScheme("package");
+        registerReceiver(mPackageReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mPackageReceiver);
+    }
+
+
+    @Override
     protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
 
@@ -249,8 +289,10 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                             break;
 
                         case 1: // Uninstall
-                            var uninstallIntent = new Intent(Intent.ACTION_DELETE);
-                            uninstallIntent.setData(android.net.Uri.parse("package:" + app.getPackageName()));
+                            var packageUri = Uri.parse("package:" + app.getPackageName());
+                            Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageUri);
+                            uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+                            uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(uninstallIntent);
                             break;
 
