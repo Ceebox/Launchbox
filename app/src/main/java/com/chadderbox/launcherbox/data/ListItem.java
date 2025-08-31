@@ -10,5 +10,4 @@ public abstract class ListItem {
     public ListItemType getType() {
         return mType;
     }
-
 }

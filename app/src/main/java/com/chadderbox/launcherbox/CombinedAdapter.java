@@ -22,6 +22,10 @@ import com.chadderbox.launcherbox.data.WebItem;
 import com.chadderbox.launcherbox.settings.SettingsManager;
 import com.chadderbox.launcherbox.utils.FontHelper;
 import com.chadderbox.launcherbox.utils.IconPackLoader;
+import com.chadderbox.launcherbox.viewholders.AppViewHolder;
+import com.chadderbox.launcherbox.viewholders.HeaderViewHolder;
+import com.chadderbox.launcherbox.viewholders.SuggestionViewHolder;
+import com.chadderbox.launcherbox.viewholders.WebViewHolder;
 
 import java.util.Collection;
 import java.util.List;
@@ -127,7 +131,7 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         if (holder instanceof HeaderViewHolder headerHolder) {
             if (item instanceof HeaderItem headerItem) {
-                headerHolder.header.setText(headerItem.getHeader());
+                headerHolder.bind(headerItem.getHeader());
             }
         }
         else if (holder instanceof AppViewHolder appHolder) {
@@ -143,106 +147,6 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         else if (holder instanceof SuggestionViewHolder suggestionHolder) {
             if (item instanceof SuggestionItem suggestionItem) {
                 suggestionHolder.bind(suggestionItem.getSuggestion());
-            }
-        }
-    }
-
-    public static class HeaderViewHolder extends RecyclerView.ViewHolder {
-        private final TextView header;
-        public HeaderViewHolder(@NonNull View itemView) {
-            super(itemView);
-            header = (TextView) itemView;
-        }
-    }
-
-    public static class WebViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textView;
-        private String mQuery;
-
-        public WebViewHolder(@NonNull View itemView, Consumer<String> clickListener) {
-            super(itemView);
-            textView = itemView.findViewById(R.id.item_name);
-
-            itemView.setOnClickListener(v -> {
-                if (mQuery != null && clickListener != null) {
-                    clickListener.accept(mQuery);
-                }
-            });
-        }
-
-        public void bind(String query) {
-            mQuery = query;
-
-            var context = itemView.getContext();
-            ImageView icon = itemView.findViewById(R.id.item_icon);
-            icon.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_browse));
-            textView.setText(context.getString(R.string.search_the_web_for, query));
-        }
-    }
-
-    public static class SuggestionViewHolder extends RecyclerView.ViewHolder {
-        private final TextView textView;
-        private String mSuggestion;
-
-        public SuggestionViewHolder(@NonNull View itemView, Consumer<String> clickListener) {
-            super(itemView);
-            textView = itemView.findViewById(R.id.item_name);
-
-            itemView.setOnClickListener(v -> {
-                if (mSuggestion != null && clickListener != null) {
-                    clickListener.accept(mSuggestion);
-                }
-            });
-        }
-
-        public void bind(String suggestion) {
-            mSuggestion = suggestion;
-
-            var context = itemView.getContext();
-            ImageView icon = itemView.findViewById(R.id.item_icon);
-            icon.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_browse_suggestion));
-            textView.setText(suggestion);
-        }
-    }
-
-    public static class AppViewHolder extends RecyclerView.ViewHolder {
-        private final ImageView icon;
-        private final TextView label;
-
-        public AppViewHolder(@NonNull View itemView, Consumer<AppInfo> shortPressListener, Consumer<AppInfo> longPressListener) {
-            super(itemView);
-            icon = itemView.findViewById(R.id.item_icon);
-            label = itemView.findViewById(R.id.item_name);
-
-            itemView.setOnClickListener(v -> {
-                AppInfo app = (AppInfo) v.getTag();
-                if (shortPressListener != null) {
-                    shortPressListener.accept(app);
-                }
-            });
-
-            itemView.setOnLongClickListener(v -> {
-                AppInfo app = (AppInfo) v.getTag();
-                if (app != null) {
-                    longPressListener.accept(app);
-                    return true;
-                }
-                return false;
-            });
-        }
-
-        public void bind(AppInfo app, IconPackLoader iconPackLoader) {
-            var drawable = iconPackLoader.loadAppIcon(app.getPackageName());
-
-            itemView.setTag(app);
-            label.setText(app.getLabel());
-            label.setTypeface(FontHelper.getFont(SettingsManager.getFont()));
-
-            if (drawable != null) {
-                icon.setVisibility(View.VISIBLE);
-                icon.setImageDrawable(drawable);
-            } else {
-                icon.setVisibility(View.GONE);
             }
         }
     }

@@ -439,11 +439,6 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                 // NOTE: Don't call super on this to prevent weird back animation
                 if (mSearchSheet.getState() == BottomSheetBehavior.STATE_EXPANDED) {
                     closeSearchSheet();
-
-                    EditText input = findViewById(R.id.search_input);
-                    input.clearFocus();
-                    var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
                 }
             }
         });
@@ -477,6 +472,12 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
     public void closeSearchSheet() {
         mSearchSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        var input = (EditText) findViewById(R.id.search_input);
+        input.clearFocus();
+        input.setText("");;
+        var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
     }
 
     @SuppressLint("NotifyDataSetChanged")

@@ -4,5 +4,6 @@ public enum ListItemType {
     HEADER,
     APP,
     WEB,
-    SUGGESTION
+    SUGGESTION,
+    SETTING
 }
