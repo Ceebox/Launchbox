@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.chadderbox.launcherbox.data.ListItem;
+import com.chadderbox.launcherbox.data.SuggestionItem;
 import com.chadderbox.launcherbox.data.WebItem;
 
 import org.json.JSONArray;
@@ -48,7 +49,7 @@ public final class WebSuggestionProvider implements ISearchProvider {
                     var arr = new JSONArray(sb.toString());
                     var suggestionsArr = arr.getJSONArray(1);
                     for (int i = 0; i < Math.min(5, suggestionsArr.length()); i++) {
-                        suggestions.add(new WebItem(suggestionsArr.getString(i)));
+                        suggestions.add(new SuggestionItem(suggestionsArr.getString(i)));
                     }
                 }
             } catch (Exception e) {
