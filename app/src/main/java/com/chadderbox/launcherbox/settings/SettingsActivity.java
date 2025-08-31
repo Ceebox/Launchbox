@@ -53,7 +53,7 @@ public final class SettingsActivity extends AppCompatActivity {
         mOptions = new ArrayList<>();
         mOptions.add(new SettingOption(
                 "Choose Icon Pack",
-                (ctx) -> SettingsManager.getIconPack() == null ? "None" : SettingsManager.getIconPack(),
+                (ctx) -> SettingsManager.getIconPack(),
                 (ctx) -> showIconPackDialog()
         ));
 
@@ -97,11 +97,10 @@ public final class SettingsActivity extends AppCompatActivity {
         var names = new ArrayList<String>();
         var packageNames = new ArrayList<String>();
 
-        // Add default system option
         names.add("System Default");
-        names.add("None");
         packageNames.add("System Default");
-        packageNames.add(null);
+        names.add("None");
+        packageNames.add("None");
 
         // Populate dialog items with icon packs
         for (var info : iconPackApps) {

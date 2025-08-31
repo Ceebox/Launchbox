@@ -109,7 +109,7 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
             // When we don't have icons, it looks weird to have everything floating
             var matchIconPadding = 16;
-            if (SettingsManager.getIconPack() == null) {
+            if (SettingsManager.getIconPack().equals("None")) {
                 matchIconPadding = 0;
             }
 

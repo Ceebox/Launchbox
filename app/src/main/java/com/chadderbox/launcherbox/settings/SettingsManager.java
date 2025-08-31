@@ -22,17 +22,12 @@ public final class SettingsManager {
         sPrefs = context.getApplicationContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
-    public static void setIconPack(@Nullable String packageName) {
+    public static void setIconPack(String packageName) {
         sPrefs.edit().putString(KEY_ICON_PACK, packageName).apply();
     }
 
-    @Nullable
     public static String getIconPack() {
         return sPrefs.getString(KEY_ICON_PACK, "System Default");
-    }
-
-    public static boolean isUsingSystemIcons() {
-        return getIconPack() == null;
     }
 
     public static void setFont(String fontName) {
