@@ -2,6 +2,8 @@ package com.chadderbox.launcherbox.search;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import com.chadderbox.launcherbox.data.ListItem;
 
@@ -16,16 +18,23 @@ public final class SearchManager {
         mSearchProviders = providers;
     }
 
-    public List<ListItem> search(String query) {
+    public void searchAsync(String query, Consumer<List<ListItem>> callback) {
         if (query == null || query.trim().isEmpty() || mSearchProviders == null) {
-            return new ArrayList<>();
+            callback.accept(new ArrayList<>());
+            return;
         }
 
-        var results = new ArrayList<ListItem>();
+        var aggregated = new ArrayList<ListItem>();
+        var pending = new AtomicInteger(mSearchProviders.size());
+
+        // TODO: Probably isolate by type (app vs search result etc)
         for (var provider : mSearchProviders) {
-            results.addAll(provider.search(query));
+            provider.searchAsync(query, results -> {
+                aggregated.addAll(results);
+                if (pending.decrementAndGet() == 0) {
+                    callback.accept(aggregated);
+                }
+            });
         }
-
-        return results;
     }
 }

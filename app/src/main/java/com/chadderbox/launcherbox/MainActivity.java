@@ -29,10 +29,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chadderbox.launcherbox.components.AlphabetIndexView;
 import com.chadderbox.launcherbox.components.NowPlayingView;
 import com.chadderbox.launcherbox.data.AppInfo;
+import com.chadderbox.launcherbox.data.AppItem;
+import com.chadderbox.launcherbox.data.HeaderItem;
 import com.chadderbox.launcherbox.data.ListItem;
 import com.chadderbox.launcherbox.search.AppSearchProvider;
 import com.chadderbox.launcherbox.search.ISearchProvider;
 import com.chadderbox.launcherbox.search.SearchManager;
+import com.chadderbox.launcherbox.search.WebSearchProvider;
+import com.chadderbox.launcherbox.search.WebSuggestionProvider;
 import com.chadderbox.launcherbox.settings.SettingsActivity;
 import com.chadderbox.launcherbox.settings.SettingsManager;
 import com.chadderbox.launcherbox.utils.AppLoader;
@@ -49,9 +53,13 @@ import java.util.concurrent.Executors;
 
 public final class MainActivity extends AppCompatActivity implements View.OnLongClickListener {
 
+    private static final long SEARCH_DELAY_MS = 300;
+
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
+    private final Handler mSearchHandler = new Handler(Looper.getMainLooper());
     private SearchManager mSearchManager;
+    private Runnable mSearchRunnable;
     private AppSearchProvider mAppSearchProvider;
     private RecyclerView mAppsView;
     private AlphabetIndexView mIndexView;
@@ -101,6 +109,8 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         var searchProviders = new ArrayList<ISearchProvider>();
         mAppSearchProvider = new AppSearchProvider(new ArrayList<>());
         searchProviders.add(mAppSearchProvider);
+        searchProviders.add(new WebSearchProvider());
+        searchProviders.add(new WebSuggestionProvider());
         mSearchManager = new SearchManager(searchProviders);
 
         AppCompatDelegate.setDefaultNightMode(SettingsManager.getTheme());
@@ -113,7 +123,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         mAppsView = findViewById(R.id.recyclerview_apps);
         mAppsView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 
-        mAppsAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::onAppLongPressed , mIconPackLoader);
+        mAppsAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::onAppLongPressed, this::openWebQuery, mIconPackLoader);
         mAppsView.setAdapter(mAppsAdapter);
         mIndexView = findViewById(R.id.alphabet_index);
 
@@ -150,10 +160,11 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
                 for (var i = 0; i < items.size(); i++) {
                     var item = items.get(i);
-                    if (item.isApp()) {
-                        var label = item.getAppInfo().getLabel().toUpperCase();
+                    if (item instanceof AppItem appItem) {
+                        var appInfo = appItem.getAppInfo();
+                        var label = appInfo.getLabel().toUpperCase();
                         if (label.startsWith(String.valueOf(currentLetter))) {
-                            if (mFavouritesHelper.isFavourite(item.getAppInfo().getPackageName())) {
+                            if (mFavouritesHelper.isFavourite(appInfo.getPackageName())) {
                                 // Don't go to favourites at the top (in the wrong position)
                                 continue;
                             }
@@ -258,6 +269,11 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         }
     }
 
+    private void openWebQuery(String query) {
+        var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=" + Uri.encode(query)));
+        startActivity(intent);
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     private void onAppLongPressed(AppInfo app) {
         var options = new String[] {
@@ -327,15 +343,15 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         var items = new ArrayList<ListItem>();
 
         if (!favApps.isEmpty()) {
-            items.add(new ListItem("Favourites"));
+            items.add(new HeaderItem("Favourites"));
             for (var app : favApps) {
-                items.add(new ListItem(app));
+                items.add(new AppItem(app));
             }
         }
 
-        items.add(new ListItem("Apps"));
+        items.add(new HeaderItem("Apps"));
         for (var app : otherApps) {
-            items.add(new ListItem(app));
+            items.add(new AppItem(app));
         }
 
         return items;
@@ -371,17 +387,25 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         mSearchResultsView = sheet.findViewById(R.id.search_results);
         mSearchResultsView.setLayoutManager(new LinearLayoutManager(this));
-        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::onAppLongPressed, mIconPackLoader);
+        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::onAppLongPressed, this::openWebQuery, mIconPackLoader);
         mSearchResultsView.setAdapter(mSearchAdapter);
 
         mSearchInput = sheet.findViewById(R.id.search_input);
         mSearchInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterSearch(s.toString());
+                if (mSearchRunnable != null) {
+                    mSearchHandler.removeCallbacks(mSearchRunnable);
+                }
+
+                final String query = s.toString();
+                mSearchRunnable = () -> performSearch(query);
+                mSearchHandler.postDelayed(mSearchRunnable, SEARCH_DELAY_MS);
             }
+
             @Override
             public void afterTextChanged(Editable s) {}
         });
@@ -456,19 +480,22 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void filterSearch(String query) {
-        if (mSearchManager == null) {
+    private void performSearch(String query) {
+        if (query.trim().isEmpty()) {
+            mSearchAdapter.clearItems();
+            mSearchAdapter.notifyDataSetChanged();
             return;
         }
 
-        var results = mSearchManager.search(query);
+        mSearchManager.searchAsync(query, results -> {
+            mSearchAdapter.clearItems();
+            if (!results.isEmpty()) {
+                mSearchAdapter.addAll(results);
+            } else {
+                mSearchAdapter.add(new HeaderItem("No results"));
+            }
 
-        mSearchAdapter.clearItems();
-        if (!results.isEmpty()) {
-            mSearchAdapter.addAll(results);
-        } else {
-            mSearchAdapter.add(new ListItem("No results"));
-        }
-        mSearchAdapter.notifyDataSetChanged();
+            mSearchAdapter.notifyDataSetChanged();
+        });
     }
 }

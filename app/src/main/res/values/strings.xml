@@ -6,4 +6,5 @@
     <string name="song_art">Song Art</string>
     <string name="settings">Settings</string>
     <string name="search_prompt">Search…</string>
+    <string name="search_the_web_for">Search the web for \"%1$s\"</string>
 </resources>

@@ -1,15 +1,23 @@
 package com.chadderbox.launcherbox.search;
 
-import com.chadderbox.launcherbox.data.AppInfo;
+import android.os.Handler;
+import android.os.Looper;
+
+import com.chadderbox.launcherbox.data.AppItem;
 import com.chadderbox.launcherbox.data.ListItem;
+import com.chadderbox.launcherbox.data.AppInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class AppSearchProvider implements ISearchProvider {
 
     private List<AppInfo> mAllApps;
+    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
     public AppSearchProvider(List<AppInfo> allApps) {
         mAllApps = allApps;
@@ -20,16 +28,17 @@ public class AppSearchProvider implements ISearchProvider {
     }
 
     @Override
-    public List<ListItem> search(String query) {
-        query = query.toLowerCase(Locale.getDefault());
-        var results = new ArrayList<ListItem>();
-
-        for (var app : mAllApps) {
-            if (app.getLabel().toLowerCase(Locale.getDefault()).contains(query)) {
-                results.add(new ListItem(app));
+    public void searchAsync(String query, Consumer<List<ListItem>> callback) {
+        mExecutor.execute(() -> {
+            var searchQuery = query.toLowerCase(Locale.getDefault());
+            var results = new ArrayList<ListItem>();
+            for (var app : mAllApps) {
+                if (app.getLabel().toLowerCase(Locale.getDefault()).contains(searchQuery)) {
+                    results.add(new AppItem(app));
+                }
             }
-        }
 
-        return results;
+            new Handler(Looper.getMainLooper()).post(() -> callback.accept(results));
+        });
     }
 }

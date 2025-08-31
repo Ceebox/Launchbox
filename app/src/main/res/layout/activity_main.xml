@@ -61,6 +61,8 @@
         android:elevation="16dp"
         app:behavior_hideable="true"
         app:behavior_peekHeight="0dp"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <!-- Handle bar -->
