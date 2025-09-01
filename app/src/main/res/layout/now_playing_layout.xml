@@ -7,15 +7,23 @@
     android:layout_margin="16dp"
     android:padding="8dp"
     android:gravity="center_vertical"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
-        android:id="@+id/song_art"
+    <androidx.cardview.widget.CardView
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:padding="8dp"
-        android:contentDescription="@string/song_art"
-        android:scaleType="centerCrop" />
+        app:cardCornerRadius="8dp"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/song_art"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/song_art"
+            android:scaleType="centerCrop" />
+
+    </androidx.cardview.widget.CardView>
 
     <LinearLayout
         android:orientation="vertical"
