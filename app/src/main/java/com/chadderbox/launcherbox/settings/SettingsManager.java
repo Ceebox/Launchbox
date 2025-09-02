@@ -3,7 +3,6 @@ package com.chadderbox.launcherbox.settings;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import java.util.HashSet;

@@ -60,7 +60,7 @@ public final class AlphabetIndexView extends View {
             }
 
             if (mListener != null) {
-                mListener.onLetterSelected(String.valueOf(LETTERS.charAt(index)));
+                mListener.onLetterSelected(LETTERS.charAt(index));
             }
 
             return true;
@@ -74,6 +74,6 @@ public final class AlphabetIndexView extends View {
     }
 
     public interface OnLetterSelectedListener {
-        void onLetterSelected(String letter);
+        void onLetterSelected(char letter);
     }
 }

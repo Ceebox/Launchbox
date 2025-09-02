@@ -31,7 +31,7 @@ public class WebViewHolder extends RecyclerView.ViewHolder {
         mQuery = query;
 
         var context = itemView.getContext();
-        ImageView icon = itemView.findViewById(R.id.item_icon);
+        var icon = (ImageView)itemView.findViewById(R.id.item_icon);
         icon.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_browse));
         textView.setText(context.getString(R.string.search_the_web_for, query));
     }

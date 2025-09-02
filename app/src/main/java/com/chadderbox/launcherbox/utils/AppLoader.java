@@ -11,21 +11,25 @@ import java.util.List;
 
 public final class AppLoader {
     private final PackageManager mPackageManager;
+    private final ArrayList<AppInfo> mInstalledApps = new ArrayList<>();
 
     public AppLoader(Context context) {
         mPackageManager = context.getPackageManager();
+        refreshInstalledApps();
     }
 
-    public List<AppInfo> loadInstalledApps() {
-        var apps = new ArrayList<AppInfo>();
+    public void refreshInstalledApps() {
         var intent = new Intent(Intent.ACTION_MAIN, null);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
 
         var resolveInfos = mPackageManager.queryIntentActivities(intent, 0);
+        mInstalledApps.clear();
         for (var info : resolveInfos) {
-            apps.add(new AppInfo(info.loadLabel(mPackageManager).toString(), info.activityInfo.packageName));
+            mInstalledApps.add(new AppInfo(info.loadLabel(mPackageManager).toString(), info.activityInfo.packageName));
         }
+    }
 
-        return apps;
+    public List<AppInfo> getInstalledApps() {
+        return mInstalledApps;
     }
 }

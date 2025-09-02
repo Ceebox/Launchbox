@@ -18,16 +18,12 @@ public final class FavouritesRepository {
         mMainHandler = mainHandler;
     }
 
-    public interface Callback {
-        void onResult(Set<String> favorites);
-    }
-
     public boolean isFavourite(@NonNull String packageName) {
         var favourites = SettingsManager.getFavourites();
         return favourites.contains(packageName);
     }
 
-    public void loadFavouritesAsync(@NonNull Callback callback) {
+    public void loadFavouritesAsync(@NonNull SetFavouritesCallback callback) {
         mExecutor.execute(() -> {
             var favourites = SettingsManager.getFavourites();
             mMainHandler.post(() -> callback.onResult(favourites));
@@ -35,8 +31,10 @@ public final class FavouritesRepository {
     }
 
     public void saveFavouritesAsync(@NonNull Set<String> newFavourites) {
-        mExecutor.execute(() -> {
-            SettingsManager.setFavourites(newFavourites);
-        });
+        mExecutor.execute(() -> SettingsManager.setFavourites(newFavourites));
+    }
+
+    public interface SetFavouritesCallback {
+        void onResult(Set<String> favorites);
     }
 }

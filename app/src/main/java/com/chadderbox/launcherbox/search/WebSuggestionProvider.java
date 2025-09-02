@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.chadderbox.launcherbox.data.ListItem;
 import com.chadderbox.launcherbox.data.SuggestionItem;
-import com.chadderbox.launcherbox.data.WebItem;
 
 import org.json.JSONArray;
 

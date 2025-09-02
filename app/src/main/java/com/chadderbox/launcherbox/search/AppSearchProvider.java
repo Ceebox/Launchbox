@@ -5,7 +5,7 @@ import android.os.Looper;
 
 import com.chadderbox.launcherbox.data.AppItem;
 import com.chadderbox.launcherbox.data.ListItem;
-import com.chadderbox.launcherbox.data.AppInfo;
+import com.chadderbox.launcherbox.utils.AppLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,17 +14,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-public class AppSearchProvider implements ISearchProvider {
-
-    private List<AppInfo> mAllApps;
+public final class AppSearchProvider implements ISearchProvider {
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+    private final AppLoader mAppLoader;
 
-    public AppSearchProvider(List<AppInfo> allApps) {
-        mAllApps = allApps;
+    public AppSearchProvider(AppLoader appLoader) {
+        mAppLoader = appLoader;
     }
 
-    public void setAllApps(List<AppInfo> allApps) {
-        mAllApps = allApps;
+    public void refreshApps() {
+        // Don't worry too much about this, it gets called in lots of other places
+        mAppLoader.refreshInstalledApps();
     }
 
     @Override
@@ -32,7 +32,8 @@ public class AppSearchProvider implements ISearchProvider {
         mExecutor.execute(() -> {
             var searchQuery = query.toLowerCase(Locale.getDefault());
             var results = new ArrayList<ListItem>();
-            for (var app : mAllApps) {
+            var apps = mAppLoader.getInstalledApps();
+            for (var app : apps) {
                 if (app.getLabel().toLowerCase(Locale.getDefault()).contains(searchQuery)) {
                     results.add(new AppItem(app));
                 }

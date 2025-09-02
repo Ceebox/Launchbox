@@ -7,13 +7,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class HeaderViewHolder extends RecyclerView.ViewHolder {
-    private final TextView header;
+    private final TextView mHeader;
     public HeaderViewHolder(@NonNull View itemView) {
         super(itemView);
-        header = (TextView) itemView;
+        mHeader = (TextView) itemView;
     }
 
     public void bind(String suggestion) {
-        header.setText(suggestion);
+        mHeader.setText(suggestion);
     }
 }

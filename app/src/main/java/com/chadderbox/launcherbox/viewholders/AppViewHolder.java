@@ -16,13 +16,13 @@ import com.chadderbox.launcherbox.utils.IconPackLoader;
 import java.util.function.Consumer;
 
 public class AppViewHolder extends RecyclerView.ViewHolder {
-    private final ImageView icon;
-    private final TextView label;
+    private final ImageView mIcon;
+    private final TextView mLabel;
 
     public AppViewHolder(@NonNull View itemView, Consumer<AppInfo> shortPressListener, Consumer<AppInfo> longPressListener) {
         super(itemView);
-        icon = itemView.findViewById(R.id.item_icon);
-        label = itemView.findViewById(R.id.item_name);
+        mIcon = itemView.findViewById(R.id.item_icon);
+        mLabel = itemView.findViewById(R.id.item_name);
 
         itemView.setOnClickListener(v -> {
             AppInfo app = (AppInfo) v.getTag();
@@ -45,14 +45,14 @@ public class AppViewHolder extends RecyclerView.ViewHolder {
         var drawable = iconPackLoader.loadAppIcon(app.getPackageName());
 
         itemView.setTag(app);
-        label.setText(app.getLabel());
-        label.setTypeface(FontHelper.getFont(SettingsManager.getFont()));
+        mLabel.setText(app.getLabel());
+        mLabel.setTypeface(FontHelper.getFont(SettingsManager.getFont()));
 
         if (drawable != null) {
-            icon.setVisibility(View.VISIBLE);
-            icon.setImageDrawable(drawable);
+            mIcon.setVisibility(View.VISIBLE);
+            mIcon.setImageDrawable(drawable);
         } else {
-            icon.setVisibility(View.GONE);
+            mIcon.setVisibility(View.GONE);
         }
     }
 }

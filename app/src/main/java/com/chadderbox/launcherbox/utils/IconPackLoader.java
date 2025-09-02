@@ -7,8 +7,6 @@ import android.graphics.drawable.Drawable;
 
 import androidx.core.content.res.ResourcesCompat;
 
-import com.chadderbox.launcherbox.R;
-
 import java.util.HashMap;
 import java.util.Map;
 

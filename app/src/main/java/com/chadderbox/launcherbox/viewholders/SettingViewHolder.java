@@ -14,11 +14,11 @@ import com.chadderbox.launcherbox.data.SettingItem;
 import java.util.function.Consumer;
 
 public class SettingViewHolder extends RecyclerView.ViewHolder {
-    private final TextView textView;
+    private final TextView mTextview;
 
     public SettingViewHolder(@NonNull View itemView, Consumer<SettingItem> clickListener) {
         super(itemView);
-        textView = itemView.findViewById(R.id.item_name);
+        mTextview = itemView.findViewById(R.id.item_name);
 
         itemView.setOnClickListener(v -> {
             var item = (SettingItem) v.getTag();
@@ -32,8 +32,8 @@ public class SettingViewHolder extends RecyclerView.ViewHolder {
         itemView.setTag(item);
 
         var context = itemView.getContext();
-        ImageView icon = itemView.findViewById(R.id.item_icon);
+        var icon = (ImageView)itemView.findViewById(R.id.item_icon);
         icon.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_settings));
-        textView.setText(item.getTitle());
+        mTextview.setText(item.getTitle());
     }
 }

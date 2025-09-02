@@ -23,18 +23,16 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.chadderbox.launcherbox.components.AlphabetIndexView;
-import com.chadderbox.launcherbox.components.NowPlayingView;
 import com.chadderbox.launcherbox.data.AppInfo;
-import com.chadderbox.launcherbox.data.AppItem;
 import com.chadderbox.launcherbox.data.HeaderItem;
-import com.chadderbox.launcherbox.data.ListItem;
 import com.chadderbox.launcherbox.data.SettingItem;
 import com.chadderbox.launcherbox.search.AppSearchProvider;
-import com.chadderbox.launcherbox.search.ISearchProvider;
 import com.chadderbox.launcherbox.search.SearchManager;
 import com.chadderbox.launcherbox.search.SettingsSearchProvider;
 import com.chadderbox.launcherbox.search.WebSearchProvider;
@@ -49,7 +47,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -60,23 +57,19 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private final Handler mSearchHandler = new Handler(Looper.getMainLooper());
+    private AppLoader mAppLoader;
     private SearchManager mSearchManager;
     private Runnable mSearchRunnable;
-    private AppSearchProvider mAppSearchProvider;
-    private RecyclerView mAppsView;
+    private MainPagerAdapter mPagerAdapter;
     private AlphabetIndexView mIndexView;
-    private CombinedAdapter mAppsAdapter;
     private GestureDetector mGestureDetector;
-    private NowPlayingView mNowPlayingView;
     private FavouritesRepository mFavouritesHelper;
     private String mLastIconPack;
     private String mLastFont;
     private IconPackLoader mIconPackLoader;
     private BottomSheetBehavior<View> mSearchSheet;
-    private RecyclerView mSearchResultsView;
     private CombinedAdapter mSearchAdapter;
-    private EditText mSearchInput;
-    private AppLoader mAppLoader;
+    private Fragment mCurrentFragment;
 
     private final BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
         @Override
@@ -91,7 +84,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                 case Intent.ACTION_PACKAGE_ADDED:
                 case Intent.ACTION_PACKAGE_REMOVED:
                 case Intent.ACTION_PACKAGE_CHANGED:
-                    loadAppsAsync();
+                    mPagerAdapter.refresh();
                     break;
             }
         }
@@ -108,12 +101,13 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         mIconPackLoader = new IconPackLoader(getApplicationContext(), mLastIconPack);
         mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler);
 
-        mAppSearchProvider = new AppSearchProvider(new ArrayList<>());
+        mAppLoader = new AppLoader(this);
+        var appSearchProvider = new AppSearchProvider(mAppLoader);
         var searchProviders = List.of(
-            mAppSearchProvider,
+            appSearchProvider,
             new WebSearchProvider(),
             new WebSuggestionProvider(),
-            new SettingsSearchProvider(this.getApplicationContext())
+            new SettingsSearchProvider(getApplicationContext())
         );
 
         mSearchManager = new SearchManager(searchProviders);
@@ -124,13 +118,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         getWindow().setDimAmount(0f);
         setContentView(R.layout.activity_main);
 
-        mAppLoader = new AppLoader(getApplicationContext());
-        mAppsView = findViewById(R.id.recyclerview_apps);
-        mAppsView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-
-        mAppsAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::onAppLongPressed, this::openWebQuery, this::openSetting, mIconPackLoader);
-        mAppsView.setAdapter(mAppsAdapter);
-        mIndexView = findViewById(R.id.alphabet_index);
+        initialiseSearchView();
 
         mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -143,54 +131,45 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
             }
         });
 
-        mAppsView.setLongClickable(true);
-        mAppsView.setOnLongClickListener(this);
+        var favouritesAdapter = new CombinedAdapter(new ArrayList<>(),
+            this::launchApp,
+            this::showAppMenu,
+            query -> {},
+            setting -> {},
+            mIconPackLoader
+        );
 
-        loadAppsAsync();
+        var appsAdapter = new CombinedAdapter(new ArrayList<>(),
+            this::launchApp,
+            this::showAppMenu,
+            query -> {},
+            setting -> {},
+            mIconPackLoader
+        );
 
-        mNowPlayingView = new NowPlayingView(this);
-        mNowPlayingView.initialize();
+        var favouritesFragment = new FavouritesFragment(favouritesAdapter, mAppLoader, mFavouritesHelper);
+        var appsFragment = new AppsFragment(appsAdapter, mAppLoader);
+        mPagerAdapter = new MainPagerAdapter(this, new AppListFragmentBase[] {
+            favouritesFragment,
+            appsFragment
+        });
 
-        initialiseSearchView();
+        var viewPager = (ViewPager2) findViewById(R.id.viewpager);
+        viewPager.setAdapter(mPagerAdapter);
+        viewPager.setOffscreenPageLimit(2);
 
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                mCurrentFragment = mPagerAdapter.getFragmentAt(position);
+            }
+        });
+
+        mIndexView = findViewById(R.id.alphabet_index);
         mIndexView.setOnLetterSelectedListener(letter -> {
-            var items = mAppsAdapter.getItems();
-            var startIndex = AlphabetIndexView.LETTERS.indexOf(letter);
-
-            var found = false;
-
-            // Try from current letter up to Z
-            for (var offset = 0; startIndex + offset < AlphabetIndexView.LETTERS.length(); offset++) {
-                var currentLetter = AlphabetIndexView.LETTERS.charAt(startIndex + offset);
-
-                for (var i = 0; i < items.size(); i++) {
-                    var item = items.get(i);
-                    if (item instanceof AppItem appItem) {
-                        var appInfo = appItem.getAppInfo();
-                        var label = appInfo.getLabel().toUpperCase();
-                        if (label.startsWith(String.valueOf(currentLetter))) {
-                            if (mFavouritesHelper.isFavourite(appInfo.getPackageName())) {
-                                // Don't go to favourites at the top (in the wrong position)
-                                continue;
-                            }
-
-                            mAppsView.scrollToPosition(i);
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (found){
-                    break;
-                }
-            }
-
-            // We've not found anything
-            // Presumably, we're at like Z, so just go to the bottom
-            if (!found) {
-                mAppsView.scrollToPosition(items.size() - 1);
-            }
+            viewPager.setCurrentItem(1);
+            appsFragment.scrollToLetter(letter);
         });
     }
 
@@ -219,14 +198,13 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         unregisterReceiver(mPackageReceiver);
     }
 
-
     @Override
     protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
 
         // Scroll to top when the home button is pressed
-        if (mAppsView != null) {
-            mAppsView.smoothScrollToPosition(0);
+        if (mCurrentFragment instanceof AppsFragment appsFragment) {
+            appsFragment.smoothScrollToPosition(0);
         }
     }
 
@@ -244,23 +222,13 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            if (mAppsView != null) {
-                mAppsView.smoothScrollToPosition(0);
+            if (mCurrentFragment instanceof AppsFragment appsFragment) {
+                appsFragment.smoothScrollToPosition(0);
             }
+
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void loadAppsAsync() {
-        mExecutor.execute(() -> mFavouritesHelper.loadFavouritesAsync(favourites -> {
-            var items = this.buildCombinedList(favourites);
-
-            this.runOnUiThread(() -> {
-                mAppsAdapter.clearItems();
-                mAppsAdapter.addAll(items);
-            });
-        }));
     }
 
     private void launchApp(AppInfo app) {
@@ -284,9 +252,10 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void onAppLongPressed(AppInfo app) {
+    private void showAppMenu(AppInfo app) {
+        var appName = app.getLabel();
         var options = new String[] {
-                mFavouritesHelper.isFavourite(app.getPackageName()) ? "Remove from favourites" : "Add to favourites",
+                mFavouritesHelper.isFavourite(app.getPackageName()) ? "Unfavourite " + appName : "Favourite " + appName,
                 "Uninstall " + app.getLabel(),
                 "Launcher Settings",
         };
@@ -302,14 +271,10 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                                 } else {
                                     currentFavourites.add(app.getPackageName());
                                 }
+
                                 mFavouritesHelper.saveFavouritesAsync(currentFavourites);
 
-                                mMainHandler.post(() -> {
-                                    var combined = buildCombinedList(currentFavourites);
-                                    mAppsAdapter.clearItems();
-                                    mAppsAdapter.addAll(combined);
-                                    mAppsAdapter.notifyDataSetChanged();
-                                });
+                                mMainHandler.post(() -> mPagerAdapter.refresh());
                             });
                             break;
 
@@ -328,42 +293,6 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                     }
                 })
                 .show();
-    }
-
-    private List<ListItem> buildCombinedList(Set<String> favourites) {
-        var apps = mAppLoader.loadInstalledApps();
-        mAppSearchProvider.setAllApps(apps);
-
-        var favApps = new ArrayList<AppInfo>();
-        var otherApps = new ArrayList<AppInfo>();
-
-        // NOTE: I can't decide if I want to split favourites or not, maybe it should be an option?
-        for (var app : apps) {
-            if (favourites.contains(app.getPackageName())) {
-                favApps.add(app);
-            }
-
-            otherApps.add(app);
-        }
-
-        favApps.sort((a, b) -> a.getLabel().compareToIgnoreCase(b.getLabel()));
-        otherApps.sort((a, b) -> a.getLabel().compareToIgnoreCase(b.getLabel()));
-
-        var items = new ArrayList<ListItem>();
-
-        if (!favApps.isEmpty()) {
-            items.add(new HeaderItem("Favourites"));
-            for (var app : favApps) {
-                items.add(new AppItem(app));
-            }
-        }
-
-        items.add(new HeaderItem("Apps"));
-        for (var app : otherApps) {
-            items.add(new AppItem(app));
-        }
-
-        return items;
     }
 
     private boolean hasAestheticChanged() {
@@ -385,7 +314,9 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         mLastFont = SettingsManager.getFont();
 
         mIconPackLoader.setIconPackPackage(mLastIconPack);
-        loadAppsAsync();
+
+        mAppLoader.refreshInstalledApps();
+        mPagerAdapter.refresh();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -394,13 +325,13 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         mSearchSheet = BottomSheetBehavior.from(sheet);
         mSearchSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-        mSearchResultsView = sheet.findViewById(R.id.search_results);
-        mSearchResultsView.setLayoutManager(new LinearLayoutManager(this));
-        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::onAppLongPressed, this::openWebQuery, this::openSetting, mIconPackLoader);
-        mSearchResultsView.setAdapter(mSearchAdapter);
+        var searchResultsView = (RecyclerView) sheet.findViewById(R.id.search_results);
+        searchResultsView.setLayoutManager(new LinearLayoutManager(this));
+        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::showAppMenu, this::openWebQuery, this::openSetting, mIconPackLoader);
+        searchResultsView.setAdapter(mSearchAdapter);
 
-        mSearchInput = sheet.findViewById(R.id.search_input);
-        mSearchInput.addTextChangedListener(new TextWatcher() {
+        var searchInput = (EditText) sheet.findViewById(R.id.search_input);
+        searchInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -426,7 +357,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    EditText input = findViewById(R.id.search_input);
+                    var input = (EditText) findViewById(R.id.search_input);
                     input.requestFocus();
                 }
 
@@ -484,7 +415,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         var input = (EditText) findViewById(R.id.search_input);
         input.clearFocus();
-        input.setText("");;
+        input.setText("");
         var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
     }

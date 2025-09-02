@@ -25,4 +25,5 @@
         android:textSize="14sp"
         android:alpha="0.7"
         android:paddingTop="2dp"/>
+
 </LinearLayout>

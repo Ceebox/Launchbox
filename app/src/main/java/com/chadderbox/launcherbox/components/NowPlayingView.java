@@ -22,7 +22,7 @@ import java.util.List;
 
 public final class NowPlayingView {
 
-    private final Activity mActivity;
+    private final View mRootView;
     private MediaSessionManager mSessionManager;
     private MediaController mController;
     private LinearLayout mContainer;
@@ -33,51 +33,55 @@ public final class NowPlayingView {
     private final MediaController.Callback mMediaCallback = new MediaController.Callback() {
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
-            mActivity.runOnUiThread(NowPlayingView.this::updateNowPlayingUI);
+            Activity activity = (Activity) mRootView.getContext();
+            activity.runOnUiThread(NowPlayingView.this::updateNowPlayingUI);
         }
 
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
-            mActivity.runOnUiThread(NowPlayingView.this::updateNowPlayingUI);
+            Activity activity = (Activity) mRootView.getContext();
+            activity.runOnUiThread(NowPlayingView.this::updateNowPlayingUI);
         }
     };
 
-    public NowPlayingView(Activity mainApp) {
-        mActivity = mainApp;
+    public NowPlayingView(View root) {
+        mRootView = root;
     }
 
     public void initialize() {
-        mContainer = mActivity.findViewById(R.id.now_playing);
-        mSongArt = mActivity.findViewById(R.id.song_art);
-        mSongTitle = mActivity.findViewById(R.id.song_title);
-        mSongArtist = mActivity.findViewById(R.id.song_artist);
-        mBtnPrevious = mActivity.findViewById(R.id.btn_prev);
-        mBtnPlayPause = mActivity.findViewById(R.id.btn_play_pause);
-        mBtnNext = mActivity.findViewById(R.id.btn_next);
+        mContainer = mRootView.findViewById(R.id.now_playing);
+        mSongArt = mRootView.findViewById(R.id.song_art);
+        mSongTitle = mRootView.findViewById(R.id.song_title);
+        mSongArtist = mRootView.findViewById(R.id.song_artist);
+        mBtnPrevious = mRootView.findViewById(R.id.btn_prev);
+        mBtnPlayPause = mRootView.findViewById(R.id.btn_play_pause);
+        mBtnNext = mRootView.findViewById(R.id.btn_next);
+
+        if (mContainer == null) {
+            throw new IllegalStateException("NowPlayingView: container not found in layout!");
+        }
 
         mContainer.setVisibility(View.GONE);
-        setupMediaController();
+        setupMediaController(mRootView.getContext());
     }
 
-    private void setupMediaController() {
-
-        if (!hasNotificationAccess(mActivity)) {
+    private void setupMediaController(Context context) {
+        if (!hasNotificationAccess(context)) {
             Log.w("NowPlayingView", "Notification access missing.");
-            requestNotificationAccess(mActivity);
+            requestNotificationAccess(context);
             return;
         }
 
         try {
-            mSessionManager = (MediaSessionManager) mActivity.getSystemService(Context.MEDIA_SESSION_SERVICE);
+            mSessionManager = (MediaSessionManager) context.getSystemService(Context.MEDIA_SESSION_SERVICE);
 
-            var notificationListener = new ComponentName(mActivity, NotificationListener.class);
+            var notificationListener = new ComponentName(context, NotificationListener.class);
             mSessionManager.addOnActiveSessionsChangedListener(
                 this::handleSessionsChanged,
                 notificationListener
             );
 
             var sessions = mSessionManager.getActiveSessions(notificationListener);
-
             handleSessionsChanged(sessions);
 
         } catch (SecurityException e) {
@@ -169,8 +173,9 @@ public final class NowPlayingView {
             enabledListeners.contains(context.getPackageName());
     }
 
-    private void requestNotificationAccess(Activity activity) {
+    private void requestNotificationAccess(Context context) {
         Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-        activity.startActivity(intent);
+        context.startActivity(intent);
     }
+
 }

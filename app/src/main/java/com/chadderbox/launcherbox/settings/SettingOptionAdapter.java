@@ -33,9 +33,7 @@ public final class SettingOptionAdapter extends RecyclerView.Adapter<SettingOpti
         var option = mItems.get(position);
         holder.title.setText(option.getTitle());
         holder.subtitle.setText(option.getSubtitle(holder.itemView.getContext()));
-        holder.itemView.setOnClickListener(v -> {
-            option.performClick(v.getContext());
-        });
+        holder.itemView.setOnClickListener(v -> option.performClick(v.getContext()));
     }
 
     @Override

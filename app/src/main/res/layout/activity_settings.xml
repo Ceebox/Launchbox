@@ -10,7 +10,6 @@
     android:paddingStart="16dp"
     android:paddingEnd="16dp">
 
-    <!-- Optional toolbar / title -->
     <com.chadderbox.launcherbox.components.FontTextView
         android:id="@+id/settingsTitle"
         android:layout_width="match_parent"

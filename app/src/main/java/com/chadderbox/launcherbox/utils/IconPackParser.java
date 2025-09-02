@@ -25,7 +25,7 @@ public final class IconPackParser {
             var res = pm.getResourcesForApplication(iconPackPkg);
 
             @SuppressLint("DiscouragedApi") // We need this because it ain't ours!
-            int xmlId = res.getIdentifier("appfilter", "xml", iconPackPkg);
+            var xmlId = res.getIdentifier("appfilter", "xml", iconPackPkg);
             if (xmlId == 0) {
                 return null;
             }
@@ -33,8 +33,8 @@ public final class IconPackParser {
             var parser = res.getXml(xmlId);
             while (parser.next() != XmlPullParser.END_DOCUMENT) {
                 if (parser.getEventType() == XmlPullParser.START_TAG && parser.getName().equals("item")) {
-                    String component = parser.getAttributeValue(null, "component");
-                    String drawable = parser.getAttributeValue(null, "drawable");
+                    var component = parser.getAttributeValue(null, "component");
+                    var drawable = parser.getAttributeValue(null, "drawable");
 
                     if (component != null && component.contains(targetPkg)) {
                         sCache.put(targetPkg, drawable);

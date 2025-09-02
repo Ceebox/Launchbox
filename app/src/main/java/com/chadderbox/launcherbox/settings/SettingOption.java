@@ -7,9 +7,11 @@ public final class SettingOption {
     private final ISubtitleProvider mSubtitleProvider;
     private final IClickAction mClickAction;
 
-    public SettingOption(String title,
-                         ISubtitleProvider subtitleProvider,
-                         IClickAction clickAction) {
+    public SettingOption(
+        String title,
+        ISubtitleProvider subtitleProvider,
+        IClickAction clickAction
+    ) {
         mTitle = title;
         mSubtitleProvider = subtitleProvider;
         mClickAction = clickAction;

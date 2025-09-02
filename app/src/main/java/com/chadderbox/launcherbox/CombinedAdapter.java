@@ -3,13 +3,10 @@ package com.chadderbox.launcherbox;
 import android.annotation.SuppressLint;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launcherbox.components.FontTextView;
@@ -21,7 +18,6 @@ import com.chadderbox.launcherbox.data.SettingItem;
 import com.chadderbox.launcherbox.data.SuggestionItem;
 import com.chadderbox.launcherbox.data.WebItem;
 import com.chadderbox.launcherbox.settings.SettingsManager;
-import com.chadderbox.launcherbox.utils.FontHelper;
 import com.chadderbox.launcherbox.utils.IconPackLoader;
 import com.chadderbox.launcherbox.viewholders.AppViewHolder;
 import com.chadderbox.launcherbox.viewholders.HeaderViewHolder;

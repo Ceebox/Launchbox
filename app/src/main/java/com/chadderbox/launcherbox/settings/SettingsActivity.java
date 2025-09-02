@@ -53,33 +53,33 @@ public final class SettingsActivity extends AppCompatActivity {
         mOptions = new ArrayList<>();
         mOptions.add(new SettingOption(
                 "Choose Icon Pack",
-                (ctx) -> SettingsManager.getIconPack(),
-                (ctx) -> showIconPackDialog()
+                ctx -> SettingsManager.getIconPack(),
+                ctx -> showIconPackDialog()
         ));
 
         mOptions.add(new SettingOption(
                 "Choose Font",
-                (ctx) -> SettingsManager.getFont(),
-                (ctx) -> showFontDialog()
+                ctx -> SettingsManager.getFont(),
+                ctx -> showFontDialog()
         ));
 
         mOptions.add(new SettingOption(
                 "Choose Theme",
-                (ctx) -> getCurrentThemeName(),
-                (ctx) -> showThemeDialog()
+                ctx -> getCurrentThemeName(),
+                ctx -> showThemeDialog()
         ));
 
         mOptions.add(new SettingOption(
                 "Other settings…",
-                (ctx) -> "More coming soon",
-                (ctx) -> Toast.makeText(ctx, "Not implemented yet", Toast.LENGTH_SHORT).show()
+                ctx -> "More coming soon",
+                ctx -> Toast.makeText(ctx, "Not implemented yet", Toast.LENGTH_SHORT).show()
         ));
 
         setupOptions();
     }
 
     private void setupOptions() {
-        RecyclerView recyclerView = findViewById(R.id.recyclerViewSettings);
+        var recyclerView = (RecyclerView) findViewById(R.id.recyclerViewSettings);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new SettingOptionAdapter(mOptions));
     }
@@ -176,13 +176,10 @@ public final class SettingsActivity extends AppCompatActivity {
     }
 
     private String getCurrentThemeName() {
-        switch (SettingsManager.getTheme()) {
-            case AppCompatDelegate.MODE_NIGHT_NO:
-                return "Light";
-            case AppCompatDelegate.MODE_NIGHT_YES:
-                return "Dark";
-            default:
-                return "System Default";
-        }
+        return switch (SettingsManager.getTheme()) {
+            case AppCompatDelegate.MODE_NIGHT_NO -> "Light";
+            case AppCompatDelegate.MODE_NIGHT_YES -> "Dark";
+            default -> "System Default";
+        };
     }
 }

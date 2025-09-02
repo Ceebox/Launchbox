@@ -13,7 +13,6 @@
     android:focusable="true"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-    <!-- Handle bar -->
     <View
         android:layout_width="40dp"
         android:layout_height="20dp"
@@ -21,7 +20,6 @@
         android:layout_margin="16dp"
         android:tint="?android:colorAccent"/>
 
-    <!-- Search box -->
     <EditText
         android:id="@+id/search_input"
         android:layout_width="match_parent"
@@ -32,7 +30,6 @@
         android:inputType="text"
         android:padding="12dp"/>
 
-    <!-- Search results -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_results"
         android:layout_width="match_parent"
