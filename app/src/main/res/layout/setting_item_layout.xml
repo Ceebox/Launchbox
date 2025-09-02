@@ -9,7 +9,7 @@
     android:paddingBottom="12dp"
     android:background="?attr/selectableItemBackground">
 
-    <com.chadderbox.launcherbox.components.FontTextView
+    <com.chadderbox.launchbox.components.FontTextView
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,7 +17,7 @@
         android:textSize="16sp"
         android:textStyle="bold"/>
 
-    <com.chadderbox.launcherbox.components.FontTextView
+    <com.chadderbox.launchbox.components.FontTextView
         android:id="@+id/subtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

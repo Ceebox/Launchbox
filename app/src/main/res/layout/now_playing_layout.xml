@@ -32,7 +32,7 @@
         android:paddingEnd="0dp"
         android:layout_width="0dp"
         android:layout_height="wrap_content">
-        <com.chadderbox.launcherbox.components.FontTextView
+        <com.chadderbox.launchbox.components.FontTextView
             android:id="@+id/song_title"
             android:textColor="#fff"
             android:textSize="16sp"
@@ -40,7 +40,7 @@
             android:ellipsize="end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-        <com.chadderbox.launcherbox.components.FontTextView
+        <com.chadderbox.launchbox.components.FontTextView
             android:id="@+id/song_artist"
             android:textColor="#ccc"
             android:textSize="14sp"

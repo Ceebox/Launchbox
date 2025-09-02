@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.chadderbox.launcherbox">
+    package="com.chadderbox.launchbox">
 
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
@@ -13,7 +13,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name">
         <activity
-            android:name="com.chadderbox.launcherbox.MainActivity"
+            android:name="com.chadderbox.launchbox.MainActivity"
             android:launchMode="singleTask"
             android:exported="true"
             android:theme="@style/Theme.Launcherbox.Launcher">
@@ -25,13 +25,13 @@
         </activity>
 
         <activity
-            android:name="com.chadderbox.launcherbox.settings.SettingsActivity"
+            android:name="com.chadderbox.launchbox.settings.SettingsActivity"
             android:exported="true"
             android:label="Settings"
             android:theme="@style/Theme.Launcherbox.Settings"/>
 
         <service
-            android:name="com.chadderbox.launcherbox.utils.NotificationListener"
+            android:name="com.chadderbox.launchbox.utils.NotificationListener"
             android:exported="true"
             android:label="Notification Listener"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
