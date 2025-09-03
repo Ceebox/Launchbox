@@ -77,6 +77,16 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return mItems.size();
     }
 
+    public boolean isEmpty() {
+        for (var item : mItems) {
+            if (!(item instanceof HeaderItem)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public List<ListItem> getItems() {
         return mItems;
     }
@@ -87,8 +97,10 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.notifyDataSetChanged();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void add(ListItem item) {
         mItems.add(item);
+        this.notifyDataSetChanged();
     }
 
     @SuppressLint("NotifyDataSetChanged")

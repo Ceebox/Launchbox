@@ -11,7 +11,7 @@ import com.chadderbox.launchbox.data.AppItem;
 
 public abstract class AppListFragmentBase extends Fragment {
 
-    protected final CombinedAdapter mAdapter;
+    protected CombinedAdapter mAdapter;
     protected RecyclerView mListView;
 
     protected AppListFragmentBase(CombinedAdapter adapter) {
@@ -28,6 +28,14 @@ public abstract class AppListFragmentBase extends Fragment {
         mListView.addOnItemTouchListener(new NestedTouchListener());
 
         mListView.setAdapter(mAdapter);
+    }
+
+    public boolean isEmpty() {
+        return mAdapter.isEmpty();
+    }
+
+    public CombinedAdapter getAdapter() {
+        return mAdapter;
     }
 
     public void scrollToLetter(char letter) {

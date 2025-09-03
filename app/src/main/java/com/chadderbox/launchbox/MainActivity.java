@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -147,12 +148,18 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
             mIconPackLoader
         );
 
-        var favouritesFragment = new FavouritesFragment(favouritesAdapter, mAppLoader, mFavouritesHelper);
-        var appsFragment = new AppsFragment(appsAdapter, mAppLoader);
-        mPagerAdapter = new MainPagerAdapter(this, new AppListFragmentBase[] {
-            favouritesFragment,
-            appsFragment
-        });
+        new ViewModelProvider(this, new FavouritesViewModel.Factory(getApplication(), mAppLoader, mFavouritesHelper, favouritesAdapter)).get(FavouritesViewModel.class);
+        var fragments = new ArrayList<AppListFragmentBase>();
+        if (mFavouritesHelper.hasFavourites()) {
+            fragments.add(new FavouritesFragment());
+        }
+
+        new ViewModelProvider(this, new AppsViewModel.Factory(getApplication(), mAppLoader, appsAdapter)).get(AppsViewModel.class);
+        fragments.add(new AppsFragment());
+
+        mPagerAdapter = new MainPagerAdapter(this, fragments);
+
+        refreshFavouritesFragment();
 
         var viewPager = (ViewPager2) findViewById(R.id.viewpager);
         viewPager.setAdapter(mPagerAdapter);
@@ -168,8 +175,8 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         mIndexView = findViewById(R.id.alphabet_index);
         mIndexView.setOnLetterSelectedListener(letter -> {
-            viewPager.setCurrentItem(1);
-            appsFragment.scrollToLetter(letter);
+            viewPager.setCurrentItem(mPagerAdapter.getItemCount() - 1);
+            mPagerAdapter.getFragmentAt(mPagerAdapter.getItemCount() - 1).scrollToLetter(letter);
         });
     }
 
@@ -273,6 +280,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                                 }
 
                                 mFavouritesHelper.saveFavouritesAsync(currentFavourites);
+                                refreshFavouritesFragment();
 
                                 mMainHandler.post(() -> mPagerAdapter.refresh());
                             });
@@ -315,8 +323,27 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         mIconPackLoader.setIconPackPackage(mLastIconPack);
 
+        refreshFavouritesFragment();
         mAppLoader.refreshInstalledApps();
         mPagerAdapter.refresh();
+    }
+
+    private void refreshFavouritesFragment() {
+        mPagerAdapter.refresh();
+        var frag = mPagerAdapter.getFragmentAt(0);
+
+        var hasFavourites = mFavouritesHelper.hasFavourites();
+        if ((frag instanceof FavouritesFragment)) {
+            if (!hasFavourites) {
+                mPagerAdapter.removeFragment(frag);
+            }
+
+            return;
+        }
+
+        if (hasFavourites) {
+            mPagerAdapter.addFragment(new FavouritesFragment(), 0);
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

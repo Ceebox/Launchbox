@@ -10,14 +10,12 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.chadderbox.launchbox.components.NowPlayingView;
 import com.chadderbox.launchbox.data.AppInfo;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.ListItem;
-import com.chadderbox.launchbox.utils.AppLoader;
-import com.chadderbox.launchbox.utils.FavouritesRepository;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
@@ -27,17 +25,11 @@ public final class FavouritesFragment extends AppListFragmentBase {
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
-    private final AppLoader mAppLoader;
-    private final FavouritesRepository mFavouritesHelper;
 
-    public FavouritesFragment(
-        CombinedAdapter favouritesAdapter,
-        AppLoader appLoader,
-        FavouritesRepository favouritesHelper
-    ) {
-        super(favouritesAdapter);
-        mAppLoader = appLoader;
-        mFavouritesHelper = favouritesHelper;
+    private FavouritesViewModel mViewModel;
+
+    public FavouritesFragment() {
+        super(null);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -47,49 +39,54 @@ public final class FavouritesFragment extends AppListFragmentBase {
         @Nullable ViewGroup container,
         @Nullable Bundle savedInstanceState
     ) {
+        View root = inflater.inflate(R.layout.fragment_favourites, container, false);
 
-        var root = inflater.inflate(R.layout.fragment_favourites, container, false);
-
-        var nowPlayingView = new NowPlayingView(root);
-        nowPlayingView.initialize();
-
-        initialiseList(root.findViewById(R.id.recyclerview));
-        loadFavouritesAsync();
+        mViewModel = new ViewModelProvider(requireActivity()).get(FavouritesViewModel.class);
+        mViewModel.getAdapter().observe(getViewLifecycleOwner(), adapter -> {
+            mAdapter = adapter;
+            initialiseList(root.findViewById(R.id.recyclerview));
+            loadFavouritesAsync();
+        });
 
         return root;
     }
 
     @Override
     void refresh() {
-        mAppLoader.refreshInstalledApps();
-        loadFavouritesAsync();
+        if (mViewModel != null) {
+            mViewModel.getAppLoader().refreshInstalledApps();
+            loadFavouritesAsync();
+        }
     }
 
     private void loadFavouritesAsync() {
-        mExecutor.execute(() -> mFavouritesHelper.loadFavouritesAsync(favourites -> {
-            var apps = mAppLoader.getInstalledApps();
+        mExecutor.execute(() ->
+            mViewModel.getFavouritesRepository().loadFavouritesAsync(favourites -> {
+                var apps = mViewModel.getAppLoader().getInstalledApps();
 
-            var favApps = new ArrayList<AppInfo>();
-            for (var app : apps) {
-                if (favourites.contains(app.getPackageName())) {
-                    favApps.add(app);
+                var favApps = new ArrayList<AppInfo>();
+                for (var app : apps) {
+                    if (favourites.contains(app.getPackageName())) {
+                        favApps.add(app);
+                    }
                 }
-            }
 
-            favApps.sort((a, b) -> a.getLabel().compareToIgnoreCase(b.getLabel()));
-
-            var items = new ArrayList<ListItem>();
-            if (!favApps.isEmpty()) {
-                items.add(new HeaderItem("Favourites"));
-                for (var app : favApps) {
-                    items.add(new AppItem(app));
+                favApps.sort((a, b) -> a.getLabel().compareToIgnoreCase(b.getLabel()));
+                var items = new ArrayList<ListItem>();
+                if (!favApps.isEmpty()) {
+                    items.add(new HeaderItem("Favourites"));
+                    for (var app : favApps) {
+                        items.add(new AppItem(app));
+                    }
                 }
-            }
 
-            mMainHandler.post(() -> {
-                mAdapter.clearItems();
-                mAdapter.addAll(items);
-            });
-        }));
+                mMainHandler.post(() -> {
+                    if (mAdapter != null) {
+                        mAdapter.clearItems();
+                        mAdapter.addAll(items);
+                    }
+                });
+            })
+        );
     }
 }

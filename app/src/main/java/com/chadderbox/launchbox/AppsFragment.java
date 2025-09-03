@@ -8,11 +8,11 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.ListItem;
-import com.chadderbox.launchbox.utils.AppLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,32 +22,37 @@ import java.util.concurrent.Executors;
 public final class AppsFragment extends AppListFragmentBase {
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-    private final AppLoader mAppLoader;
+    private AppsViewModel mViewModel;
 
-    public AppsFragment(
-        CombinedAdapter appsAdapter,
-        AppLoader appLoader
-    ) {
-        super(appsAdapter);
-        mAppLoader = appLoader;
+    public AppsFragment() {
+        super(null);
     }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(
+        @NonNull LayoutInflater inflater,
+        @Nullable ViewGroup container,
+        @Nullable Bundle savedInstanceState
+    ) {
         var root = inflater.inflate(R.layout.fragment_apps, container, false);
 
-        initialiseList(root.findViewById(R.id.recyclerview));
-        loadAppsAsync();
+        mViewModel = new ViewModelProvider(requireActivity()).get(AppsViewModel.class);
+        mViewModel.getAdapter().observe(getViewLifecycleOwner(), adapter -> {
+            mAdapter = adapter;
+            initialiseList(root.findViewById(R.id.recyclerview));
+            loadAppsAsync();
+        });
 
         return root;
     }
 
     @Override
     void refresh() {
-        mAppLoader.refreshInstalledApps();
-        loadAppsAsync();
+        if (mViewModel != null) {
+            mViewModel.getAppLoader().refreshInstalledApps();
+            loadAppsAsync();
+        }
     }
 
     private void loadAppsAsync() {
@@ -55,15 +60,17 @@ public final class AppsFragment extends AppListFragmentBase {
             var items = buildAppsList();
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
-                    mAdapter.clearItems();
-                    mAdapter.addAll(items);
+                    if (mAdapter != null) {
+                        mAdapter.clearItems();
+                        mAdapter.addAll(items);
+                    }
                 });
             }
         });
     }
 
     private List<ListItem> buildAppsList() {
-        var apps = mAppLoader.getInstalledApps();
+        var apps = mViewModel.getAppLoader().getInstalledApps();
         apps.sort((a, b) -> a.getLabel().compareToIgnoreCase(b.getLabel()));
 
         var items = new ArrayList<ListItem>();

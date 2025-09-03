@@ -1,6 +1,5 @@
 package com.chadderbox.launchbox.components;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -8,7 +7,9 @@ import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -18,11 +19,12 @@ import android.widget.TextView;
 import com.chadderbox.launchbox.utils.NotificationListener;
 import com.chadderbox.launchbox.R;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
 
-public final class NowPlayingView {
+public final class NowPlayingView extends LinearLayout {
 
-    private final View mRootView;
     private MediaSessionManager mSessionManager;
     private MediaController mController;
     private LinearLayout mContainer;
@@ -33,36 +35,48 @@ public final class NowPlayingView {
     private final MediaController.Callback mMediaCallback = new MediaController.Callback() {
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
-            Activity activity = (Activity) mRootView.getContext();
-            activity.runOnUiThread(NowPlayingView.this::updateNowPlayingUI);
+            post(NowPlayingView.this::updateNowPlayingUI);
         }
 
         @Override
         public void onPlaybackStateChanged(PlaybackState state) {
-            Activity activity = (Activity) mRootView.getContext();
-            activity.runOnUiThread(NowPlayingView.this::updateNowPlayingUI);
+            post(NowPlayingView.this::updateNowPlayingUI);
         }
     };
 
-    public NowPlayingView(View root) {
-        mRootView = root;
+    public NowPlayingView(Context context) {
+        super(context);
+        initialise(context);
     }
 
-    public void initialize() {
-        mContainer = mRootView.findViewById(R.id.now_playing);
-        mSongArt = mRootView.findViewById(R.id.song_art);
-        mSongTitle = mRootView.findViewById(R.id.song_title);
-        mSongArtist = mRootView.findViewById(R.id.song_artist);
-        mBtnPrevious = mRootView.findViewById(R.id.btn_prev);
-        mBtnPlayPause = mRootView.findViewById(R.id.btn_play_pause);
-        mBtnNext = mRootView.findViewById(R.id.btn_next);
+    public NowPlayingView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        initialise(context);
+    }
+
+    public NowPlayingView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        initialise(context);
+    }
+
+    public void initialise(Context context) {
+
+        LayoutInflater.from(context).inflate(R.layout.now_playing_layout, this, true);
+
+        mContainer = findViewById(R.id.now_playing);
+        mSongArt = findViewById(R.id.song_art);
+        mSongTitle = findViewById(R.id.song_title);
+        mSongArtist = findViewById(R.id.song_artist);
+        mBtnPrevious = findViewById(R.id.btn_prev);
+        mBtnPlayPause = findViewById(R.id.btn_play_pause);
+        mBtnNext = findViewById(R.id.btn_next);
 
         if (mContainer == null) {
             throw new IllegalStateException("NowPlayingView: container not found in layout!");
         }
 
         mContainer.setVisibility(View.GONE);
-        setupMediaController(mRootView.getContext());
+        setupMediaController(context);
     }
 
     private void setupMediaController(Context context) {
@@ -165,16 +179,16 @@ public final class NowPlayingView {
     }
 
     private boolean hasNotificationAccess(Context context) {
-        String enabledListeners = android.provider.Settings.Secure.getString(
+        var enabledListeners = android.provider.Settings.Secure.getString(
             context.getContentResolver(),
             "enabled_notification_listeners"
         );
-        return enabledListeners != null &&
-            enabledListeners.contains(context.getPackageName());
+
+        return enabledListeners != null && enabledListeners.contains(context.getPackageName());
     }
 
     private void requestNotificationAccess(Context context) {
-        Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+        var intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
         context.startActivity(intent);
     }
 
