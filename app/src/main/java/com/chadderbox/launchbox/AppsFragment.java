@@ -21,15 +21,6 @@ public final class AppsFragment extends AppListFragmentBase {
         super(null);
     }
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-
-        if (context instanceof IAdapterFetcher fetcher) {
-            mAdapter = fetcher.getAdapter(AppsFragment.class);
-        }
-    }
-
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public View onCreateView(
@@ -38,6 +29,10 @@ public final class AppsFragment extends AppListFragmentBase {
         @Nullable Bundle savedInstanceState
     ) {
         var root = inflater.inflate(R.layout.fragment_apps, container, false);
+
+        if (getActivity() instanceof IAdapterFetcher fetcher) {
+            mAdapter = fetcher.getAdapter(AppsFragment.class);
+        }
 
         initialiseList(root.findViewById(R.id.recyclerview));
 
@@ -50,11 +45,6 @@ public final class AppsFragment extends AppListFragmentBase {
         ).get(AppsViewModel.class);
 
         mViewModel.getItems().observe(getViewLifecycleOwner(), list -> {
-
-            if (mAdapter == null) {
-                return;
-            }
-
             mAdapter.clearItems();
             mAdapter.addAll(list);
             mAdapter.notifyDataSetChanged();

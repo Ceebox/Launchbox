@@ -29,15 +29,6 @@ public final class FavouritesFragment extends AppListFragmentBase {
         super(null);
     }
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-
-        if (context instanceof IAdapterFetcher fetcher) {
-            mAdapter = fetcher.getAdapter(FavouritesFragment.class);
-        }
-    }
-
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public View onCreateView(
@@ -47,6 +38,10 @@ public final class FavouritesFragment extends AppListFragmentBase {
     ) {
 
         var root = inflater.inflate(R.layout.fragment_favourites, container, false);
+
+        if (getActivity() instanceof IAdapterFetcher fetcher) {
+            mAdapter = fetcher.getAdapter(FavouritesFragment.class);
+        }
 
         initialiseList(root.findViewById(R.id.recyclerview));
 
@@ -60,15 +55,12 @@ public final class FavouritesFragment extends AppListFragmentBase {
         ).get(FavouritesViewModel.class);
 
         mViewModel.getItems().observe(getViewLifecycleOwner(), list -> {
-
-            if (mAdapter == null) {
-                return;
-            }
-
             mAdapter.clearItems();
             mAdapter.addAll(list);
             mAdapter.notifyDataSetChanged();
         });
+
+        mViewModel.loadFavourites();
 
         return root;
     }
