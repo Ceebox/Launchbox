@@ -7,8 +7,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.chadderbox.launchbox.MainActivity;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.AppInfo;
+import com.chadderbox.launchbox.data.AppItem;
+import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.FontHelper;
 import com.chadderbox.launchbox.utils.IconPackLoader;
@@ -19,32 +22,34 @@ public class AppViewHolder extends RecyclerView.ViewHolder {
     private final ImageView mIcon;
     private final TextView mLabel;
 
-    public AppViewHolder(@NonNull View itemView, Consumer<AppInfo> shortPressListener, Consumer<AppInfo> longPressListener) {
+    public AppViewHolder(@NonNull View itemView) {
         super(itemView);
         mIcon = itemView.findViewById(R.id.item_icon);
         mLabel = itemView.findViewById(R.id.item_name);
 
         itemView.setOnClickListener(v -> {
-            AppInfo app = (AppInfo) v.getTag();
-            if (shortPressListener != null) {
-                shortPressListener.accept(app);
+            var tag = v.getTag();
+            if (tag instanceof ListItem item) {
+                item.performOpenAction(v.getContext());
             }
         });
 
         itemView.setOnLongClickListener(v -> {
-            AppInfo app = (AppInfo) v.getTag();
-            if (app != null) {
-                longPressListener.accept(app);
+            var tag = v.getTag();
+            if (tag instanceof ListItem item) {
+                item.performHoldAction(v.getContext());
                 return true;
             }
+
             return false;
         });
     }
 
-    public void bind(AppInfo app, IconPackLoader iconPackLoader) {
+    public void bind(AppItem appItem, IconPackLoader iconPackLoader) {
+        var app = appItem.getAppInfo();
         var drawable = iconPackLoader.loadAppIcon(app.getPackageName());
 
-        itemView.setTag(app);
+        itemView.setTag(appItem);
         mLabel.setText(app.getLabel());
         mLabel.setTypeface(FontHelper.getFont(SettingsManager.getFont()));
 

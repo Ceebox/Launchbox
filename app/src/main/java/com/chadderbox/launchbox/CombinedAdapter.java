@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.components.FontTextView;
-import com.chadderbox.launchbox.data.AppInfo;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.ListItem;
@@ -27,7 +26,6 @@ import com.chadderbox.launchbox.viewholders.WebViewHolder;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -38,25 +36,13 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int TYPE_SETTING = 4;
 
     private final List<ListItem> mItems;
-    private final Consumer<AppInfo> mAppShortPressListener;
-    private final Consumer<AppInfo> mAppLongPressListener;
-    private final Consumer<String> mWebShortPressListener;
-    private final Consumer<SettingItem> mSettingsShortPressListener;
     private final IconPackLoader mIconPackLoader;
 
     public CombinedAdapter(
             List<ListItem> items,
-            Consumer<AppInfo> appShortPressListener,
-            Consumer<AppInfo> appLongPressListener,
-            Consumer<String> webShortPressListener,
-            Consumer<SettingItem> settingsShortPressListener,
             IconPackLoader iconPackLoader
     ) {
         mItems = items;
-        mAppShortPressListener = appShortPressListener;
-        mAppLongPressListener = appLongPressListener;
-        mWebShortPressListener = webShortPressListener;
-        mSettingsShortPressListener = settingsShortPressListener;
         mIconPackLoader = iconPackLoader;
     }
 
@@ -89,6 +75,10 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     public List<ListItem> getItems() {
         return mItems;
+    }
+
+    public ListItem getItem(int index) {
+        return mItems.get(index);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -127,16 +117,16 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return new HeaderViewHolder(header);
         } else if (viewType == TYPE_APP) {
             var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new AppViewHolder(view, mAppShortPressListener, mAppLongPressListener);
+            return new AppViewHolder(view);
         } else if (viewType == TYPE_WEB) {
             var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new WebViewHolder(view, mWebShortPressListener);
+            return new WebViewHolder(view);
         } else if (viewType == TYPE_SUGGESTION) {
             var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new SuggestionViewHolder(view, mWebShortPressListener);
+            return new SuggestionViewHolder(view);
         } else if (viewType == TYPE_SETTING) {
             var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new SettingViewHolder(view, mSettingsShortPressListener);
+            return new SettingViewHolder(view);
         }
 
         // Idk
@@ -154,17 +144,17 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
         else if (holder instanceof AppViewHolder appHolder) {
             if (item instanceof AppItem appItem) {
-                appHolder.bind(appItem.getAppInfo(), mIconPackLoader);
+                appHolder.bind(appItem, mIconPackLoader);
             }
         }
         else if (holder instanceof WebViewHolder webHolder) {
             if (item instanceof WebItem webItem) {
-                webHolder.bind(webItem.getQuery());
+                webHolder.bind(webItem);
             }
         }
         else if (holder instanceof SuggestionViewHolder suggestionHolder) {
             if (item instanceof SuggestionItem suggestionItem) {
-                suggestionHolder.bind(suggestionItem.getSuggestion());
+                suggestionHolder.bind(suggestionItem);
             }
         }
         else if (holder instanceof SettingViewHolder settingHolder) {

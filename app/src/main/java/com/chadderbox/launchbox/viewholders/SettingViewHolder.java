@@ -9,6 +9,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SettingItem;
 
 import java.util.function.Consumer;
@@ -16,15 +17,25 @@ import java.util.function.Consumer;
 public class SettingViewHolder extends RecyclerView.ViewHolder {
     private final TextView mTextview;
 
-    public SettingViewHolder(@NonNull View itemView, Consumer<SettingItem> clickListener) {
+    public SettingViewHolder(@NonNull View itemView) {
         super(itemView);
         mTextview = itemView.findViewById(R.id.item_name);
 
         itemView.setOnClickListener(v -> {
-            var item = (SettingItem) v.getTag();
-            if (item != null && clickListener != null) {
-                clickListener.accept(item);
+            var tag = v.getTag();
+            if (tag instanceof ListItem item) {
+                item.performOpenAction(v.getContext());
             }
+        });
+
+        itemView.setOnLongClickListener(v -> {
+            var tag = v.getTag();
+            if (tag instanceof ListItem item) {
+                item.performHoldAction(v.getContext());
+                return true;
+            }
+
+            return false;
         });
     }
 

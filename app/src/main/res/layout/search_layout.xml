@@ -27,6 +27,7 @@
         android:layout_margin="16dp"
         android:importantForAutofill="no"
         android:hint="@string/search_prompt"
+        android:imeOptions="actionSearch"
         android:inputType="text"
         android:padding="12dp"/>
 

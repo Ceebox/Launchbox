@@ -138,10 +138,6 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         var appsAdapter = new CombinedAdapter(
             new ArrayList<>(),
-            this::launchApp,
-            this::showAppMenu,
-            (ignored) -> {},
-            (ignored) -> {},
             mIconPackLoader
         );
 
@@ -149,10 +145,6 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         var favouritesAdapter = new CombinedAdapter(
             new ArrayList<>(),
-            this::launchApp,
-            this::showAppMenu,
-            (ignored) -> {},
-            (ignored) -> {},
             mIconPackLoader
         );
 
@@ -267,12 +259,12 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         }
     }
 
-    private void openWebQuery(String query) {
+    public void openWebQuery(String query) {
         var intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=" + Uri.encode(query)));
         startActivity(intent);
     }
 
-    private void openSetting(SettingItem settingItem) {
+    public void openSetting(SettingItem settingItem) {
         startActivity(settingItem.getIntent());
     }
 
@@ -377,7 +369,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         var searchResultsView = (RecyclerView) sheet.findViewById(R.id.search_results);
         searchResultsView.setLayoutManager(new LinearLayoutManager(this));
-        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), this::launchApp, this::showAppMenu, this::openWebQuery, this::openSetting, mIconPackLoader);
+        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), mIconPackLoader);
         searchResultsView.setAdapter(mSearchAdapter);
 
         var searchInput = (EditText) sheet.findViewById(R.id.search_input);
@@ -398,6 +390,23 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
             @Override
             public void afterTextChanged(Editable s) {}
+        });
+
+        searchInput.setOnEditorActionListener((v, actionId, event) -> {
+            boolean handled = false;
+
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH ||
+                (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN)) {
+
+                if (mSearchAdapter.getItemCount() > 0) {
+                    mSearchAdapter.getItem(0).performOpenAction(this);
+                    closeSearchSheet();
+                }
+
+                handled = true;
+            }
+
+            return handled;
         });
 
         // Start hidden
