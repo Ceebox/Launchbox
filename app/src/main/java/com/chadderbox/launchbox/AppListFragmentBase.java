@@ -64,6 +64,10 @@ public abstract class AppListFragmentBase extends Fragment {
         mListView.smoothScrollToPosition(position);
     }
 
+    public void scrollToPosition(int position) {
+        mListView.scrollToPosition(position);
+    }
+
     private static final class NestedTouchListener implements RecyclerView.OnItemTouchListener {
         private float mLastY;
 

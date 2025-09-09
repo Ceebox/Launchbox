@@ -63,7 +63,6 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     private SearchManager mSearchManager;
     private Runnable mSearchRunnable;
     private MainPagerAdapter mPagerAdapter;
-    private AlphabetIndexView mIndexView;
     private ViewPager2 mViewPager;
     private GestureDetector mGestureDetector;
     private FavouritesRepository mFavouritesHelper;
@@ -171,14 +170,40 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
             }
         });
 
-        mIndexView = findViewById(R.id.alphabet_index);
-        mIndexView.setOnLetterSelectedListener(letter -> {
+        var indexView = (AlphabetIndexView)findViewById(R.id.alphabet_index);
+        indexView.setOnLetterSelectedListener(letter -> {
             var lastPos = mPagerAdapter.getItemCount() - 1;
             mViewPager.setCurrentItem(lastPos);
 
             var fragment = findPagerFragment(lastPos);
             if (fragment instanceof AppsFragment appsFragment) {
                 appsFragment.scrollToLetter(letter);
+            }
+        });
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // NOTE: Don't call super on this to prevent weird back animation
+                // Close the search if we press the back button
+                if (mSearchSheet.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    closeSearchSheet();
+                }
+
+                // Otherwise take us to the favourites section
+                var firstFragment = findPagerFragment(0);
+                if (mCurrentFragment != firstFragment) {
+                    mViewPager.setCurrentItem(0, true);
+                    mCurrentFragment = firstFragment;
+
+                    // This doesn't really work
+                    // TODO: Figure out why?
+                    if (mCurrentFragment instanceof AppsFragment appsFragment) {
+                        appsFragment.scrollToPosition(0);
+                    }
+                } else {
+                    setEnabled(false);
+                }
             }
         });
     }
@@ -428,18 +453,6 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
-        });
-
-        // Close the search if we press the back button
-        var onBackPressedDispatcher = getOnBackPressedDispatcher();
-        onBackPressedDispatcher.addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                // NOTE: Don't call super on this to prevent weird back animation
-                if (mSearchSheet.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                    closeSearchSheet();
-                }
-            }
         });
 
         // Hacks to try and get swipe detection working
