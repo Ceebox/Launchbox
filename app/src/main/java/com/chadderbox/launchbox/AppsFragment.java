@@ -50,6 +50,11 @@ public final class AppsFragment extends AppListFragmentBase {
         ).get(AppsViewModel.class);
 
         mViewModel.getItems().observe(getViewLifecycleOwner(), list -> {
+
+            if (mAdapter == null) {
+                return;
+            }
+
             mAdapter.clearItems();
             mAdapter.addAll(list);
             mAdapter.notifyDataSetChanged();

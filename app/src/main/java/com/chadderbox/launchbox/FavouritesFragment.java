@@ -60,6 +60,11 @@ public final class FavouritesFragment extends AppListFragmentBase {
         ).get(FavouritesViewModel.class);
 
         mViewModel.getItems().observe(getViewLifecycleOwner(), list -> {
+
+            if (mAdapter == null) {
+                return;
+            }
+
             mAdapter.clearItems();
             mAdapter.addAll(list);
             mAdapter.notifyDataSetChanged();

@@ -133,7 +133,11 @@ public final class NowPlayingView extends LinearLayout {
             mContainer.setVisibility(View.VISIBLE);
             var title = md.getString(MediaMetadata.METADATA_KEY_TITLE);
             var artist = md.getString(MediaMetadata.METADATA_KEY_ARTIST);
-            var art = md.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+
+            var art = md.getBitmap(MediaMetadata.METADATA_KEY_ART);
+            if (art == null || (art.getWidth() == 0 || art.getHeight() == 0)) {
+                art = md.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
+            }
 
             mSongTitle.setText(title != null ? title : "");
             mSongArtist.setText(artist != null ? artist : "");
