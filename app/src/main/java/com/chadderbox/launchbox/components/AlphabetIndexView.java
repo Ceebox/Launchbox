@@ -7,10 +7,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import com.chadderbox.launchbox.settings.SettingsManager;
 
@@ -23,10 +25,10 @@ public final class AlphabetIndexView extends View {
     public AlphabetIndexView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaint.setColor(Color.WHITE);
         mPaint.setTextSize(32f * getResources().getDisplayMetrics().density / 3);
         mPaint.setTextAlign(Paint.Align.CENTER);
 
+        applyTextColour(context);
         applyCurrentFont();
     }
 
@@ -76,6 +78,23 @@ public final class AlphabetIndexView extends View {
 
     public void setOnLetterSelectedListener(OnLetterSelectedListener listener) {
         mListener = listener;
+    }
+
+    private void applyTextColour(Context context) {
+        var typedValue = new TypedValue();
+        if (context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue, true)) {
+            int colour;
+            if (typedValue.type >= TypedValue.TYPE_FIRST_COLOR_INT && typedValue.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+                colour = typedValue.data;
+            } else {
+                // Colour resource reference
+                colour = ContextCompat.getColor(context, typedValue.resourceId);
+            }
+            mPaint.setColor(colour);
+        } else {
+            // Fallback
+            mPaint.setColor(Color.WHITE);
+        }
     }
 
     private void applyCurrentFont() {
