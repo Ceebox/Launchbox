@@ -197,6 +197,8 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         if (hasAestheticChanged()) {
             refreshUi();
         }
+
+        closeSearchSheet();
     }
 
     @Override

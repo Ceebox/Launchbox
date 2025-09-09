@@ -5,11 +5,14 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+
+import com.chadderbox.launchbox.settings.SettingsManager;
 
 public final class AlphabetIndexView extends View {
     public static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -23,6 +26,8 @@ public final class AlphabetIndexView extends View {
         mPaint.setColor(Color.WHITE);
         mPaint.setTextSize(32f * getResources().getDisplayMetrics().density / 3);
         mPaint.setTextAlign(Paint.Align.CENTER);
+
+        applyCurrentFont();
     }
 
     @Override
@@ -71,6 +76,23 @@ public final class AlphabetIndexView extends View {
 
     public void setOnLetterSelectedListener(OnLetterSelectedListener listener) {
         mListener = listener;
+    }
+
+    private void applyCurrentFont() {
+        // This doesn't work properly at the moment
+        var fontPackage = SettingsManager.getFont();
+        var typeface = Typeface.DEFAULT;
+
+        if (!fontPackage.isEmpty()) {
+            try {
+                typeface = Typeface.create(fontPackage, Typeface.NORMAL);
+            } catch (Exception ignored) {
+                // Use default, I guess
+            }
+        }
+
+        mPaint.setTypeface(typeface);
+        invalidate();
     }
 
     public interface OnLetterSelectedListener {
