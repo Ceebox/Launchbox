@@ -24,7 +24,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -46,27 +45,31 @@ import com.chadderbox.launchbox.utils.IconPackLoader;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public final class MainActivity extends AppCompatActivity implements View.OnLongClickListener {
+public final class MainActivity extends AppCompatActivity implements View.OnLongClickListener, IAdapterFetcher {
 
     private static final long SEARCH_DELAY_MS = 300;
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private final Handler mSearchHandler = new Handler(Looper.getMainLooper());
+    private final HashMap<Class<? extends AppListFragmentBase>, CombinedAdapter> mAdapters = new HashMap<>();
     private AppLoader mAppLoader;
     private SearchManager mSearchManager;
     private Runnable mSearchRunnable;
     private MainPagerAdapter mPagerAdapter;
     private AlphabetIndexView mIndexView;
+    private ViewPager2 mViewPager;
     private GestureDetector mGestureDetector;
     private FavouritesRepository mFavouritesHelper;
     private String mLastIconPack;
     private String mLastFont;
+    private int mLastTheme;
     private IconPackLoader mIconPackLoader;
     private BottomSheetBehavior<View> mSearchSheet;
     private CombinedAdapter mSearchAdapter;
@@ -85,7 +88,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                 case Intent.ACTION_PACKAGE_ADDED:
                 case Intent.ACTION_PACKAGE_REMOVED:
                 case Intent.ACTION_PACKAGE_CHANGED:
-                    mPagerAdapter.refresh();
+                    refreshAllVisibleFragments();
                     break;
             }
         }
@@ -98,6 +101,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         mLastIconPack = SettingsManager.getIconPack();
         mLastFont = SettingsManager.getFont();
+        mLastTheme = SettingsManager.getTheme();
 
         mIconPackLoader = new IconPackLoader(getApplicationContext(), mLastIconPack);
         mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler);
@@ -132,51 +136,58 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
             }
         });
 
-        var favouritesAdapter = new CombinedAdapter(new ArrayList<>(),
+        var appsAdapter = new CombinedAdapter(
+            new ArrayList<>(),
             this::launchApp,
             this::showAppMenu,
-            query -> {},
-            setting -> {},
+            (ignored) -> {},
+            (ignored) -> {},
             mIconPackLoader
         );
 
-        var appsAdapter = new CombinedAdapter(new ArrayList<>(),
+        mAdapters.put(AppsFragment.class, appsAdapter);
+
+        var favouritesAdapter = new CombinedAdapter(
+            new ArrayList<>(),
             this::launchApp,
             this::showAppMenu,
-            query -> {},
-            setting -> {},
+            (ignored) -> {},
+            (ignored) -> {},
             mIconPackLoader
         );
 
-        new ViewModelProvider(this, new FavouritesViewModel.Factory(getApplication(), mAppLoader, mFavouritesHelper, favouritesAdapter)).get(FavouritesViewModel.class);
-        var fragments = new ArrayList<AppListFragmentBase>();
-        if (mFavouritesHelper.hasFavourites()) {
-            fragments.add(new FavouritesFragment());
-        }
+        mAdapters.put(FavouritesFragment.class, favouritesAdapter);
 
-        new ViewModelProvider(this, new AppsViewModel.Factory(getApplication(), mAppLoader, appsAdapter)).get(AppsViewModel.class);
-        fragments.add(new AppsFragment());
+        var fragments = List.of(
+            FavouritesFragment.class,
+            AppsFragment.class
+        );
 
         mPagerAdapter = new MainPagerAdapter(this, fragments);
 
         refreshFavouritesFragment();
 
-        var viewPager = (ViewPager2) findViewById(R.id.viewpager);
-        viewPager.setAdapter(mPagerAdapter);
-        viewPager.setOffscreenPageLimit(2);
+        mViewPager = findViewById(R.id.viewpager);
+        mViewPager.setAdapter(mPagerAdapter);
+        mViewPager.setOffscreenPageLimit(2);
 
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+        mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                mCurrentFragment = mPagerAdapter.getFragmentAt(position);
+                mCurrentFragment = findPagerFragment(position);
             }
         });
 
         mIndexView = findViewById(R.id.alphabet_index);
         mIndexView.setOnLetterSelectedListener(letter -> {
-            viewPager.setCurrentItem(mPagerAdapter.getItemCount() - 1);
-            mPagerAdapter.getFragmentAt(mPagerAdapter.getItemCount() - 1).scrollToLetter(letter);
+            var lastPos = mPagerAdapter.getItemCount() - 1;
+            mViewPager.setCurrentItem(lastPos);
+
+            var fragment = findPagerFragment(lastPos);
+            if (fragment instanceof AppsFragment appsFragment) {
+                appsFragment.scrollToLetter(letter);
+            }
         });
     }
 
@@ -238,7 +249,12 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         return super.onOptionsItemSelected(item);
     }
 
-    private void launchApp(AppInfo app) {
+    @Override
+    public CombinedAdapter getAdapter(Class<? extends AppListFragmentBase> fragmentClass) {
+        return mAdapters.get(fragmentClass);
+    }
+
+    public void launchApp(AppInfo app) {
         var pm = getPackageManager();
         var intent = pm.getLaunchIntentForPackage(app.getPackageName());
         if (intent != null) {
@@ -259,7 +275,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void showAppMenu(AppInfo app) {
+    public void showAppMenu(AppInfo app) {
         var appName = app.getLabel();
         var options = new String[] {
                 mFavouritesHelper.isFavourite(app.getPackageName()) ? "Unfavourite " + appName : "Favourite " + appName,
@@ -279,10 +295,10 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                                     currentFavourites.add(app.getPackageName());
                                 }
 
-                                mFavouritesHelper.saveFavouritesAsync(currentFavourites);
+                                mFavouritesHelper.saveFavourites(currentFavourites);
                                 refreshFavouritesFragment();
 
-                                mMainHandler.post(() -> mPagerAdapter.refresh());
+                                mMainHandler.post(this::refreshAllVisibleFragments);
                             });
                             break;
 
@@ -307,12 +323,15 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         // First load, this is gonna happen anyway
         if (mLastFont == null) {
-            return false;
+            return true;
         }
 
         var newIconPack = SettingsManager.getIconPack();
         var newFont = SettingsManager.getFont();
-        return !Objects.equals(mLastIconPack, newIconPack) || !Objects.equals(mLastFont, newFont);
+        var newTheme = SettingsManager.getTheme();
+        return !Objects.equals(mLastIconPack, newIconPack) ||
+            !Objects.equals(mLastFont, newFont) ||
+            !Objects.equals(mLastTheme, newTheme);
     }
 
     private void refreshUi() {
@@ -320,29 +339,31 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
         mLastIconPack = SettingsManager.getIconPack();
         mLastFont = SettingsManager.getFont();
+        mLastTheme = SettingsManager.getTheme();
 
         mIconPackLoader.setIconPackPackage(mLastIconPack);
 
-        refreshFavouritesFragment();
         mAppLoader.refreshInstalledApps();
-        mPagerAdapter.refresh();
+        refreshAllVisibleFragments();
     }
 
     private void refreshFavouritesFragment() {
-        mPagerAdapter.refresh();
-        var frag = mPagerAdapter.getFragmentAt(0);
-
-        var hasFavourites = mFavouritesHelper.hasFavourites();
-        if ((frag instanceof FavouritesFragment)) {
-            if (!hasFavourites) {
-                mPagerAdapter.removeFragment(frag);
+        mPagerAdapter.updateVisibility(fragment -> {
+            if (fragment instanceof FavouritesFragment) {
+                return mFavouritesHelper.hasFavourites();
             }
 
-            return;
-        }
+            return true;
+        });
+    }
 
-        if (hasFavourites) {
-            mPagerAdapter.addFragment(new FavouritesFragment(), 0);
+
+    private void refreshAllVisibleFragments() {
+        for (int i = 0; i < mPagerAdapter.getItemCount(); i++) {
+            var fragment = findPagerFragment(i);
+            if (fragment instanceof AppListFragmentBase base) {
+                base.refresh();
+            }
         }
     }
 
@@ -465,5 +486,10 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
 
             mSearchAdapter.notifyDataSetChanged();
         });
+    }
+
+    private Fragment findPagerFragment(int position) {
+        long itemId = mPagerAdapter.getItemId(position);
+        return getSupportFragmentManager().findFragmentByTag("f" + itemId);
     }
 }

@@ -24,6 +24,14 @@ public final class FavouritesRepository {
         return favourites.contains(packageName);
     }
 
+    /**
+     * Synchronously load favourites from settings
+     */
+    public Set<String> loadFavourites() {
+        return new HashSet<>(SettingsManager.getFavourites());
+    }
+
+    // This probably needs to go
     public void loadFavouritesAsync(@NonNull SetFavouritesCallback callback) {
         mExecutor.execute(() -> {
             // Copy here to prevent concurrent modification
@@ -32,15 +40,15 @@ public final class FavouritesRepository {
         });
     }
 
-    public void saveFavouritesAsync(@NonNull Set<String> newFavourites) {
-        mExecutor.execute(() -> SettingsManager.setFavourites(newFavourites));
-    }
-
-    public interface SetFavouritesCallback {
-        void onResult(Set<String> favorites);
+    public void saveFavourites(@NonNull Set<String> newFavourites) {
+        SettingsManager.setFavourites(newFavourites);
     }
 
     public boolean hasFavourites() {
         return !SettingsManager.getFavourites().isEmpty();
+    }
+
+    public interface SetFavouritesCallback {
+        void onResult(Set<String> favorites);
     }
 }

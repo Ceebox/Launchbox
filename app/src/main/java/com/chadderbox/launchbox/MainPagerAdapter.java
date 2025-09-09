@@ -1,36 +1,44 @@
 package com.chadderbox.launchbox;
 
+import android.annotation.SuppressLint;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class MainPagerAdapter extends FragmentStateAdapter {
 
-    private final List<AppListFragmentBase> mFragments;
+    private final List<Class<? extends AppListFragmentBase>> mFragmentClasses;
+    private final List<Class<? extends AppListFragmentBase>> mVisibleFragmentClasses;
 
-    public MainPagerAdapter(@NonNull FragmentActivity fragmentActivity, List<AppListFragmentBase> fragments) {
+    public MainPagerAdapter(@NonNull FragmentActivity fragmentActivity, List<Class<? extends AppListFragmentBase>> fragmentClasses) {
         super(fragmentActivity);
-
-        mFragments = fragments;
+        mFragmentClasses = new ArrayList<>(fragmentClasses);
+        mVisibleFragmentClasses = new ArrayList<>(fragmentClasses);
     }
 
     @NonNull
     @Override
     public AppListFragmentBase createFragment(int position) {
-        return mFragments.get(position);
+        try {
+            return mVisibleFragmentClasses.get(position).getConstructor().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create fragment", e);
+        }
     }
 
     @Override
     public long getItemId(int position) {
-        return mFragments.get(position).hashCode();
+        return mVisibleFragmentClasses.get(position).getName().hashCode();
     }
 
     @Override
     public boolean containsItem(long id) {
-        for (var fragment : mFragments) {
-            if (fragment.hashCode() == id) {
+        for (var cls : mVisibleFragmentClasses) {
+            if (cls.getName().hashCode() == id) {
                 return true;
             }
         }
@@ -38,38 +46,29 @@ public final class MainPagerAdapter extends FragmentStateAdapter {
         return false;
     }
 
-    public void addFragment(AppListFragmentBase fragment, int position) {
-        mFragments.add(position, fragment);
-        notifyItemInserted(position);
-    }
-
-    public void removeFragment(int position) {
-        mFragments.remove(position);
-        notifyItemRemoved(position);
-    }
-
-    public void removeFragment(AppListFragmentBase item) {
-        var position = mFragments.indexOf(item);
-        mFragments.remove(position);
-        notifyItemRemoved(position);
-    }
-
     @Override
     public int getItemCount() {
-        return mFragments.size();
+        return mVisibleFragmentClasses.size();
     }
 
-    public AppListFragmentBase getFragmentAt(int position) {
-        return mFragments.get(position);
-    }
-
-    public List<AppListFragmentBase> getFragments() {
-        return mFragments;
-    }
-
-    public void refresh() {
-        for (var fragment : mFragments) {
-            fragment.refresh();
+    @SuppressLint("NotifyDataSetChanged")
+    public void updateVisibility(IFragmentVisiblePredicate predicate) {
+        mVisibleFragmentClasses.clear();
+        for (var cls : mFragmentClasses) {
+            try {
+                var instance = cls.getConstructor().newInstance();
+                if (predicate.shouldShow(instance)) {
+                    mVisibleFragmentClasses.add(cls);
+                }
+            } catch (Exception e) {
+                // Skip if we can't instantiate it
+                // TODO: Maybe log this?
+            }
         }
+        notifyDataSetChanged();
+    }
+
+    public interface IFragmentVisiblePredicate {
+        boolean shouldShow(AppListFragmentBase fragment);
     }
 }
