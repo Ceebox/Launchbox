@@ -8,7 +8,7 @@
     android:background="?android:attr/colorBackground"
     android:elevation="16dp"
     app:behavior_hideable="true"
-    app:behavior_peekHeight="0dp"
+    app:behavior_peekHeight="60dp"
     android:clickable="true"
     android:focusable="true"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -20,7 +20,7 @@
         android:layout_margin="16dp"
         android:tint="?android:colorAccent"/>
 
-    <EditText
+    <com.chadderbox.launchbox.components.FontEditText
         android:id="@+id/search_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
