@@ -125,9 +125,13 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         initialiseSearchView();
 
         mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            private static final int SWIPE_THRESHOLD = 100;
+            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+
             @Override
             public boolean onFling(MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
-                if (velocityY < -500) {
+                var diffY = e1.getY() - e2.getY();
+                if (diffY > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
                     openSearchSheet();
                     return true;
                 }
@@ -458,24 +462,6 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         // Hacks to try and get swipe detection working
         var root = findViewById(R.id.root_coordinator);
         root.setOnTouchListener((v, event) -> mGestureDetector.onTouchEvent(event));
-
-        var rootLayout = findViewById(R.id.root_layout);
-        var gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            private static final int SWIPE_THRESHOLD = 100;
-            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
-
-            @Override
-            public boolean onFling(MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
-                var diffY = e1.getY() - e2.getY();
-                if (diffY > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                    openSearchSheet();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        rootLayout.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 
     public void openSearchSheet() {
