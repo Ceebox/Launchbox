@@ -90,6 +90,7 @@ public final class AlphabetIndexView extends View {
                 // Colour resource reference
                 colour = ContextCompat.getColor(context, typedValue.resourceId);
             }
+
             mPaint.setColor(colour);
         } else {
             // Fallback

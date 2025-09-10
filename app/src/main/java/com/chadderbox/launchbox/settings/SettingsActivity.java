@@ -14,9 +14,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.chadderbox.launchbox.AppsViewModel;
+import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.IconPackLoader;
 import com.chadderbox.launchbox.utils.IconPackParser;
 import com.chadderbox.launchbox.R;
@@ -62,6 +65,12 @@ public final class SettingsActivity extends AppCompatActivity {
         ));
 
         mOptions.add(new SettingOption(
+            "Show Character Headings",
+            ctx -> SettingsManager.getCharacterHeadings() ? "On" : "Off",
+            ctx -> showCharacterHeadingDialog()
+        ));
+
+        mOptions.add(new SettingOption(
                 "Choose Font",
                 ctx -> SettingsManager.getFont(),
                 ctx -> showFontDialog()
@@ -92,6 +101,29 @@ public final class SettingsActivity extends AppCompatActivity {
         var recyclerView = (RecyclerView) findViewById(R.id.recyclerViewSettings);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new SettingOptionAdapter(mOptions));
+    }
+
+    private void showCharacterHeadingDialog() {
+        var options = new String[] { "On", "Off" };
+        var current = SettingsManager.getCharacterHeadings();
+        var checkedItem = current ? 0 : 1;
+
+        new AlertDialog.Builder(this)
+            .setTitle("Character Headings")
+            .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
+                var enabled = which == 0;
+                if (enabled == current) {
+                    return;
+                }
+
+                SettingsManager.setCharacterHeadings(enabled);
+                Toast.makeText(this, "Character headings: " + (enabled ? "On" : "Off"), Toast.LENGTH_SHORT).show();
+
+                buildOptions();
+                dialog.dismiss();
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
     }
 
     private void showIconPackDialog() {
@@ -205,6 +237,7 @@ public final class SettingsActivity extends AppCompatActivity {
                 }
 
                 SettingsManager.setFontSize(selectedSize);
+                Toast.makeText(this, "Size applied: " + selectedSize, Toast.LENGTH_SHORT).show();
 
                 buildOptions();
             })

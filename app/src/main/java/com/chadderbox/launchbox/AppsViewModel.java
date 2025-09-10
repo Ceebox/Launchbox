@@ -1,8 +1,10 @@
 package com.chadderbox.launchbox;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -12,13 +14,15 @@ import androidx.lifecycle.ViewModelProvider;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.ListItem;
+import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.AppLoader;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AppsViewModel extends AndroidViewModel {
+public class AppsViewModel extends AndroidViewModel
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final AppLoader mAppLoader;
     private final MutableLiveData<List<ListItem>> mItems = new MutableLiveData<>();
@@ -26,7 +30,15 @@ public class AppsViewModel extends AndroidViewModel {
     public AppsViewModel(@NonNull Application app, AppLoader loader) {
         super(app);
         mAppLoader = loader;
+        SettingsManager.registerChangeListener(this);
         loadApps();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, @Nullable String key) {
+        if (SettingsManager.KEY_CHARACTER_HEADINGS.equals(key)) {
+            loadApps();
+        }
     }
 
     public AppLoader getAppLoader() {
@@ -48,7 +60,15 @@ public class AppsViewModel extends AndroidViewModel {
         var list = new ArrayList<ListItem>();
         list.add(new HeaderItem("Apps"));
 
+        var characterHeadings = SettingsManager.getCharacterHeadings();
+        var lastHeading = ' ';
         for (var app : apps) {
+            var appName = app.getLabel();
+            if (characterHeadings && !Character.isDigit(appName.charAt(0)) && lastHeading != appName.charAt(0)) {
+                list.add(new HeaderItem(String.valueOf(appName.charAt(0))));
+                lastHeading = appName.charAt(0);
+            }
+
             list.add(new AppItem(app));
         }
 

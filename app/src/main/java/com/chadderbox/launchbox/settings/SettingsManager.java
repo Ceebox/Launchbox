@@ -10,6 +10,7 @@ import java.util.Set;
 
 public final class SettingsManager {
     public static final String PREFS_NAME = "cbxlauncher_prefs";
+    public static final String KEY_CHARACTER_HEADINGS = "character_headings";
     public static final String KEY_ICON_PACK = "icon_pack";
     public static final String KEY_FONT = "font";
     public static final String KEY_FONT_SIZE = "font_size";
@@ -28,6 +29,14 @@ public final class SettingsManager {
 
     public static void unregisterChangeListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
         sPrefs.unregisterOnSharedPreferenceChangeListener(listener);
+    }
+
+    public static void setCharacterHeadings(boolean hasCharacterHeadings) {
+        sPrefs.edit().putBoolean(KEY_CHARACTER_HEADINGS, hasCharacterHeadings).apply();
+    }
+
+    public static boolean getCharacterHeadings() {
+        return sPrefs.getBoolean(KEY_CHARACTER_HEADINGS, false);
     }
 
     public static void setIconPack(String packageName) {
