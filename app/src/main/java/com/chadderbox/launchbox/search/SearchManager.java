@@ -1,7 +1,10 @@
 package com.chadderbox.launchbox.search;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -15,7 +18,8 @@ public final class SearchManager {
     private final List<ISearchProvider> mSearchProviders;
 
     public SearchManager(List<ISearchProvider> providers) {
-        mSearchProviders = providers;
+        mSearchProviders = new ArrayList<>(providers);
+        mSearchProviders.sort(Comparator.comparingInt(ISearchProvider::getPriority));
     }
 
     public void searchAsync(String query, Consumer<List<ListItem>> callback) {
@@ -26,12 +30,18 @@ public final class SearchManager {
 
         var aggregated = new ArrayList<ListItem>();
         var pending = new AtomicInteger(mSearchProviders.size());
+        var resultsByProvider = new ConcurrentHashMap<ISearchProvider, List<ListItem>>();
 
-        // TODO: Probably isolate by type (app vs search result etc)
         for (var provider : mSearchProviders) {
             provider.searchAsync(query, results -> {
-                aggregated.addAll(results);
+                resultsByProvider.put(provider, results);
                 if (pending.decrementAndGet() == 0) {
+
+                    // Order by priority
+                    for (var p : mSearchProviders) {
+                        aggregated.addAll(Objects.requireNonNull(resultsByProvider.getOrDefault(p, List.of())));
+                    }
+
                     callback.accept(aggregated);
                 }
             });

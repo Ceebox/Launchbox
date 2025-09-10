@@ -26,6 +26,12 @@ public final class AppSearchProvider implements ISearchProvider {
     }
 
     @Override
+    public int getPriority() {
+        // Apps have the highest priority
+        return 0;
+    }
+
+    @Override
     public void searchAsync(String query, Consumer<List<ListItem>> callback) {
         mExecutor.execute(() -> {
             var searchQuery = query.toLowerCase(Locale.getDefault());

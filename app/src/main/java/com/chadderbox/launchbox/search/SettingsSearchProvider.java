@@ -25,6 +25,11 @@ public class SettingsSearchProvider implements ISearchProvider {
     }
 
     @Override
+    public int getPriority() {
+        return 1;
+    }
+
+    @Override
     public void searchAsync(String query, Consumer<List<ListItem>> callback) {
         mExecutor.execute(() -> {
             var results = new ArrayList<ListItem>();

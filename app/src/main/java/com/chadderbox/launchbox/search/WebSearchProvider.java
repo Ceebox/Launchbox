@@ -21,6 +21,11 @@ public final class WebSearchProvider implements ISearchProvider {
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
     @Override
+    public int getPriority() {
+        return 2;
+    }
+
+    @Override
     public void searchAsync(String query, Consumer<List<ListItem>> callback) {
         mExecutor.execute(() -> {
             var result = new ArrayList<ListItem>();

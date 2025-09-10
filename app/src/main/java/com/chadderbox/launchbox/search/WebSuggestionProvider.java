@@ -28,6 +28,11 @@ public final class WebSuggestionProvider implements ISearchProvider {
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
     @Override
+    public int getPriority() {
+        return 3;
+    }
+
+    @Override
     public void searchAsync(String query, Consumer<List<ListItem>> callback) {
         mExecutor.execute(() -> {
             List<ListItem> suggestions = new ArrayList<>();
