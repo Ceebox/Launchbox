@@ -4,16 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.util.LruCache;
 
 import androidx.core.content.res.ResourcesCompat;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public final class IconPackLoader {
 
-    private static final Map<String, Drawable> sIconCache = new HashMap<>();
-    private static final Map<String, Drawable> sSystemIconCache = new HashMap<>();
+    private static final LruCache<String, Drawable> sIconCache = new LruCache<>(256);
+    private static final LruCache<String, Drawable> sSystemIconCache = new LruCache<>(256);
     private final Context mContext;
     private final PackageManager mPackageManager;
     private String mIconPackPackage;
@@ -27,7 +25,7 @@ public final class IconPackLoader {
     }
 
     public static void clearCache() {
-        sIconCache.clear();
+        sIconCache.evictAll();
     }
 
     public String getIconPackPackage() {
@@ -38,7 +36,7 @@ public final class IconPackLoader {
         if ((mIconPackPackage == null && newIconPackPackage != null)
             || (mIconPackPackage != null && !mIconPackPackage.equals(newIconPackPackage))) {
             mIconPackPackage = newIconPackPackage;
-            sIconCache.clear();
+            sIconCache.evictAll();
             loadDefaultMissingIcon();
         }
     }
@@ -69,20 +67,16 @@ public final class IconPackLoader {
             return null;
         }
 
-        if (sIconCache.containsKey(packageName)) {
-            var cached = sIconCache.get(packageName);
-            if (cached != null) {
-                return cached;
-            }
+        var cached = sIconCache.get(packageName);
+        if (cached != null) {
+            return cached;
         }
 
         // Default
         if (mIconPackPackage.equalsIgnoreCase("System Default")) {
-            if (sSystemIconCache.containsKey(packageName)) {
-                var cachedSysIcon = sSystemIconCache.get(packageName);
-                if (cachedSysIcon != null) {
-                    return cachedSysIcon;
-                }
+            var cachedSysIcon = sSystemIconCache.get(packageName);
+            if (cachedSysIcon != null) {
+                return cachedSysIcon;
             }
             try {
                 var systemIcon = mPackageManager.getApplicationIcon(packageName);

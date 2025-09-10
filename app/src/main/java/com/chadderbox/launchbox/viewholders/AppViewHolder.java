@@ -1,5 +1,7 @@
 package com.chadderbox.launchbox.viewholders;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -7,18 +9,21 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.chadderbox.launchbox.MainActivity;
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.data.AppInfo;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.FontHelper;
 import com.chadderbox.launchbox.utils.IconPackLoader;
 
-import java.util.function.Consumer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AppViewHolder extends RecyclerView.ViewHolder {
+
+    private static final ExecutorService mIconExecutor = Executors.newCachedThreadPool();
+    private static final Handler mMainHandler = new Handler(Looper.getMainLooper());
+
     private final ImageView mIcon;
     private final TextView mLabel;
 
@@ -47,17 +52,24 @@ public class AppViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(AppItem appItem, IconPackLoader iconPackLoader) {
         var app = appItem.getAppInfo();
-        var drawable = iconPackLoader.loadAppIcon(app.getPackageName());
 
         itemView.setTag(appItem);
         mLabel.setText(app.getLabel());
         mLabel.setTypeface(FontHelper.getFont(SettingsManager.getFont()));
 
-        if (drawable != null) {
-            mIcon.setVisibility(View.VISIBLE);
-            mIcon.setImageDrawable(drawable);
-        } else {
-            mIcon.setVisibility(View.GONE);
-        }
+        mIconExecutor.submit(() -> {
+            var drawable = iconPackLoader.loadAppIcon(app.getPackageName());
+            mMainHandler.post(() -> {
+                // Verify the same item is still bound, we could have been reused
+                if (itemView.getTag() == appItem) {
+                    if (drawable != null) {
+                        mIcon.setVisibility(View.VISIBLE);
+                        mIcon.setImageDrawable(drawable);
+                    } else {
+                        mIcon.setVisibility(View.GONE);
+                    }
+                }
+            });
+        });
     }
 }
