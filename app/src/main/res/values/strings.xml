@@ -8,4 +8,5 @@
     <string name="search_prompt">Search…</string>
     <string name="search_the_web_for">Search the web for \"%1$s\"</string>
     <string name="play_pause">Play / Pause</string>
+    <string name="font_size_pick">"Font size: \"%1$s\"</string>
 </resources>

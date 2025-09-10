@@ -1,9 +1,13 @@
 package com.chadderbox.launchbox.settings;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -61,6 +65,12 @@ public final class SettingsActivity extends AppCompatActivity {
                 "Choose Font",
                 ctx -> SettingsManager.getFont(),
                 ctx -> showFontDialog()
+        ));
+
+        mOptions.add(new SettingOption(
+            "Font Size",
+            ctx -> String.valueOf(SettingsManager.getFontSize()),
+            ctx -> showFontSizeDialog()
         ));
 
         mOptions.add(new SettingOption(
@@ -145,12 +155,61 @@ public final class SettingsActivity extends AppCompatActivity {
                 .setTitle("Select Font")
                 .setItems(fonts, (dialog, which) -> {
                     var chosenFont = fonts[which];
+
+                    if (chosenFont.equals(SettingsManager.getFont())) {
+                        return;
+                    }
+
                     SettingsManager.setFont(chosenFont);
                     Toast.makeText(this, "Font applied: " + chosenFont, Toast.LENGTH_SHORT).show();
 
                     buildOptions();
                 })
                 .show();
+    }
+
+    private void showFontSizeDialog() {
+        var seekBar = new SeekBar(this);
+        seekBar.setMax(32 - 14);
+        seekBar.setProgress(SettingsManager.getFontSize() - 14);
+        seekBar.setPadding(40, 40, 40, 40);
+
+        var preview = new TextView(this);
+        preview.setText(getString(R.string.font_size_pick, String.valueOf(SettingsManager.getFontSize())));
+        preview.setTextSize(16);
+        preview.setPadding(40, 20, 40, 20);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                var fontSize = 14 + progress;
+                preview.setText(getString(R.string.font_size_pick, String.valueOf(fontSize)));
+            }
+
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        var layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.addView(preview);
+        layout.addView(seekBar);
+
+        new AlertDialog.Builder(this)
+            .setTitle("Select Font Size")
+            .setView(layout)
+            .setPositiveButton("OK", (dialog, which) -> {
+                var selectedSize = 14 + seekBar.getProgress();
+                if (selectedSize == SettingsManager.getFontSize()) {
+                    return;
+                }
+
+                SettingsManager.setFontSize(selectedSize);
+
+                buildOptions();
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
     }
 
     private void showThemeDialog() {
@@ -181,5 +240,14 @@ public final class SettingsActivity extends AppCompatActivity {
             case AppCompatDelegate.MODE_NIGHT_YES -> "Dark";
             default -> "System Default";
         };
+    }
+
+    @SuppressLint("UnsafeIntentLaunch")
+    private void fullRefreshUi() {
+        // HACK
+        finish();
+        overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0);
+        startActivity(getIntent());
+        overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0);
     }
 }

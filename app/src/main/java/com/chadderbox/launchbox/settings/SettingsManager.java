@@ -9,16 +9,25 @@ import java.util.HashSet;
 import java.util.Set;
 
 public final class SettingsManager {
-    private static final String PREFS_NAME = "cbxlauncher_prefs";
-    private static final String KEY_ICON_PACK = "icon_pack";
-    private static final String KEY_FONT = "font";
-    private static final String KEY_FAVORITES = "favorites";
-    private static final String KEY_THEME = "theme";
+    public static final String PREFS_NAME = "cbxlauncher_prefs";
+    public static final String KEY_ICON_PACK = "icon_pack";
+    public static final String KEY_FONT = "font";
+    public static final String KEY_FONT_SIZE = "font_size";
+    public static final String KEY_FAVORITES = "favorites";
+    public static final String KEY_THEME = "theme";
 
     private static SharedPreferences sPrefs;
 
     public static void initialiseSettingsManager(Context context) {
         sPrefs = context.getApplicationContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    }
+
+    public static void registerChangeListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
+        sPrefs.registerOnSharedPreferenceChangeListener(listener);
+    }
+
+    public static void unregisterChangeListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
+        sPrefs.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
     public static void setIconPack(String packageName) {
@@ -35,6 +44,14 @@ public final class SettingsManager {
 
     public static String getFont() {
         return sPrefs.getString(KEY_FONT, "System Default");
+    }
+
+    public static void setFontSize(int fontName) {
+        sPrefs.edit().putInt(KEY_FONT_SIZE, fontName).apply();
+    }
+
+    public static int getFontSize() {
+        return sPrefs.getInt(KEY_FONT_SIZE, 16);
     }
 
     public static void setFavourites(Set<String> newFavourites) {

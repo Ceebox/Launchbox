@@ -35,6 +35,8 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int TYPE_SUGGESTION = 3;
     private static final int TYPE_SETTING = 4;
 
+    private static final float HEADER_SIZE_MULTIPLIER = 1.5f;
+
     private final List<ListItem> mItems;
     private final IconPackLoader mIconPackLoader;
 
@@ -104,6 +106,7 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_HEADER) {
             var header = new FontTextView(parent.getContext());
+            header.setIsHeading(true);
 
             // When we don't have icons, it looks weird to have everything floating
             var matchIconPadding = 16;
@@ -112,8 +115,6 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             }
 
             header.setPadding(matchIconPadding, 16, matchIconPadding, 16);
-            header.setTextSize(24f);
-            header.setTypeface(header.getTypeface(), Typeface.BOLD);
             return new HeaderViewHolder(header);
         } else if (viewType == TYPE_APP) {
             var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);

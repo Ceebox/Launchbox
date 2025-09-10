@@ -2,8 +2,6 @@ package com.chadderbox.launchbox.data;
 
 import android.content.Context;
 
-import com.chadderbox.launchbox.MainActivity;
-
 public final class HeaderItem extends ListItem {
     private final String mTitle;
 
