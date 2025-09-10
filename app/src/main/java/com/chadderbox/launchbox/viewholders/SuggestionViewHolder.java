@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SuggestionItem;
+import com.chadderbox.launchbox.utils.TintHelper;
 
 import java.util.function.Consumer;
 
@@ -46,7 +47,8 @@ public class SuggestionViewHolder extends RecyclerView.ViewHolder {
 
         var context = itemView.getContext();
         var icon = (ImageView)itemView.findViewById(R.id.item_icon);
-        icon.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_browse_suggestion));
+        var drawable = AppCompatResources.getDrawable(context, R.drawable.ic_browse_suggestion);
+        icon.setImageDrawable(TintHelper.tryTintIcon(context, drawable));
         textView.setText(mSuggestion);
     }
 }

@@ -4,9 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.util.LruCache;
+import android.util.TypedValue;
 
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 public final class IconPackLoader {
 
@@ -99,6 +104,8 @@ public final class IconPackLoader {
             }
         } catch (Exception ignored) {
         }
+
+        icon = TintHelper.tryTintIcon(mContext, icon);
 
         if (icon == null && mDefaultMissingIcon != null) {
             icon = mDefaultMissingIcon;

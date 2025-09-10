@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.WebItem;
+import com.chadderbox.launchbox.utils.TintHelper;
 
 import java.util.function.Consumer;
 
@@ -46,7 +47,8 @@ public class WebViewHolder extends RecyclerView.ViewHolder {
         itemView.setTag(item);
         var context = itemView.getContext();
         var icon = (ImageView)itemView.findViewById(R.id.item_icon);
-        icon.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_browse));
+        var drawable = AppCompatResources.getDrawable(context, R.drawable.ic_browse);
+        icon.setImageDrawable(TintHelper.tryTintIcon(context, drawable));
         textView.setText(context.getString(R.string.search_the_web_for, mQuery));
     }
 }
