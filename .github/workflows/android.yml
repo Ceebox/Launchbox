@@ -3,8 +3,6 @@ name: Android CI with Release
 on:
   push:
     branches: [main]
-    tags:
-      - 'v*.*.*'
   pull_request:
     branches: [main]
 
@@ -89,14 +87,14 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v${{ github.run_number }}" -m "Release v${{ github.run_number }}"
-          git push origin "v${{ github.run_number }}"
+          git tag -a "v0.0${{ github.run_number }}" -m "Release v0.0${{ github.run_number }}"
+          git push origin "v0.0${{ github.run_number }}"
 
       - name: Create GitHub Release and Upload APK
         uses: softprops/action-gh-release@v2
         if: success()
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
+          tag_name: "v0.0.${{ github.run_number }}"
           name: Release ${{ env.VERSION }}
           body: |
             ${{ github.event.head_commit.message }}
