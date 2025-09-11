@@ -1,5 +1,3 @@
-import com.android.build.gradle.internal.api.BaseVariantOutputImpl
-
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -12,7 +10,6 @@ android {
         minSdk = 34
         targetSdk = 36
         versionCode = 1
-        versionName = "0.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
