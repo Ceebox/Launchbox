@@ -37,7 +37,7 @@ jobs:
       - name: Rename APK
         run: |
           APK_DIR=app/build/outputs/apk/release
-          mv "$APK_DIR/Launchbox.apk" "$APK_DIR/Launchbox-0.0.${{ github.run_number }}.apk"
+          mv "$APK_DIR/app-release.apk" "$APK_DIR/Launchbox-0.0.${{ github.run_number }}.apk"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
