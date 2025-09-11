@@ -26,15 +26,6 @@ jobs:
         with:
           build_number: ${{ github.run_number }}
 
-      - name: Set version number
-        id: version
-        shell: bash
-        run: |
-          version="1.0.${GITHUB_RUN_NUMBER}"
-          echo "VERSION=$version" >> $GITHUB_ENV
-          echo "tag=v$version" >> $GITHUB_OUTPUT
-          echo "filename=app-release.apk" >> $GITHUB_OUTPUT  # Update if output file differs
-
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -46,13 +37,21 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+          VERSION_NAME: "0.0.${{ github.run_number }}"
         run: ./gradlew build
+
+      - name: Rename APK
+        run: |
+          APK_DIR=app/build/outputs/apk/release
+          mv "$APK_DIR/app-release.apk" "$APK_DIR/Launchbox-0.0.${{ github.run_number }}.apk"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.version.outputs.filename }}
-          path: app/build/outputs/apk/release/Launchbox.apk
+          path: "app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk"
 
       - name: Get Changelog
         id: changelog
