@@ -57,17 +57,17 @@ jobs:
         run: |
           echo "APK files found:"
           find app/build/outputs/apk/ -iname "*.apk" -exec ls -lh {} \;
-
+          
       - name: Rename APK
         run: |
           APK_DIR=app/build/outputs/apk/release
-          mv "$APK_DIR/app-release.apk" "$APK_DIR/Launchbox-0.0.${{ github.run_number }}.apk"
+          mv "app/build/outputs/apk/release/app-release.apk" "app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.version.outputs.filename }}
-          path: "$APK_DIR/Launchbox-0.0.${{ github.run_number }}.apk"
+          path: "app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk"
 
       - name: Get Changelog
         id: changelog
@@ -95,11 +95,11 @@ jobs:
         if: success()
         with:
           tag_name: "v0.0.${{ github.run_number }}"
-          name: Release ${{ env.VERSION }}
+          name: Release 0.0.${{ github.run_number }}
           body: |
             ${{ github.event.head_commit.message }}
             ## Changelog
             ${{ env.changelog }}
-          files: app/build/outputs/apk/release/app-release.apk
+          files: app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
