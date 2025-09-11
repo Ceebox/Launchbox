@@ -54,6 +54,6 @@ tasks.register<Copy>("renameApk") {
     rename { apkNameNew }
 }
 
-tasks.named("assembleRelease") {
+tasks.named("build") {
     finalizedBy("renameApk")
 }
