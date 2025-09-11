@@ -15,6 +15,7 @@
             android:name="com.chadderbox.launchbox.MainActivity"
             android:launchMode="singleTask"
             android:exported="true"
+            android:windowSoftInputMode="adjustNothing"
             android:theme="@style/Theme.Launcherbox.Launcher">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

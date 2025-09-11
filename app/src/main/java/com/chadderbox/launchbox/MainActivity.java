@@ -93,6 +93,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
         }
     };
 
+    @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -452,6 +453,11 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                 // Prevent weird "peeking", it kinda stays open
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     mSearchSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+                    // Stop the pesky keyboard staying open
+                    var input = (EditText) findViewById(R.id.search_input);
+                    var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
                 }
             }
 

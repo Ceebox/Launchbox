@@ -11,6 +11,8 @@ import com.chadderbox.launchbox.data.AppItem;
 
 public abstract class AppListFragmentBase extends Fragment {
 
+    private static final int SCROLL_THRESHOLD_PERCENT = 10;
+
     protected CombinedAdapter mAdapter;
     protected RecyclerView mListView;
 
@@ -38,29 +40,90 @@ public abstract class AppListFragmentBase extends Fragment {
         return mAdapter;
     }
 
-    public void scrollToLetter(char letter) {
-        var items = mAdapter.getItems();
-        var layoutManager = (LinearLayoutManager) mListView.getLayoutManager();
+    public void scrollToLetter(final char letter) {
+        final var items = mAdapter.getItems();
+        final var layoutManager = (LinearLayoutManager) mListView.getLayoutManager();
 
-        if (layoutManager == null) {
+        if (layoutManager == null || items.isEmpty()) {
             // Maybe I should throw here?
             // Something has gone wrong, probably, but eh, don't crash
             return;
         }
 
-        for (var i = 0; i < items.size(); i++) {
-            var item = items.get(i);
+        char firstLetter = 0;
+        char lastLetter = 0;
+
+        // TODO: If these end up not alphabetical in the future, sort that!
+        // Even though these are sorted alphabetically,
+        // since I made the wise decision to conflate various types of view item,
+        // we need to search through to find a valid one...
+        // I guess only the future will find out if that was a smart decision, but here I regret it
+        for (var item : items) {
             if (item instanceof AppItem appItem) {
-                if (appItem.getAppInfo().getLabel().toUpperCase().startsWith("" + letter)) {
-                    // Scroll so that the item appears at the top
-                    layoutManager.scrollToPositionWithOffset(i, 0);
-                    return;
+                var label = appItem.getAppInfo().getLabel();
+                if (label != null && !label.isEmpty()) {
+                    firstLetter = Character.toUpperCase(label.charAt(0));
+                    break;
                 }
             }
         }
 
-        // If we've got to here, we've overshot our mark, go to the last item we have
-        layoutManager.scrollToPositionWithOffset(items.size() - 1, 0);
+        for (int i = items.size() - 1; i >= 0; i--) {
+            var item = items.get(i);
+            if (item instanceof AppItem appItem) {
+                var label = appItem.getAppInfo().getLabel();
+                if (label != null && !label.isEmpty()) {
+                    lastLetter = Character.toUpperCase(label.charAt(0));
+                    break;
+                }
+            }
+        }
+
+        // If we've overshot in either direction, scroll to the top or bottom
+        if (letter < firstLetter) {
+            scrollToPositionWithCentering(layoutManager, 0);
+            return;
+        }
+
+        if (letter > lastLetter) {
+            scrollToPositionWithCentering(layoutManager, items.size() - 1);
+            return;
+        }
+
+        // Right, look for the letter inside the items
+        // Find exact or closest item position for the letter
+        Integer closestPosBefore = null;
+        Integer closestPosAfter = null;
+        for (int i = 0; i < items.size(); i++) {
+            if (!(items.get(i) instanceof AppItem appItem)) {
+                continue;
+            }
+
+            var label = appItem.getAppInfo().getLabel();
+            if (label == null || label.isEmpty()) {
+                continue;
+            }
+
+            var currentLetter = Character.toUpperCase(label.charAt(0));
+            if (currentLetter == letter) {
+                if (shouldScrollToPosition(layoutManager, i)) {
+                    scrollToPositionWithCentering(layoutManager, i);
+                }
+
+                return;
+            } else if (currentLetter < letter) {
+                closestPosBefore = i;
+            } else {
+                closestPosAfter = i;
+                break;
+            }
+        }
+
+        // If we don't have an exact match, pick the closest before or after
+        var targetPos = closestPosBefore != null ? closestPosBefore : closestPosAfter;
+        if (targetPos != null && shouldScrollToPosition(layoutManager, targetPos)) {
+            scrollToPositionWithCentering(layoutManager, targetPos);
+        }
     }
 
     public void smoothScrollToPosition(int position) {
@@ -69,6 +132,41 @@ public abstract class AppListFragmentBase extends Fragment {
 
     public void scrollToPosition(int position) {
         mListView.scrollToPosition(position);
+    }
+
+    private void scrollToPositionWithCentering(final LinearLayoutManager layoutManager, final int position) {
+        final var recyclerViewHeight = mListView.getHeight();
+        final var itemView = layoutManager.findViewByPosition(position);
+
+        var itemHeight = 100;
+        if (itemView != null) {
+            itemHeight = itemView.getHeight();
+        }
+
+        var offset = (recyclerViewHeight / 2) - (itemHeight / 2);
+        layoutManager.scrollToPositionWithOffset(position, offset);
+    }
+
+    /**
+     * Check if an item is within a certain threshold to the center of the screen
+     */
+    private boolean shouldScrollToPosition(final LinearLayoutManager layoutManager, final int position) {
+        final var recyclerViewHeight = mListView.getHeight();
+        final var itemView = layoutManager.findViewByPosition(position);
+
+        if (itemView == null) {
+            // Item is offscreen, so scroll
+            return true;
+        }
+
+        final var itemTop = itemView.getTop();
+        final var itemBottom = itemView.getBottom();
+        final var itemCenter = (itemTop + itemBottom) / 2;
+        final var recyclerCenter = recyclerViewHeight / 2;
+
+        final var threshold = recyclerViewHeight / SCROLL_THRESHOLD_PERCENT;
+
+        return Math.abs(itemCenter - recyclerCenter) > threshold;
     }
 
     private static final class NestedTouchListener implements RecyclerView.OnItemTouchListener {

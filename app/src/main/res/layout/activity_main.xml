@@ -24,10 +24,10 @@
 
     <com.chadderbox.launchbox.components.AlphabetIndexView
         android:id="@+id/alphabet_index"
-        android:layout_width="32dp"
-        android:layout_height="wrap_content"
+        android:layout_width="96dp"
+        android:layout_height="match_parent"
         android:layout_gravity="end|center_vertical"
-        android:layout_margin="16dp"
+        android:layout_marginEnd="16dp"
         android:paddingTop="96dp"
         android:paddingBottom="96dp"
         android:clickable="true"
