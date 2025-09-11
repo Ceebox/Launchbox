@@ -25,14 +25,23 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
+      - name: Restore Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > upload-keystore.jks
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
+      - name: Build signed APK with Gradle
         env:
           VERSION_CODE: ${{ github.run_number }}
           VERSION_NAME: "0.0.${{ github.run_number }}"
-        run: ./gradlew build
+        run: ./gradlew build -Pandroid.injected.signing.store.file=upload-keystore.jks -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+
+      - name: List APK files
+        run: |
+          echo "APK files found:"
+          find app/build/outputs/apk/ -iname "*.apk" -exec ls -lh {} \;
 
       - name: Rename APK
         run: |
