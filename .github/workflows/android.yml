@@ -34,6 +34,11 @@ jobs:
           VERSION_NAME: "0.0.${{ github.run_number }}"
         run: ./gradlew build
 
+      - name: List APK files
+        run: |
+          echo "APK files found:"
+          find app/build/outputs/apk/ -iname "*.apk" -exec ls -lh {} \;
+
       - name: Rename APK
         run: |
           APK_DIR=app/build/outputs/apk/release
