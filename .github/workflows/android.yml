@@ -3,6 +3,8 @@ name: Android CI with Release
 on:
   push:
     branches: [main]
+    tags:
+      - 'v*.*.*'
   pull_request:
     branches: [main]
 
@@ -82,6 +84,13 @@ jobs:
             echo "No tags found — using fallback changelog"
           fi
           printf "changelog<<EOF\n%s\nEOF\n" "$changelog" >> "$GITHUB_ENV"
+
+      - name: Create tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ github.run_number }}" -m "Release v${{ github.run_number }}"
+          git push origin "v${{ github.run_number }}"
 
       - name: Create GitHub Release and Upload APK
         uses: softprops/action-gh-release@v2
