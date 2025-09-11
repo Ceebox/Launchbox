@@ -20,7 +20,7 @@ public final class AlphabetIndexView extends View {
     public static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     private final Paint mPaint;
-    private OnLetterSelectedListener mListener;
+    private IOnLetterSelectedListener mListener;
 
     public AlphabetIndexView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,7 +76,7 @@ public final class AlphabetIndexView extends View {
         return super.onTouchEvent(event);
     }
 
-    public void setOnLetterSelectedListener(OnLetterSelectedListener listener) {
+    public void setOnLetterSelectedListener(IOnLetterSelectedListener listener) {
         mListener = listener;
     }
 
@@ -115,7 +115,7 @@ public final class AlphabetIndexView extends View {
         invalidate();
     }
 
-    public interface OnLetterSelectedListener {
+    public interface IOnLetterSelectedListener {
         void onLetterSelected(char letter);
     }
 }

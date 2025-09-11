@@ -54,10 +54,13 @@ public abstract class AppListFragmentBase extends Fragment {
                 if (appItem.getAppInfo().getLabel().toUpperCase().startsWith("" + letter)) {
                     // Scroll so that the item appears at the top
                     layoutManager.scrollToPositionWithOffset(i, 0);
-                    break;
+                    return;
                 }
             }
         }
+
+        // If we've got to here, we've overshot our mark, go to the last item we have
+        layoutManager.scrollToPositionWithOffset(items.size() - 1, 0);
     }
 
     public void smoothScrollToPosition(int position) {
