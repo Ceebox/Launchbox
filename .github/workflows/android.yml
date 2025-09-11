@@ -66,7 +66,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.version.outputs.filename }}
+          name: "Launchbox-0.0.${{ github.run_number }}.apk"
           path: "app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk"
 
       - name: Get Changelog
