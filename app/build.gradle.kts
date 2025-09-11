@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -40,4 +42,18 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+}
+
+tasks.register<Copy>("renameApk") {
+    val apkDir = layout.buildDirectory.dir("outputs/apk/release").get().asFile
+    val apkNameOld = "app-release.apk"
+    val apkNameNew = "Launchbox.apk"
+
+    from(apkDir.resolve(apkNameOld))
+    into(apkDir)
+    rename { apkNameNew }
+}
+
+tasks.named("assembleRelease") {
+    finalizedBy("renameApk")
 }
