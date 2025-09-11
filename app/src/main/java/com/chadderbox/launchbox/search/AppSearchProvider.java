@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 
 public final class AppSearchProvider implements ISearchProvider {
 
-    private final int LEVENSHTEIN_HEURISTIC = 5;
+    private final int LEVENSHTEIN_HEURISTIC = 3;
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final AppLoader mAppLoader;
