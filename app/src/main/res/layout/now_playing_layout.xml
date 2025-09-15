@@ -2,88 +2,109 @@
     android:id="@+id/now_playing"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:baselineAligned="false"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingVertical="4dp"
+    android:paddingVertical="8dp"
     android:paddingHorizontal="8dp"
     android:background="@android:color/transparent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Album art -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        app:cardCornerRadius="8dp"
-        android:padding="8dp">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/song_art"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/song_art"
-            android:scaleType="centerCrop"/>
-    </androidx.cardview.widget.CardView>
+        <androidx.cardview.widget.CardView
+            android:id="@+id/art_container"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Title & Artist -->
+            <ImageView
+                android:id="@+id/song_art"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/song_art"
+                android:scaleType="centerCrop"/>
+        </androidx.cardview.widget.CardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="3"
+        android:orientation="vertical"
+        android:paddingStart="12dp"
         android:paddingEnd="8dp">
 
-        <com.chadderbox.launchbox.components.FontTextView
-            android:id="@+id/song_title"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="#FFFFFF"
-            android:maxLines="1"
-            android:ellipsize="end"/>
+            android:orientation="vertical">
 
-        <com.chadderbox.launchbox.components.FontTextView
-            android:id="@+id/song_artist"
+            <com.chadderbox.launchbox.components.FontTextView
+                android:id="@+id/song_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:overrideFontSize="true"
+                android:paddingBottom="2dp"/>
+
+            <com.chadderbox.launchbox.components.FontTextView
+                android:id="@+id/song_artist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:textColor="#CCCCCC"
+                android:maxLines="1"
+                android:ellipsize="end"
+                app:overrideFontSize="true"/>
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="#CCCCCC"
-            android:maxLines="1"
-            android:ellipsize="end"/>
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="8dp">
+
+            <ImageButton
+                android:id="@+id/btn_prev"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_skip_previous"
+                android:contentDescription="@string/previous"
+                android:padding="6dp"/>
+
+            <ImageButton
+                android:id="@+id/btn_play_pause"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_play_arrow"
+                android:contentDescription="@string/play_pause"
+                android:padding="6dp"
+                android:layout_marginHorizontal="8dp"/>
+
+            <ImageButton
+                android:id="@+id/btn_next"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_skip_next"
+                android:contentDescription="@string/skip"
+                android:padding="6dp"/>
+        </LinearLayout>
     </LinearLayout>
-
-    <!-- Controls -->
-    <ImageButton
-        android:id="@+id/btn_prev"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_skip_previous"
-        android:contentDescription="@string/previous"
-        android:adjustViewBounds="true"
-        android:padding="4dp"/>
-
-    <ImageButton
-        android:id="@+id/btn_play_pause"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1.2"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_play_arrow"
-        android:contentDescription="@string/play_pause"
-        android:adjustViewBounds="true"
-        android:padding="4dp"/>
-
-    <ImageButton
-        android:id="@+id/btn_next"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_skip_next"
-        android:contentDescription="@string/skip"
-        android:adjustViewBounds="true"
-        android:padding="4dp"/>
 </LinearLayout>

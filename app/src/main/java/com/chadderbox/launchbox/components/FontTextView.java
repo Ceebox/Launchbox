@@ -2,6 +2,7 @@ package com.chadderbox.launchbox.components;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatTextView;
@@ -35,6 +36,26 @@ public final class FontTextView extends AppCompatTextView {
             try (var a = getContext().obtainStyledAttributes(attrs, R.styleable.FontTextView)) {
                 mFontManager.setIsHeading(a.getBoolean(R.styleable.FontTextView_isHeading, false));
             } catch (Exception ignored) { }
+
+            var shouldOverride = false;
+            try (var a = getContext().obtainStyledAttributes(attrs, R.styleable.FontTextView)) {
+                shouldOverride = a.getBoolean(R.styleable.FontTextView_overrideFontSize, false);
+            } catch (Exception ignored) { }
+
+            if (shouldOverride) {
+                try (var a = getContext().obtainStyledAttributes(attrs, new int[] { android.R.attr.textSize })) {
+                    if (a.hasValue(0)) {
+                        var pxSize = a.getDimensionPixelSize(0, (int) getTextSize());
+                        var spSize = TypedValue.deriveDimension(
+                            TypedValue.COMPLEX_UNIT_SP,
+                            pxSize,
+                            getResources().getDisplayMetrics()
+                        );
+
+                        mFontManager.setOverrideFontSize(spSize);
+                    }
+                } catch (Exception ignored) { }
+            }
         }
     }
 

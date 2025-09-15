@@ -12,9 +12,11 @@ public final class CustomFontManager
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final float HEADING_SIZE_MULTIPLIER = 1.35f;
+    private static final float OVERRIDE_FONT_SIZE_UNSET = -1f;
 
     private final TextView mTarget;
     private boolean mIsHeading = false;
+    private float mOverrideFontSize = OVERRIDE_FONT_SIZE_UNSET;
 
     public CustomFontManager(TextView target) {
         mTarget = target;
@@ -29,6 +31,15 @@ public final class CustomFontManager
 
     public boolean getIsHeading() {
         return mIsHeading;
+    }
+
+    public void setOverrideFontSize(float override) {
+        mOverrideFontSize = override;
+        applyFontAndSize();
+    }
+
+    public float getOverrideFontSize() {
+        return mOverrideFontSize;
     }
 
     public void applyFontAndSize() {
@@ -52,7 +63,11 @@ public final class CustomFontManager
     }
 
     private void applyTextSize() {
-        var fontSize = SettingsManager.getFontSize();
+
+        var fontSize = mOverrideFontSize == OVERRIDE_FONT_SIZE_UNSET
+            ? SettingsManager.getFontSize()
+            : mOverrideFontSize;
+
         if (mIsHeading) {
             fontSize *= HEADING_SIZE_MULTIPLIER;
         }
