@@ -16,6 +16,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Restore Gradle Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -23,33 +33,38 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
-      - name: Restore Keystore
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > upload-keystore.jks
-
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
+      - name: Create app directory for keystore
+        run: mkdir -p app
+
+      - name: Restore Keystore
+        run: |
+          mkdir -p app
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/upload-keystore.jks
 
       - name: Build signed APK with Gradle
         env:
           VERSION_CODE: ${{ github.run_number }}
           VERSION_NAME: "0.0.${{ github.run_number }}"
-        run: ./gradlew build -Pandroid.injected.signing.store.file=upload-keystore.jks -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PATH: ${{ github.workspace }}/app/upload-keystore.jks
+        run: ./gradlew build -Pandroid.injected.signing.store.file=$KEYSTORE_PATH -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
 
       - name: List APK files
         run: |
           echo "APK files found:"
           find app/build/outputs/apk/ -iname "*.apk" -exec ls -lh {} \;
-
+          
       - name: Rename APK
         run: |
           APK_DIR=app/build/outputs/apk/release
-          mv "$APK_DIR/app-release.apk" "$APK_DIR/Launchbox-0.0.${{ github.run_number }}.apk"
+          mv "app/build/outputs/apk/release/app-release.apk" "app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.version.outputs.filename }}
+          name: "Launchbox-0.0.${{ github.run_number }}.apk"
           path: "app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk"
 
       - name: Get Changelog
@@ -66,16 +81,23 @@ jobs:
           fi
           printf "changelog<<EOF\n%s\nEOF\n" "$changelog" >> "$GITHUB_ENV"
 
+      - name: Create tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v0.0${{ github.run_number }}" -m "Release v0.0${{ github.run_number }}"
+          git push origin "v0.0${{ github.run_number }}"
+
       - name: Create GitHub Release and Upload APK
         uses: softprops/action-gh-release@v2
         if: success()
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: Release ${{ env.VERSION }}
+          tag_name: "v0.0.${{ github.run_number }}"
+          name: Release 0.0.${{ github.run_number }}
           body: |
             ${{ github.event.head_commit.message }}
             ## Changelog
             ${{ env.changelog }}
-          files: app/build/outputs/apk/release/app-release.apk
+          files: app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

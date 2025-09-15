@@ -2,42 +2,41 @@ package com.chadderbox.launchbox.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
 import android.util.LruCache;
-import android.util.TypedValue;
 
-import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
-public final class IconPackLoader {
+import com.chadderbox.launchbox.settings.SettingsManager;
+
+public final class IconPackLoader
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final LruCache<String, Drawable> sIconCache = new LruCache<>(256);
     private static final LruCache<String, Drawable> sSystemIconCache = new LruCache<>(256);
     private final Context mContext;
+    private final IconPackParser mIconPackParser;
     private final PackageManager mPackageManager;
     private String mIconPackPackage;
     private Drawable mDefaultMissingIcon = null;
 
     public IconPackLoader(Context ctx, String iconPackPackage) {
         mContext = ctx;
+        mIconPackParser = new IconPackParser();
         mPackageManager = ctx.getPackageManager();
         mIconPackPackage = iconPackPackage;
         loadDefaultMissingIcon();
+
+        SettingsManager.registerChangeListener(this);
     }
 
     public static void clearCache() {
         sIconCache.evictAll();
     }
 
-    public String getIconPackPackage() {
-        return mIconPackPackage;
-    }
-
-    public void setIconPackPackage(String newIconPackPackage) {
+    private void setIconPackPackage(String newIconPackPackage) {
         if ((mIconPackPackage == null && newIconPackPackage != null)
             || (mIconPackPackage != null && !mIconPackPackage.equals(newIconPackPackage))) {
             mIconPackPackage = newIconPackPackage;
@@ -68,7 +67,7 @@ public final class IconPackLoader {
     public Drawable loadAppIcon(String packageName) {
 
         // No icon pack
-        if (mIconPackPackage == null) {
+        if (mIconPackPackage == null || "None".equals(mIconPackPackage)) {
             return null;
         }
 
@@ -93,7 +92,7 @@ public final class IconPackLoader {
         Drawable icon = null;
         try {
             var res = mPackageManager.getResourcesForApplication(mIconPackPackage);
-            var drawableName = IconPackParser.getDrawableNameForPackage(mContext, mIconPackPackage, packageName);
+            var drawableName = mIconPackParser.getDrawableNameForPackage(mContext, mIconPackPackage, packageName);
 
             if (drawableName != null) {
                 @SuppressLint("DiscouragedApi")
@@ -114,5 +113,13 @@ public final class IconPackLoader {
         sIconCache.put(packageName, icon);
 
         return icon;
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (SettingsManager.KEY_ICON_PACK.equals(key)) {
+            setIconPackPackage(SettingsManager.getIconPack());
+            clearCache();
+        }
     }
 }

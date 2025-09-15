@@ -14,14 +14,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.chadderbox.launchbox.AppsViewModel;
-import com.chadderbox.launchbox.utils.AppLoader;
-import com.chadderbox.launchbox.utils.IconPackLoader;
-import com.chadderbox.launchbox.utils.IconPackParser;
 import com.chadderbox.launchbox.R;
 
 import java.util.ArrayList;
@@ -165,10 +160,6 @@ public final class SettingsActivity extends AppCompatActivity {
                     Objects.equals(chosenPackage, "System Default") ? "Using system icons"
                         : "Icon pack applied: " + names.get(which),
                     Toast.LENGTH_SHORT).show();
-
-                // Clear cache since we've got a new theme
-                IconPackParser.clearCache();
-                IconPackLoader.clearCache();
 
                 buildOptions();
             })

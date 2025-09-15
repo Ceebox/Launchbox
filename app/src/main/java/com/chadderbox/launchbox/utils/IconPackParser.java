@@ -2,20 +2,24 @@ package com.chadderbox.launchbox.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
+
+import com.chadderbox.launchbox.settings.SettingsManager;
 
 import org.xmlpull.v1.XmlPullParser;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public final class IconPackParser {
+final class IconPackParser
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final Map<String, String> sCache = new HashMap<>();
 
-    public static void clearCache() {
-        sCache.clear();
+    public IconPackParser() {
+        SettingsManager.registerChangeListener(this);
     }
 
-    public static String getDrawableNameForPackage(Context ctx, String iconPackPkg, String targetPkg) {
+    public String getDrawableNameForPackage(Context ctx, String iconPackPkg, String targetPkg) {
         if (sCache.containsKey(targetPkg)) {
             return sCache.get(targetPkg);
         }
@@ -45,5 +49,16 @@ public final class IconPackParser {
         } catch (Exception ignored) {}
 
         return null;
+    }
+
+    public void clearCache() {
+        sCache.clear();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (SettingsManager.KEY_ICON_PACK.equals(key)) {
+            clearCache();
+        }
     }
 }
