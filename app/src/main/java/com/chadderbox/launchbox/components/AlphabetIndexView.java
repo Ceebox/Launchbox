@@ -1,5 +1,7 @@
 package com.chadderbox.launchbox.components;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -19,19 +21,23 @@ import androidx.core.content.ContextCompat;
 
 import com.chadderbox.launchbox.settings.SettingsManager;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public final class AlphabetIndexView extends View {
     public static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
     private static final boolean EXPERIMENT_BUBBLE_ENABLED = false;
+    private static final int ANIMATION_DURATION = 185;
+    private static final float ANIMATION_ORIGINAL_SIZE = 1f;
+    private static final float ANIMATION_SCALED_SIZE = 1.55f;
 
+    private final Map<Integer, ValueAnimator> mAnimators = new HashMap<>();
+    private final float[] mLetterScales = new float[LETTERS.length()];
     private final Paint mPaint;
     private final Paint mBubblePaint;
     private IOnLetterSelectedListener mListener;
 
     private int mSelectedIndex = -1;
-    private final float[] mLetterScales = new float[LETTERS.length()];
-    private ValueAnimator mScaleAnimator;
-
     private final float mBubbleRadius = 60f * getResources().getDisplayMetrics().density / 3;
     private boolean mShowBubble = false;
     private float mBubbleX;
@@ -52,29 +58,26 @@ public final class AlphabetIndexView extends View {
         mBubblePaint.setColor(Color.parseColor("#AAFF3535"));
         mBubblePaint.setStyle(Paint.Style.FILL);
 
-        for (int i = 0; i < LETTERS.length(); i++) {
-            mLetterScales[i] = 1f;
-        }
+        resetLetterScale();
     }
 
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
-        var width = getWidth();
         var height = getHeight();
 
         var availableHeight = height - getPaddingTop() - getPaddingBottom();
         var cellHeight = (float) availableHeight / LETTERS.length();
 
         for (var i = 0; i < LETTERS.length(); i++) {
-            float x = getWidth() - getPaddingRight();
+            var x = getWidth() - getPaddingRight();
             var y = getPaddingTop() + cellHeight * i + cellHeight / 2f + mPaint.getTextSize() / 2f;
 
             canvas.save();
 
             // Scale around center of letter
-            float letterScale = mLetterScales[i];
+            var letterScale = mLetterScales[i];
             canvas.translate(x, y);
             canvas.scale(letterScale, letterScale);
             canvas.translate(-x, -y);
@@ -184,11 +187,11 @@ public final class AlphabetIndexView extends View {
             return;
         }
 
-        startScaleAnimation(newIndex, 1.5f);
+        startScaleAnimation(newIndex, ANIMATION_SCALED_SIZE);
 
         // Set the previously selected letter back
         if (mSelectedIndex >= 0 && mSelectedIndex != newIndex) {
-            startScaleAnimation(mSelectedIndex, 1f);
+            startScaleAnimation(mSelectedIndex, ANIMATION_ORIGINAL_SIZE);
         }
     }
 
@@ -197,24 +200,49 @@ public final class AlphabetIndexView extends View {
             return;
         }
 
-        startScaleAnimation(index, 1f);
+        startScaleAnimation(index, ANIMATION_ORIGINAL_SIZE);
     }
 
     private void startScaleAnimation(final int index, final float targetScale) {
-        if (mScaleAnimator != null && mScaleAnimator.isRunning()) {
-            mScaleAnimator.cancel();
+        var running = mAnimators.get(index);
+        if (running != null && running.isRunning()) {
+            running.cancel();
         }
 
         final var startScale = mLetterScales[index];
-        mScaleAnimator = ValueAnimator.ofFloat(startScale, targetScale);
-        mScaleAnimator.setDuration(200);
-        mScaleAnimator.setInterpolator(new DecelerateInterpolator());
-        mScaleAnimator.addUpdateListener(animation -> {
+        var animator = ValueAnimator.ofFloat(startScale, targetScale);
+        animator.setDuration(ANIMATION_DURATION);
+        animator.setInterpolator(new DecelerateInterpolator());
+        animator.addUpdateListener(animation -> {
             mLetterScales[index] = (float) animation.getAnimatedValue();
             invalidate();
         });
 
-        mScaleAnimator.start();
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                if (targetScale != ANIMATION_ORIGINAL_SIZE) {
+                    var revert = ValueAnimator.ofFloat(mLetterScales[index], ANIMATION_ORIGINAL_SIZE);
+                    revert.setDuration(ANIMATION_DURATION);
+                    revert.setInterpolator(new DecelerateInterpolator());
+                    revert.addUpdateListener(anim -> {
+                        mLetterScales[index] = (float)anim.getAnimatedValue();
+                        invalidate();
+                    });
+
+                    revert.start();
+                    mAnimators.put(index, revert);
+                }
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mAnimators.remove(index);
+            }
+        });
+
+        mAnimators.put(index, animator);
+        animator.start();
     }
 
     public void setOnLetterSelectedListener(IOnLetterSelectedListener listener) {
@@ -254,6 +282,12 @@ public final class AlphabetIndexView extends View {
 
         mPaint.setTypeface(typeface);
         invalidate();
+    }
+
+    private void resetLetterScale() {
+        for (var i = 0; i < LETTERS.length(); i++) {
+            mLetterScales[i] = ANIMATION_ORIGINAL_SIZE;
+        }
     }
 
     public interface IOnLetterSelectedListener {
