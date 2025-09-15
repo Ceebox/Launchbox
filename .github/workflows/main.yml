@@ -1,11 +1,11 @@
-name: Launchbox main CI with Release
+name: Launchbox Main CI with Release
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build:
+  build-main:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -55,7 +55,7 @@ jobs:
         run: |
           echo "APK files found:"
           find app/build/outputs/apk/ -iname "*.apk" -exec ls -lh {} \;
-          
+
       - name: Rename APK
         run: |
           APK_DIR=app/build/outputs/apk/release
