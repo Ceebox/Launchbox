@@ -1,5 +1,6 @@
 package com.chadderbox.launchbox.viewholders;
 
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
@@ -19,13 +20,17 @@ import com.chadderbox.launchbox.utils.IconPackLoader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class AppViewHolder extends RecyclerView.ViewHolder {
+public class AppViewHolder
+    extends RecyclerView.ViewHolder
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final ExecutorService mIconExecutor = Executors.newCachedThreadPool();
     private static final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     private final ImageView mIcon;
     private final TextView mLabel;
+    private IconPackLoader mIconPackLoader;
+    private AppItem mAppItem;
 
     public AppViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -48,20 +53,28 @@ public class AppViewHolder extends RecyclerView.ViewHolder {
 
             return false;
         });
+
+        SettingsManager.registerChangeListener(this);
     }
 
     public void bind(AppItem appItem, IconPackLoader iconPackLoader) {
-        var app = appItem.getAppInfo();
+        mAppItem = appItem;
+        mIconPackLoader = iconPackLoader;
 
-        itemView.setTag(appItem);
+        var app = mAppItem.getAppInfo();
+        itemView.setTag(mAppItem);
         mLabel.setText(app.getLabel());
         mLabel.setTypeface(FontHelper.getFont(SettingsManager.getFont()));
 
+        loadIcon();
+    }
+
+    private void loadIcon() {
         mIconExecutor.submit(() -> {
-            var drawable = iconPackLoader.loadAppIcon(app.getPackageName());
+            var drawable = mIconPackLoader.loadAppIcon(mAppItem.getAppInfo().getPackageName());
             mMainHandler.post(() -> {
                 // Verify the same item is still bound, we could have been reused
-                if (itemView.getTag() == appItem) {
+                if (itemView.getTag() == mAppItem) {
                     if (drawable != null) {
                         mIcon.setVisibility(View.VISIBLE);
                         mIcon.setImageDrawable(drawable);
@@ -71,5 +84,12 @@ public class AppViewHolder extends RecyclerView.ViewHolder {
                 }
             });
         });
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (SettingsManager.KEY_ICON_PACK.equals(key)) {
+            loadIcon();
+        }
     }
 }

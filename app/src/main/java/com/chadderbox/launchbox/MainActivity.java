@@ -359,13 +359,9 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     }
 
     private void refreshUi() {
-        IconPackLoader.clearCache();
-
         mLastIconPack = SettingsManager.getIconPack();
         mLastFont = SettingsManager.getFont();
         mLastTheme = SettingsManager.getTheme();
-
-        mIconPackLoader.setIconPackPackage(mLastIconPack);
 
         mAppLoader.refreshInstalledApps();
         refreshAllVisibleFragments();
