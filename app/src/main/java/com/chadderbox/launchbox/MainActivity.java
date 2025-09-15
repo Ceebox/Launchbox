@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,11 +48,14 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public final class MainActivity extends AppCompatActivity implements View.OnLongClickListener, IAdapterFetcher {
+public final class MainActivity
+    extends AppCompatActivity
+    implements View.OnLongClickListener,
+        IAdapterFetcher,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final long SEARCH_DELAY_MS = 300;
 
@@ -66,9 +70,6 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     private ViewPager2 mViewPager;
     private GestureDetector mGestureDetector;
     private FavouritesRepository mFavouritesHelper;
-    private String mLastIconPack;
-    private String mLastFont;
-    private int mLastTheme;
     private IconPackLoader mIconPackLoader;
     private BottomSheetBehavior<View> mSearchSheet;
     private CombinedAdapter mSearchAdapter;
@@ -98,12 +99,9 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     protected void onCreate(Bundle savedInstanceState) {
 
         SettingsManager.initialiseSettingsManager(getApplicationContext());
+        SettingsManager.registerChangeListener(this);
 
-        mLastIconPack = SettingsManager.getIconPack();
-        mLastFont = SettingsManager.getFont();
-        mLastTheme = SettingsManager.getTheme();
-
-        mIconPackLoader = new IconPackLoader(getApplicationContext(), mLastIconPack);
+        mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack());
         mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler);
 
         mAppLoader = new AppLoader(this);
@@ -216,10 +214,6 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     @Override
     protected void onStart() {
         super.onStart();
-        if (hasAestheticChanged()) {
-            refreshUi();
-        }
-
         closeSearchSheet();
     }
 
@@ -343,26 +337,7 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
                 .show();
     }
 
-    private boolean hasAestheticChanged() {
-
-        // First load, this is gonna happen anyway
-        if (mLastFont == null) {
-            return true;
-        }
-
-        var newIconPack = SettingsManager.getIconPack();
-        var newFont = SettingsManager.getFont();
-        var newTheme = SettingsManager.getTheme();
-        return !Objects.equals(mLastIconPack, newIconPack) ||
-            !Objects.equals(mLastFont, newFont) ||
-            !Objects.equals(mLastTheme, newTheme);
-    }
-
     private void refreshUi() {
-        mLastIconPack = SettingsManager.getIconPack();
-        mLastFont = SettingsManager.getFont();
-        mLastTheme = SettingsManager.getTheme();
-
         mAppLoader.refreshInstalledApps();
         refreshAllVisibleFragments();
     }
@@ -503,5 +478,17 @@ public final class MainActivity extends AppCompatActivity implements View.OnLong
     private Fragment findPagerFragment(int position) {
         long itemId = mPagerAdapter.getItemId(position);
         return getSupportFragmentManager().findFragmentByTag("f" + itemId);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (SettingsManager.KEY_ICON_PACK.equals(key) ||
+            SettingsManager.KEY_CHARACTER_HEADINGS.equals(key) ||
+            SettingsManager.KEY_FONT_SIZE.equals(key) ||
+            SettingsManager.KEY_FONT.equals(key) ||
+            SettingsManager.KEY_THEME.equals(key)
+        ) {
+            refreshUi();
+        }
     }
 }
