@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -20,11 +21,14 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.chadderbox.launchbox.settings.SettingsManager;
+import com.chadderbox.launchbox.utils.FontHelper;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public final class AlphabetIndexView extends View {
+public final class AlphabetIndexView
+    extends View
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final boolean EXPERIMENT_BUBBLE_ENABLED = false;
     private static final int ANIMATION_DURATION = 185;
@@ -48,11 +52,11 @@ public final class AlphabetIndexView extends View {
     public AlphabetIndexView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        SettingsManager.registerChangeListener(this);
+
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setTextSize(48f * getResources().getDisplayMetrics().density / 3);
         mPaint.setTextAlign(mLeftHanded ? Paint.Align.LEFT : Paint.Align.RIGHT);
-        applyTextColour(context);
-        applyCurrentFont();
 
         mBubblePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBubblePaint.setTextAlign(Paint.Align.CENTER);
@@ -60,6 +64,8 @@ public final class AlphabetIndexView extends View {
         mBubblePaint.setColor(Color.parseColor("#AAFF3535"));
         mBubblePaint.setStyle(Paint.Style.FILL);
 
+        applyTextColour(context);
+        applyCurrentFont();
         resetLetterScale();
     }
 
@@ -270,18 +276,10 @@ public final class AlphabetIndexView extends View {
     }
 
     private void applyCurrentFont() {
-        // This doesn't work properly at the moment
         var fontPackage = SettingsManager.getFont();
-        var typeface = Typeface.DEFAULT;
+        var typeface = fontPackage.isEmpty() ? Typeface.DEFAULT : FontHelper.getFont(fontPackage);
 
-        if (!fontPackage.isEmpty()) {
-            try {
-                typeface = Typeface.create(fontPackage, Typeface.NORMAL);
-            } catch (Exception ignored) {
-                // Use default, I guess
-            }
-        }
-
+        mBubblePaint.setTypeface(typeface);
         mPaint.setTypeface(typeface);
         invalidate();
     }
@@ -289,6 +287,13 @@ public final class AlphabetIndexView extends View {
     private void resetLetterScale() {
         for (var i = 0; i < LETTERS.length(); i++) {
             mLetterScales[i] = ANIMATION_ORIGINAL_SIZE;
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (SettingsManager.KEY_FONT.equals(key)) {
+            applyCurrentFont();
         }
     }
 

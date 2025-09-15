@@ -8,7 +8,8 @@ import android.widget.TextView;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.FontHelper;
 
-public final class CustomFontManager implements SharedPreferences.OnSharedPreferenceChangeListener {
+public final class CustomFontManager
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final float HEADING_SIZE_MULTIPLIER = 1.35f;
 
