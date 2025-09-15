@@ -34,10 +34,11 @@ public final class AlphabetIndexView extends View {
     private final Map<Integer, ValueAnimator> mAnimators = new HashMap<>();
     private final float[] mLetterScales = new float[LETTERS.length()];
     private final Paint mPaint;
-    private final Paint mBubblePaint;
+    private int mSelectedIndex = -1;
+    private boolean mLeftHanded = false;
     private IOnLetterSelectedListener mListener;
 
-    private int mSelectedIndex = -1;
+    private final Paint mBubblePaint;
     private final float mBubbleRadius = 60f * getResources().getDisplayMetrics().density / 3;
     private boolean mShowBubble = false;
     private float mBubbleX;
@@ -49,11 +50,12 @@ public final class AlphabetIndexView extends View {
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setTextSize(48f * getResources().getDisplayMetrics().density / 3);
-        mPaint.setTextAlign(Paint.Align.RIGHT);
+        mPaint.setTextAlign(mLeftHanded ? Paint.Align.LEFT : Paint.Align.RIGHT);
         applyTextColour(context);
         applyCurrentFont();
 
         mBubblePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBubblePaint.setTextAlign(Paint.Align.CENTER);
         // TODO: Make this customisable?
         mBubblePaint.setColor(Color.parseColor("#AAFF3535"));
         mBubblePaint.setStyle(Paint.Style.FILL);
@@ -71,7 +73,7 @@ public final class AlphabetIndexView extends View {
         var cellHeight = (float) availableHeight / LETTERS.length();
 
         for (var i = 0; i < LETTERS.length(); i++) {
-            var x = getWidth() - getPaddingRight();
+            var x = mLeftHanded ? getPaddingLeft() : getWidth() - getPaddingRight();
             var y = getPaddingTop() + cellHeight * i + cellHeight / 2f + mPaint.getTextSize() / 2f;
 
             canvas.save();

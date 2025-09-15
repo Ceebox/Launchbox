@@ -24,12 +24,12 @@
 
     <com.chadderbox.launchbox.components.AlphabetIndexView
         android:id="@+id/alphabet_index"
-        android:layout_width="96dp"
+        android:layout_width="80dp"
         android:layout_height="match_parent"
         android:layout_gravity="end|center_vertical"
         android:layout_marginEnd="16dp"
-        android:paddingTop="96dp"
-        android:paddingBottom="96dp"
+        android:paddingTop="288dp"
+        android:paddingBottom="32dp"
         android:clickable="true"
         android:focusable="true"
         android:contentDescription="@string/appbar_scrolling_view_behavior" />
