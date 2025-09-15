@@ -1,9 +1,7 @@
-name: Android CI with Release
+name: Launchbox main CI with Release
 
 on:
   push:
-    branches: [main]
-  pull_request:
     branches: [main]
 
 jobs:
