@@ -16,6 +16,8 @@ public final class SettingsManager {
     public static final String KEY_FONT_SIZE = "font_size";
     public static final String KEY_FAVORITES = "favorites";
     public static final String KEY_THEME = "theme";
+    public static final String KEY_WALLPAPER = "wallpaper";
+    public static final String KEY_WALLPAPER_DIM_AMOUNT = "wallpaper_dim_amount";
 
     private static SharedPreferences sPrefs;
 
@@ -77,5 +79,21 @@ public final class SettingsManager {
 
     public static int getTheme() {
         return sPrefs.getInt(KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+    }
+
+    public static void setWallpaper(String wallpaper) {
+        sPrefs.edit().putString(KEY_WALLPAPER, wallpaper).apply();
+    }
+
+    public static String getWallpaper() {
+        return sPrefs.getString(KEY_WALLPAPER, null);
+    }
+
+    public static void setWallpaperDimAmount(float dimAmount) {
+        sPrefs.edit().putFloat(KEY_WALLPAPER_DIM_AMOUNT, dimAmount).apply();
+    }
+
+    public static float getWallpaperDimAmount() {
+        return sPrefs.getFloat(KEY_WALLPAPER_DIM_AMOUNT, 0.375f);
     }
 }

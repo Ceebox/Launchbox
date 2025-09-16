@@ -33,5 +33,6 @@
         android:paddingBottom="16dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:scrollbars="vertical"/>
+        android:scrollbars="none" />
+
 </LinearLayout>
