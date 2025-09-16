@@ -6,6 +6,16 @@
     android:clickable="true"
     android:focusable="true">
 
+    <!-- Wallpaper -->
+    <!-- This goes first so to not get in the way -->
+    <ImageView
+        android:id="@+id/wallpaper_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/wallpaper_background"
+        android:adjustViewBounds="true" />
+
     <LinearLayout
         android:id="@+id/root_layout"
         android:orientation="vertical"

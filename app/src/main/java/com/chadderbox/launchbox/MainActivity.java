@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.BlendMode;
+import android.graphics.BlendModeColorFilter;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +21,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -74,6 +78,7 @@ public final class MainActivity
     private BottomSheetBehavior<View> mSearchSheet;
     private CombinedAdapter mSearchAdapter;
     private Fragment mCurrentFragment;
+    private Drawable mWallpaperDrawable;
 
     private final BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
         @Override
@@ -105,7 +110,7 @@ public final class MainActivity
         mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler);
 
         mAppLoader = new AppLoader(this);
-        var appSearchProvider = new AppSearchProvider(mAppLoader);
+        var appSearchProvider = new AppSearchProvider(mAppLoader, mFavouritesHelper);
         var searchProviders = List.of(
             appSearchProvider,
             new WebSearchProvider(),
@@ -120,6 +125,7 @@ public final class MainActivity
         super.onCreate(savedInstanceState);
         getWindow().setDimAmount(0f);
         setContentView(R.layout.activity_main);
+        loadWallpaperBackground();
 
         initialiseSearchView();
 
@@ -475,9 +481,42 @@ public final class MainActivity
         });
     }
 
-    private Fragment findPagerFragment(int position) {
-        long itemId = mPagerAdapter.getItemId(position);
+    private void loadWallpaperBackground() {
+        var wallpaperPath = SettingsManager.getWallpaper();
+        if (wallpaperPath == null || wallpaperPath.isEmpty()) {
+            return;
+        }
+
+        var wallpaperUri = Uri.parse(wallpaperPath);
+        try (var inputStream = getContentResolver().openInputStream(wallpaperUri)) {
+            if (inputStream != null) {
+                mWallpaperDrawable = Drawable.createFromStream(inputStream, wallpaperUri.toString());
+                if (mWallpaperDrawable == null) {
+                    return;
+                }
+
+                setWallpaperDim();
+            }
+        } catch (Exception ignored) { }
+    }
+
+    private void setWallpaperDim() {
+        var dimColor = getDimColour(SettingsManager.getWallpaperDimAmount());
+        var filter = new BlendModeColorFilter(dimColor, BlendMode.SRC_ATOP);
+        mWallpaperDrawable.setColorFilter(filter);
+        var wallpaperHost = (ImageView) findViewById(R.id.wallpaper_image);
+        wallpaperHost.setImageDrawable(mWallpaperDrawable);
+    }
+
+    private Fragment findPagerFragment(final int position) {
+        var itemId = mPagerAdapter.getItemId(position);
         return getSupportFragmentManager().findFragmentByTag("f" + itemId);
+    }
+
+    private int getDimColour(float dimAmount) {
+        dimAmount = Math.max(0f, Math.min(dimAmount, 1f));
+        var alpha = (int) (dimAmount * 255);
+        return alpha << 24;
     }
 
     @Override
@@ -489,6 +528,12 @@ public final class MainActivity
             SettingsManager.KEY_THEME.equals(key)
         ) {
             refreshUi();
+        }
+
+        if (SettingsManager.KEY_WALLPAPER.equals(key) ||
+            SettingsManager.KEY_WALLPAPER_DIM_AMOUNT.equals(key)
+        ) {
+            loadWallpaperBackground();
         }
     }
 }
