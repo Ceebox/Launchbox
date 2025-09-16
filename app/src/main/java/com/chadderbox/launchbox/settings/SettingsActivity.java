@@ -163,6 +163,7 @@ public final class SettingsActivity extends AppCompatActivity {
 
                 buildOptions();
             })
+            .setNegativeButton("Cancel", null)
             .show();
     }
 
@@ -188,6 +189,7 @@ public final class SettingsActivity extends AppCompatActivity {
 
                     buildOptions();
                 })
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 
@@ -221,7 +223,7 @@ public final class SettingsActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
             .setTitle("Select Font Size")
             .setView(layout)
-            .setPositiveButton("OK", (dialog, which) -> {
+            .setPositiveButton("Ok", (dialog, which) -> {
                 var selectedSize = 14 + seekBar.getProgress();
                 if (selectedSize == SettingsManager.getFontSize()) {
                     return;
@@ -255,6 +257,7 @@ public final class SettingsActivity extends AppCompatActivity {
 
                     buildOptions();
                 })
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 
