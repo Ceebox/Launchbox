@@ -34,7 +34,7 @@
 
     <com.chadderbox.launchbox.components.AlphabetIndexView
         android:id="@+id/alphabet_index"
-        android:layout_width="80dp"
+        android:layout_width="84dp"
         android:layout_height="match_parent"
         android:layout_gravity="end|center_vertical"
         android:paddingStart="0dp"

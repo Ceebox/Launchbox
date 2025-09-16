@@ -75,9 +75,7 @@ public final class AlphabetIndexView
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
-        var height = getHeight();
-
-        var availableHeight = height - getPaddingTop() - getPaddingBottom();
+        var availableHeight = getHeight() - getPaddingTop() - getPaddingBottom();
         var cellHeight = (float) availableHeight / LETTERS.length();
 
         for (var i = 0; i < LETTERS.length(); i++) {
@@ -107,8 +105,7 @@ public final class AlphabetIndexView
         // Draw bubble popup if visible
         // TODO: At the moment, the text inside the bubble is weirdly aligned
         if (EXPERIMENT_BUBBLE_ENABLED && (mShowBubble && mSelectedIndex >= 0 && mSelectedIndex < LETTERS.length())) {
-            char letter = LETTERS.charAt(mSelectedIndex);
-
+            var letter = LETTERS.charAt(mSelectedIndex);
             mBubbleRect.set(
                 mBubbleX - mBubbleRadius,
                 mBubbleY - mBubbleRadius,
