@@ -41,6 +41,10 @@ public abstract class AppListFragmentBase extends Fragment {
     }
 
     public void scrollToLetter(final char letter) {
+
+        // We could be scrolling all the way to the top, not ideal
+        mListView.stopScroll();
+
         final var items = mAdapter.getItems();
         final var layoutManager = (LinearLayoutManager) mListView.getLayoutManager();
 
@@ -68,7 +72,7 @@ public abstract class AppListFragmentBase extends Fragment {
             }
         }
 
-        for (int i = items.size() - 1; i >= 0; i--) {
+        for (var i = items.size() - 1; i >= 0; i--) {
             var item = items.get(i);
             if (item instanceof AppItem appItem) {
                 var label = appItem.getAppInfo().getLabel();
