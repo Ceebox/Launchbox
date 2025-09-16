@@ -110,7 +110,7 @@ public final class MainActivity
         mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler);
 
         mAppLoader = new AppLoader(this);
-        var appSearchProvider = new AppSearchProvider(mAppLoader);
+        var appSearchProvider = new AppSearchProvider(mAppLoader, mFavouritesHelper);
         var searchProviders = List.of(
             appSearchProvider,
             new WebSearchProvider(),
