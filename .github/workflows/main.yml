@@ -1,8 +1,7 @@
 name: Launchbox Main CI with Release
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build-main:
@@ -15,6 +14,42 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Increment version
+        uses: actions/github-script@v6
+        id: increment_version
+        with:
+          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          script: |
+            const varName = "VERSION_BUILD_COUNT";
+      
+            async function getVariable() {
+              try {
+                const response = await github.rest.actions.getRepoVariable({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: varName,
+                });
+                return parseInt(response.data.value) || 0;
+              } catch (error) {
+                return 0;
+              }
+            }
+      
+            async function updateVariable(newValue) {
+              await github.rest.actions.updateRepoVariable({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: varName,
+                value: newValue.toString(),
+              });
+            }
+      
+            let currentValue = await getVariable();
+            let newValue = currentValue + 1;
+            await updateVariable(newValue);
+      
+            core.setOutput("version", newValue);
 
       - name: Restore Gradle Cache
         uses: actions/cache@v3
@@ -46,8 +81,8 @@ jobs:
 
       - name: Build signed APK with Gradle
         env:
-          VERSION_CODE: ${{ github.run_number }}
-          VERSION_NAME: "0.0.${{ github.run_number }}"
+          VERSION_CODE: ${{ steps.increment_version.outputs.version }}
+          VERSION_NAME: "0.0.${{ steps.increment_version.outputs.version }}"
           KEYSTORE_PATH: ${{ github.workspace }}/app/upload-keystore.jks
         run: ./gradlew build -Pandroid.injected.signing.store.file=$KEYSTORE_PATH -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
 
@@ -59,13 +94,13 @@ jobs:
       - name: Rename APK
         run: |
           APK_DIR=app/build/outputs/apk/release
-          mv "app/build/outputs/apk/release/app-release.apk" "app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk"
+          mv "app/build/outputs/apk/release/app-release.apk" "app/build/outputs/apk/release/Launchbox-0.0.${{ steps.increment_version.outputs.version }}.apk"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: "Launchbox-0.0.${{ github.run_number }}.apk"
-          path: "app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk"
+          name: "Launchbox-0.0.${{ steps.increment_version.outputs.version }}.apk"
+          path: "app/build/outputs/apk/release/Launchbox-0.0.${{ steps.increment_version.outputs.version }}.apk"
 
       - name: Get Changelog
         id: changelog
@@ -85,19 +120,19 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v0.0${{ github.run_number }}" -m "Release v0.0${{ github.run_number }}"
-          git push origin "v0.0${{ github.run_number }}"
+          git tag -a "v0.0${{ steps.increment_version.outputs.version }}" -m "Release v0.0${{ steps.increment_version.outputs.version }}"
+          git push origin "v0.0${{ steps.increment_version.outputs.version }}"
 
       - name: Create GitHub Release and Upload APK
         uses: softprops/action-gh-release@v2
         if: success()
         with:
-          tag_name: "v0.0.${{ github.run_number }}"
-          name: Release 0.0.${{ github.run_number }}
+          tag_name: "v0.0.${{ steps.increment_version.outputs.version }}"
+          name: Release 0.0.${{ steps.increment_version.outputs.version }}
           body: |
             ${{ github.event.head_commit.message }}
             ## Changelog
             ${{ env.changelog }}
-          files: app/build/outputs/apk/release/Launchbox-0.0.${{ github.run_number }}.apk
+          files: app/build/outputs/apk/release/Launchbox-0.0.${{ steps.increment_version.outputs.version }}.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
