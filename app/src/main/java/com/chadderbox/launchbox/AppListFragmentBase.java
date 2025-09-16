@@ -81,12 +81,12 @@ public abstract class AppListFragmentBase extends Fragment {
 
         // If we've overshot in either direction, scroll to the top or bottom
         if (letter < firstLetter) {
-            scrollToPositionWithCentering(layoutManager, 0);
+            scrollToPositionWithOffset(layoutManager, 0);
             return;
         }
 
         if (letter > lastLetter) {
-            scrollToPositionWithCentering(layoutManager, items.size() - 1);
+            scrollToPositionWithOffset(layoutManager, items.size() - 1);
             return;
         }
 
@@ -107,7 +107,7 @@ public abstract class AppListFragmentBase extends Fragment {
             var currentLetter = Character.toUpperCase(label.charAt(0));
             if (currentLetter == letter) {
                 if (shouldScrollToPosition(layoutManager, i)) {
-                    scrollToPositionWithCentering(layoutManager, i);
+                    scrollToPositionWithOffset(layoutManager, i);
                 }
 
                 return;
@@ -120,9 +120,9 @@ public abstract class AppListFragmentBase extends Fragment {
         }
 
         // If we don't have an exact match, pick the closest before or after
-        var targetPos = closestPosBefore != null ? closestPosBefore : closestPosAfter;
+        final var targetPos = closestPosBefore != null ? closestPosBefore : closestPosAfter;
         if (targetPos != null && shouldScrollToPosition(layoutManager, targetPos)) {
-            scrollToPositionWithCentering(layoutManager, targetPos);
+            scrollToPositionWithOffset(layoutManager, targetPos);
         }
     }
 
@@ -134,7 +134,7 @@ public abstract class AppListFragmentBase extends Fragment {
         mListView.scrollToPosition(position);
     }
 
-    private void scrollToPositionWithCentering(final LinearLayoutManager layoutManager, final int position) {
+    private void scrollToPositionWithOffset(final LinearLayoutManager layoutManager, final int position) {
         final var recyclerViewHeight = mListView.getHeight();
         final var itemView = layoutManager.findViewByPosition(position);
 
@@ -143,8 +143,9 @@ public abstract class AppListFragmentBase extends Fragment {
             itemHeight = itemView.getHeight();
         }
 
-        var offset = (recyclerViewHeight / 2) - (itemHeight / 2);
-        layoutManager.scrollToPositionWithOffset(position, offset);
+        // Go a little above half way so it is easier to focus on
+        final var offset = (recyclerViewHeight / 3.33f) - (itemHeight / 2f);
+        layoutManager.scrollToPositionWithOffset(position, Math.round(offset));
     }
 
     /**
