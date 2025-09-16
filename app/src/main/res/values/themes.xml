@@ -28,4 +28,15 @@
         <item name="textAppearanceHeadline6">@style/TextAppearance.Material3.HeadlineMedium</item>
         <item name="textAppearanceBody1">@style/TextAppearance.Material3.BodyMedium</item>
     </style>
+
+    <style name="Theme.Launcherbox.OLED" parent="Base.Theme.Launcherbox">
+        <item name="android:windowBackground">#000000</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="colorSurface">#000000</item>
+        <item name="colorOnSurface">?android:attr/textColorPrimary</item>
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:textColorSecondary">#B3B3B3</item>
+    </style>
+
 </resources>

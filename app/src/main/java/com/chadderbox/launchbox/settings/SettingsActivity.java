@@ -1,6 +1,5 @@
 package com.chadderbox.launchbox.settings;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -13,11 +12,11 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.utils.ThemeHelper;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -28,8 +27,7 @@ public final class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        SettingsManager.initialiseSettingsManager(getApplicationContext());
-        AppCompatDelegate.setDefaultNightMode(SettingsManager.getTheme());
+        ThemeHelper.setTheme(this, SettingsManager.getTheme());
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
@@ -48,6 +46,7 @@ public final class SettingsActivity extends AppCompatActivity {
             finish();
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -237,41 +236,33 @@ public final class SettingsActivity extends AppCompatActivity {
     }
 
     private void showThemeDialog() {
-        var themes = new String[]{"System Default", "Light", "Dark"};
+        var themes = new String[] { "System Default", "Light", "Dark", "OLED" };
         var themeModes = new int[]{
-                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-                AppCompatDelegate.MODE_NIGHT_NO,
-                AppCompatDelegate.MODE_NIGHT_YES
+            ThemeHelper.MODE_NIGHT_FOLLOW_SYSTEM,
+            ThemeHelper.MODE_NIGHT_NO,
+            ThemeHelper.MODE_NIGHT_YES,
+            ThemeHelper.MODE_NIGHT_OLED
         };
 
         new AlertDialog.Builder(this)
-                .setTitle("Select Theme")
-                .setItems(themes, (dialog, which) -> {
-                    var chosenMode = themeModes[which];
-                    SettingsManager.setTheme(chosenMode);
-                    AppCompatDelegate.setDefaultNightMode(chosenMode);
-                    getDelegate().applyDayNight();
-                    Toast.makeText(this, "Theme applied: " + themes[which], Toast.LENGTH_SHORT).show();
+            .setTitle("Select Theme")
+            .setItems(themes, (dialog, which) -> {
+                var chosenMode = themeModes[which];
+                ThemeHelper.setTheme(this, chosenMode);
 
-                    buildOptions();
-                })
-                .show();
+                Toast.makeText(this, "Theme applied: " + themes[which], Toast.LENGTH_SHORT).show();
+
+                buildOptions();
+            })
+            .show();
     }
 
     private String getCurrentThemeName() {
         return switch (SettingsManager.getTheme()) {
-            case AppCompatDelegate.MODE_NIGHT_NO -> "Light";
-            case AppCompatDelegate.MODE_NIGHT_YES -> "Dark";
+            case ThemeHelper.MODE_NIGHT_NO -> "Light";
+            case ThemeHelper.MODE_NIGHT_YES -> "Dark";
+            case ThemeHelper.MODE_NIGHT_OLED -> "OLED";
             default -> "System Default";
         };
-    }
-
-    @SuppressLint("UnsafeIntentLaunch")
-    private void fullRefreshUi() {
-        // HACK
-        finish();
-        overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0);
-        startActivity(getIntent());
-        overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0);
     }
 }
