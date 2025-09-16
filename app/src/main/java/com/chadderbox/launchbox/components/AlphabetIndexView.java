@@ -34,8 +34,10 @@ public final class AlphabetIndexView
     private static final int ANIMATION_DURATION = 185;
     private static final float ANIMATION_ORIGINAL_SIZE = 1f;
     private static final float ANIMATION_SCALED_SIZE = 1.55f;
+    private static final float ANIMATION_TEXT_OFFSET = 90f;
 
     private final Map<Integer, ValueAnimator> mAnimators = new HashMap<>();
+    private final float[] mLetterPositions = new float[LETTERS.length()];
     private final float[] mLetterScales = new float[LETTERS.length()];
     private final Paint mPaint;
     private int mSelectedIndex = -1;
@@ -98,7 +100,7 @@ public final class AlphabetIndexView
                 mPaint.setFakeBoldText(false);
             }
 
-            canvas.drawText(String.valueOf(LETTERS.charAt(i)), x, y, mPaint);
+            canvas.drawText(String.valueOf(LETTERS.charAt(i)), x + mLetterPositions[i], y, mPaint);
             canvas.restore();
         }
 
@@ -195,11 +197,11 @@ public final class AlphabetIndexView
             return;
         }
 
-        startScaleAnimation(newIndex, ANIMATION_SCALED_SIZE);
+        startSelectionAnimation(newIndex, ANIMATION_TEXT_OFFSET * (mLeftHanded ? 1 : -1), ANIMATION_SCALED_SIZE);
 
         // Set the previously selected letter back
         if (mSelectedIndex >= 0 && mSelectedIndex != newIndex) {
-            startScaleAnimation(mSelectedIndex, ANIMATION_ORIGINAL_SIZE);
+            startSelectionAnimation(mSelectedIndex, 0, ANIMATION_ORIGINAL_SIZE);
         }
     }
 
@@ -208,21 +210,23 @@ public final class AlphabetIndexView
             return;
         }
 
-        startScaleAnimation(index, ANIMATION_ORIGINAL_SIZE);
+        startSelectionAnimation(index, 0, ANIMATION_ORIGINAL_SIZE);
     }
 
-    private void startScaleAnimation(final int index, final float targetScale) {
+    private void startSelectionAnimation(final int index, final float targetPosition, final float targetScale) {
         var running = mAnimators.get(index);
         if (running != null && running.isRunning()) {
             running.cancel();
         }
 
         final var startScale = mLetterScales[index];
+        var startPosition = mLetterPositions[index];
         var animator = ValueAnimator.ofFloat(startScale, targetScale);
         animator.setDuration(ANIMATION_DURATION);
         animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(animation -> {
-            mLetterScales[index] = (float) animation.getAnimatedValue();
+            mLetterScales[index] = (float)animation.getAnimatedValue();
+            mLetterPositions[index] = linearInterpolate(startPosition, targetPosition, animation.getAnimatedFraction());
             invalidate();
         });
 
@@ -230,11 +234,13 @@ public final class AlphabetIndexView
             @Override
             public void onAnimationCancel(Animator animation) {
                 if (targetScale != ANIMATION_ORIGINAL_SIZE) {
+                    var startReversePosition = mLetterPositions[index];
                     var revert = ValueAnimator.ofFloat(mLetterScales[index], ANIMATION_ORIGINAL_SIZE);
                     revert.setDuration(ANIMATION_DURATION);
                     revert.setInterpolator(new DecelerateInterpolator());
                     revert.addUpdateListener(anim -> {
                         mLetterScales[index] = (float)anim.getAnimatedValue();
+                        mLetterPositions[index] = linearInterpolate(startReversePosition, targetPosition, anim.getAnimatedFraction());
                         invalidate();
                     });
 
@@ -288,6 +294,11 @@ public final class AlphabetIndexView
         for (var i = 0; i < LETTERS.length(); i++) {
             mLetterScales[i] = ANIMATION_ORIGINAL_SIZE;
         }
+    }
+
+    private float linearInterpolate(float a, float b, float f)
+    {
+        return a * (1.0f - f) + (b * f);
     }
 
     @Override
