@@ -36,7 +36,7 @@ public final class SettingsManager {
     }
 
     public static boolean getCharacterHeadings() {
-        return sPrefs.getBoolean(KEY_CHARACTER_HEADINGS, false);
+        return sPrefs.getBoolean(KEY_CHARACTER_HEADINGS, true);
     }
 
     public static void setIconPack(String packageName) {
