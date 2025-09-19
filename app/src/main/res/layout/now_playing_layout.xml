@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="#FFFFFF"
+                android:textColor="?android:attr/textColorPrimary"
                 android:maxLines="1"
                 android:ellipsize="end"
                 app:overrideFontSize="true"
@@ -65,7 +65,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="15sp"
-                android:textColor="#CCCCCC"
+                android:textColor="?android:attr/textColorSecondary"
                 android:maxLines="1"
                 android:ellipsize="end"
                 app:overrideFontSize="true"/>
@@ -78,6 +78,7 @@
             android:gravity="center"
             android:layout_marginTop="8dp">
 
+            <!-- TODO: Tint these if we're in light mode! -->
             <ImageButton
                 android:id="@+id/btn_prev"
                 android:layout_width="48dp"

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_favourites"
     android:fitsSystemWindows="true"
     android:layout_width="match_parent"
@@ -21,12 +22,14 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:elevation="8dp"
-            app:cardCornerRadius="12dp"
+            app:cardCornerRadius="8dp"
             android:padding="8dp">
 
             <com.chadderbox.launchbox.components.NowPlayingView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                tools:layout_width="match_parent"
+                tools:layout_height="80dp"/>
 
         </androidx.cardview.widget.CardView>
 
@@ -37,7 +40,7 @@
             android:layout_weight="1"
             android:layout_margin="16dp"
             android:clipToPadding="false"
-            android:scrollbars="none"/>
+            android:scrollbars="none" />
 
     </LinearLayout>
 

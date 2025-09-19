@@ -18,6 +18,7 @@ public final class SettingsManager {
     public static final String KEY_THEME = "theme";
     public static final String KEY_WALLPAPER = "wallpaper";
     public static final String KEY_WALLPAPER_DIM_AMOUNT = "wallpaper_dim_amount";
+    public static final String KEY_NOW_PLAYING_WIDGET = "now_playing_enabled";
 
     private static SharedPreferences sPrefs;
 
@@ -95,5 +96,14 @@ public final class SettingsManager {
 
     public static float getWallpaperDimAmount() {
         return sPrefs.getFloat(KEY_WALLPAPER_DIM_AMOUNT, 0.375f);
+    }
+
+    public static void setNowPlayingEnabled(boolean enabled) {
+        sPrefs.edit().putBoolean(KEY_NOW_PLAYING_WIDGET, enabled).apply();
+    }
+
+    public static boolean getNowPlayingEnabled() {
+        // Disable this initially  because people need to grant access
+        return sPrefs.getBoolean(KEY_NOW_PLAYING_WIDGET, false);
     }
 }

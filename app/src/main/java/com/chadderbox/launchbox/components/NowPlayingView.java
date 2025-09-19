@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.NotificationListener;
 import com.chadderbox.launchbox.R;
 
@@ -61,6 +62,11 @@ public final class NowPlayingView extends LinearLayout {
 
     public void initialise(Context context) {
 
+        if (!SettingsManager.getNowPlayingEnabled()) {
+            // NO!
+            return;
+        }
+
         LayoutInflater.from(context).inflate(R.layout.now_playing_layout, this, true);
 
         mContainer = findViewById(R.id.now_playing);
@@ -80,9 +86,10 @@ public final class NowPlayingView extends LinearLayout {
     }
 
     private void setupMediaController(Context context) {
-        if (!hasNotificationAccess(context)) {
+
+        // This shouldn't really happen
+        if (!SettingsManager.getNowPlayingEnabled()) {
             Log.w("NowPlayingView", "Notification access missing.");
-            requestNotificationAccess(context);
             return;
         }
 
@@ -181,19 +188,4 @@ public final class NowPlayingView extends LinearLayout {
             }
         });
     }
-
-    private boolean hasNotificationAccess(Context context) {
-        var enabledListeners = android.provider.Settings.Secure.getString(
-            context.getContentResolver(),
-            "enabled_notification_listeners"
-        );
-
-        return enabledListeners != null && enabledListeners.contains(context.getPackageName());
-    }
-
-    private void requestNotificationAccess(Context context) {
-        var intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
-        context.startActivity(intent);
-    }
-
 }

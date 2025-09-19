@@ -13,6 +13,7 @@
     android:focusable="true"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
+    <!-- Handle -->
     <View
         android:layout_width="40dp"
         android:layout_height="20dp"

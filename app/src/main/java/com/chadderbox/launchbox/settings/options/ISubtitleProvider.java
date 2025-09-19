@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.settings;
+package com.chadderbox.launchbox.settings.options;
 
 import android.content.Context;
 

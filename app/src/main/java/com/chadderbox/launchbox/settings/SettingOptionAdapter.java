@@ -9,14 +9,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.settings.options.GenericSettingOption;
+import com.chadderbox.launchbox.settings.options.ISettingOption;
 
 import java.util.List;
 
 public final class SettingOptionAdapter extends RecyclerView.Adapter<SettingOptionAdapter.SettingItemHolder> {
 
-    private final List<SettingOption> mItems;
+    private final List<ISettingOption> mItems;
 
-    public SettingOptionAdapter(List<SettingOption> items) {
+    public SettingOptionAdapter(List<ISettingOption> items) {
         mItems = items;
     }
 
@@ -32,8 +34,8 @@ public final class SettingOptionAdapter extends RecyclerView.Adapter<SettingOpti
     public void onBindViewHolder(@NonNull SettingItemHolder holder, int position) {
         var option = mItems.get(position);
         holder.title.setText(option.getTitle());
-        holder.subtitle.setText(option.getSubtitle(holder.itemView.getContext()));
-        holder.itemView.setOnClickListener(v -> option.performClick(v.getContext()));
+        holder.subtitle.setText(option.getSubtitle((SettingsActivity)holder.itemView.getContext()));
+        holder.itemView.setOnClickListener(v -> option.performClick((SettingsActivity)v.getContext()));
     }
 
     @Override
