@@ -126,7 +126,6 @@ public final class MainActivity
         super.onCreate(savedInstanceState);
         getWindow().setDimAmount(0f);
         setContentView(R.layout.activity_main);
-        WindowCompat.enableEdgeToEdge(getWindow());
         loadWallpaperBackground();
 
         initialiseSearchView();
