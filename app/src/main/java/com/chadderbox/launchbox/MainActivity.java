@@ -51,6 +51,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -70,6 +71,7 @@ public final class MainActivity
     private AppLoader mAppLoader;
     private SearchManager mSearchManager;
     private Runnable mSearchRunnable;
+    private AlphabetIndexView mIndexView;
     private MainPagerAdapter mPagerAdapter;
     private ViewPager2 mViewPager;
     private GestureDetector mGestureDetector;
@@ -93,6 +95,7 @@ public final class MainActivity
                 case Intent.ACTION_PACKAGE_ADDED:
                 case Intent.ACTION_PACKAGE_REMOVED:
                 case Intent.ACTION_PACKAGE_CHANGED:
+                    populateAlphabetViewLetters();
                     refreshAllVisibleFragments();
                     break;
             }
@@ -184,8 +187,9 @@ public final class MainActivity
             }
         });
 
-        var indexView = (AlphabetIndexView)findViewById(R.id.alphabet_index);
-        indexView.setOnLetterSelectedListener(letter -> {
+        mIndexView = findViewById(R.id.alphabet_index);
+        populateAlphabetViewLetters();
+        mIndexView.setOnLetterSelectedListener(letter -> {
             var position = letter == AlphabetIndexView.FAVOURITES_CHARACTER
                 ? 0
                 : mPagerAdapter.getItemCount() - 1;
@@ -525,6 +529,45 @@ public final class MainActivity
         return alpha << 24;
     }
 
+    private void populateAlphabetViewLetters() {
+        if (SettingsManager.getShowOnlyInstalled()) {
+            mIndexView.setLetters(getAlphabetViewLetters());
+        } else {
+            mIndexView.setLetters(AlphabetIndexView.LETTERS);
+        }
+    }
+
+    private String getAlphabetViewLetters() {
+        var chars = new HashSet<Character>();
+        var apps = mAppLoader.getInstalledApps();
+
+        for (var app : apps) {
+            var label = app.getLabel();
+            if (label == null || label.isEmpty()) {
+                continue;
+            }
+
+            var character = label.charAt(0);
+            if (Character.isLetter(character)) {
+                character = Character.toUpperCase(character);
+            } else if (Character.isDigit(character)) {
+                character = AlphabetIndexView.NUMBER_CHARACTER;
+            } else {
+                continue;
+            }
+
+            chars.add(character);
+        }
+
+        var newChars = chars.stream().sorted().toList();
+        var result = new StringBuilder();
+        for (var character : newChars) {
+            result.append(character);
+        }
+
+        return result.toString();
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
@@ -540,6 +583,10 @@ public final class MainActivity
         ) {
             refreshUi();
             return;
+        }
+
+        if (SettingsManager.KEY_SHOW_ONLY_INSTALLED.equals(key)) {
+            populateAlphabetViewLetters();
         }
 
         if (SettingsManager.KEY_WALLPAPER.equals(key) ||

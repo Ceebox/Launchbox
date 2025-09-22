@@ -43,22 +43,28 @@ public final class AlphabetIndexView
     private static final float ANIMATION_SCALED_SIZE = 1.55f;
     private static final float ANIMATION_TEXT_OFFSET = 90f;
     private final Map<Integer, ValueAnimator> mAnimators = new HashMap<>();
-    private final float[] mLetterPositions = new float[LETTERS.length()];
-    private final float[] mLetterScales = new float[LETTERS.length()];
+    private final HashMap<Character, Float> mLetterPositions = new HashMap<>(LETTERS.length());
+    private final HashMap<Character, Float> mLetterScales = new HashMap<>(LETTERS.length());
     private final Paint mPaint;
     private int mSelectedIndex = -1;
     private boolean mLeftHanded = false;
     private IOnLetterSelectedListener mListener;
-
     private final Paint mBubblePaint;
     private final float mBubbleRadius = 60f * getResources().getDisplayMetrics().density / 3;
     private boolean mShowBubble = false;
     private float mBubbleX;
     private float mBubbleY;
     private final RectF mBubbleRect = new RectF();
+    private String mLetters = LETTERS;
 
     public AlphabetIndexView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        for (var i = 0; i < LETTERS.length(); i++) {
+            final char character = LETTERS.charAt(i);
+            mLetterPositions.put(character, 0f);
+            mLetterScales.put(character, ANIMATION_ORIGINAL_SIZE);
+        }
 
         SettingsManager.registerChangeListener(this);
         mLeftHanded = SettingsManager.getLeftHanded();
@@ -89,16 +95,16 @@ public final class AlphabetIndexView
         super.onDraw(canvas);
 
         var availableHeight = getHeight() - getPaddingTop() - getPaddingBottom();
-        var cellHeight = (float) availableHeight / LETTERS.length();
+        var cellHeight = (float) availableHeight / mLetters.length();
 
-        for (var i = 0; i < LETTERS.length(); i++) {
+        for (var i = 0; i < mLetters.length(); i++) {
             final var x = mLeftHanded ? getPaddingLeft() : getWidth() - getPaddingRight();
             final var y = getPaddingTop() + cellHeight * i + cellHeight / 2f + mPaint.getTextSize() / 2f;
 
             canvas.save();
 
             // Scale around center of letter
-            var letterScale = mLetterScales[i];
+            var letterScale = mLetterScales.get(LETTERS.charAt(i));
             canvas.translate(x, y);
             canvas.scale(letterScale, letterScale);
             canvas.translate(-x, -y);
@@ -111,14 +117,14 @@ public final class AlphabetIndexView
                 mPaint.setFakeBoldText(false);
             }
 
-            canvas.drawText(String.valueOf(LETTERS.charAt(i)), x + mLetterPositions[i], y, mPaint);
+            canvas.drawText(String.valueOf(mLetters.charAt(i)), x + mLetterPositions.get(LETTERS.charAt(i)), y, mPaint);
             canvas.restore();
         }
 
         // Draw bubble popup if visible
         // TODO: At the moment, the text inside the bubble is weirdly aligned
-        if (EXPERIMENT_BUBBLE_ENABLED && (mShowBubble && mSelectedIndex >= 0 && mSelectedIndex < LETTERS.length())) {
-            var letter = LETTERS.charAt(mSelectedIndex);
+        if (EXPERIMENT_BUBBLE_ENABLED && (mShowBubble && mSelectedIndex >= 0 && mSelectedIndex < mLetters.length())) {
+            var letter = mLetters.charAt(mSelectedIndex);
             mBubbleRect.set(
                 mBubbleX - mBubbleRadius,
                 mBubbleY - mBubbleRadius,
@@ -145,7 +151,7 @@ public final class AlphabetIndexView
         var y = event.getY();
         var height = getHeight() - getPaddingTop() - getPaddingBottom();
 
-        var index = (int) ((y - getPaddingTop()) / height * LETTERS.length());
+        var index = (int) ((y - getPaddingTop()) / height * mLetters.length());
 
         if (y < getPaddingTop() || y > getHeight() - getPaddingBottom()) {
             index = -1;
@@ -154,8 +160,8 @@ public final class AlphabetIndexView
                 index = 0;
             }
 
-            if (index >= LETTERS.length()) {
-                index = LETTERS.length() - 1;
+            if (index >= mLetters.length()) {
+                index = mLetters.length() - 1;
             }
         }
 
@@ -171,7 +177,7 @@ public final class AlphabetIndexView
                     }
 
                     if (index >= 0 && mListener != null) {
-                        mListener.onLetterSelected(LETTERS.charAt(index));
+                        mListener.onLetterSelected(mLetters.charAt(index));
                     }
                 }
 
@@ -204,8 +210,12 @@ public final class AlphabetIndexView
         }
     }
 
+    public void setLetters(String letters) {
+        mLetters = letters;
+    }
+
     private void animateLetterSelection(int newIndex) {
-        if (newIndex < 0 || newIndex >= LETTERS.length()) {
+        if (newIndex < 0 || newIndex >= mLetters.length()) {
             return;
         }
 
@@ -218,7 +228,7 @@ public final class AlphabetIndexView
     }
 
     private void animateLetterDeselection(int index) {
-        if (index < 0 || index >= LETTERS.length()) {
+        if (index < 0 || index >= mLetters.length()) {
             return;
         }
 
@@ -231,14 +241,14 @@ public final class AlphabetIndexView
             running.cancel();
         }
 
-        final var startScale = mLetterScales[index];
-        var startPosition = mLetterPositions[index];
+        final var startScale = mLetterScales.get(LETTERS.charAt(index));
+        var startPosition = mLetterPositions.get(LETTERS.charAt(index));
         var animator = ValueAnimator.ofFloat(startScale, targetScale);
         animator.setDuration(ANIMATION_DURATION);
         animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(animation -> {
-            mLetterScales[index] = (float)animation.getAnimatedValue();
-            mLetterPositions[index] = linearInterpolate(startPosition, targetPosition, animation.getAnimatedFraction());
+            mLetterScales.put(LETTERS.charAt(index), (float)animation.getAnimatedValue());
+            mLetterPositions.put(LETTERS.charAt(index), linearInterpolate(startPosition, targetPosition, animation.getAnimatedFraction()));
             invalidate();
         });
 
@@ -246,13 +256,13 @@ public final class AlphabetIndexView
             @Override
             public void onAnimationCancel(Animator animation) {
                 if (targetScale != ANIMATION_ORIGINAL_SIZE) {
-                    var startReversePosition = mLetterPositions[index];
-                    var revert = ValueAnimator.ofFloat(mLetterScales[index], ANIMATION_ORIGINAL_SIZE);
+                    var startReversePosition = mLetterPositions.get(LETTERS.charAt(index));
+                    var revert = ValueAnimator.ofFloat(mLetterScales.get(LETTERS.charAt(index)), ANIMATION_ORIGINAL_SIZE);
                     revert.setDuration(ANIMATION_DURATION);
                     revert.setInterpolator(new DecelerateInterpolator());
                     revert.addUpdateListener(anim -> {
-                        mLetterScales[index] = (float)anim.getAnimatedValue();
-                        mLetterPositions[index] = linearInterpolate(startReversePosition, targetPosition, anim.getAnimatedFraction());
+                        mLetterScales.put(LETTERS.charAt(index), (float)anim.getAnimatedValue());
+                        mLetterPositions.put(LETTERS.charAt(index), linearInterpolate(startReversePosition, targetPosition, anim.getAnimatedFraction()));
                         invalidate();
                     });
 
@@ -321,7 +331,7 @@ public final class AlphabetIndexView
 
     private void resetLetterScale() {
         for (var i = 0; i < LETTERS.length(); i++) {
-            mLetterScales[i] = ANIMATION_ORIGINAL_SIZE;
+            mLetterScales.put(LETTERS.charAt(i), ANIMATION_ORIGINAL_SIZE);
         }
     }
 
