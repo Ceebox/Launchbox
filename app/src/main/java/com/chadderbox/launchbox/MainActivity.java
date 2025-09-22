@@ -541,6 +541,7 @@ public final class MainActivity
         var chars = new HashSet<Character>();
         var apps = mAppLoader.getInstalledApps();
 
+        chars.add(AlphabetIndexView.FAVOURITES_CHARACTER);
         for (var app : apps) {
             var label = app.getLabel();
             if (label == null || label.isEmpty()) {
