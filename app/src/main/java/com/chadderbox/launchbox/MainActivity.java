@@ -28,6 +28,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.view.WindowCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -125,6 +126,7 @@ public final class MainActivity
         super.onCreate(savedInstanceState);
         getWindow().setDimAmount(0f);
         setContentView(R.layout.activity_main);
+        WindowCompat.enableEdgeToEdge(getWindow());
         loadWallpaperBackground();
 
         initialiseSearchView();
