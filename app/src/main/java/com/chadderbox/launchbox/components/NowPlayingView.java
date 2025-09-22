@@ -2,7 +2,6 @@ package com.chadderbox.launchbox.components;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
@@ -29,7 +28,6 @@ public final class NowPlayingView
     extends LinearLayout
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private MediaSessionManager mSessionManager;
     private MediaController mController;
     private LinearLayout mContainer;
     private ImageView mSongArt;
@@ -94,15 +92,15 @@ public final class NowPlayingView
         }
 
         try {
-            mSessionManager = (MediaSessionManager) context.getSystemService(Context.MEDIA_SESSION_SERVICE);
+            var sessionManager = (MediaSessionManager) context.getSystemService(Context.MEDIA_SESSION_SERVICE);
 
             var notificationListener = new ComponentName(context, NotificationListener.class);
-            mSessionManager.addOnActiveSessionsChangedListener(
+            sessionManager.addOnActiveSessionsChangedListener(
                 this::handleSessionsChanged,
                 notificationListener
             );
 
-            var sessions = mSessionManager.getActiveSessions(notificationListener);
+            var sessions = sessionManager.getActiveSessions(notificationListener);
             handleSessionsChanged(sessions);
 
         } catch (SecurityException e) {

@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.settings.options.GenericSettingOption;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
 
 import java.util.List;

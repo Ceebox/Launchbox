@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.utils.ThemeHelper;
 
+@SuppressLint("AppCompatCustomView")
 public final class FontEditText extends EditText {
 
     private final CustomFontManager mFontManager;

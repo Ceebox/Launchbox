@@ -504,12 +504,10 @@ public final class MainActivity
     }
 
     private void setWallpaperDim() {
-        var dimAmount = SettingsManager.getWallpaperDimAmount();
-        var dimColor = (int) (dimAmount * 255) << 24;
         var wallpaperHost = (ImageView) findViewById(R.id.wallpaper_image);
 
         var drawable = mWallpaperDrawable.mutate();
-        drawable.setColorFilter(new BlendModeColorFilter(dimColor, BlendMode.SRC));
+        drawable.setColorFilter(new BlendModeColorFilter(getDimColour(SettingsManager.getWallpaperDimAmount()), BlendMode.SRC));
         wallpaperHost.setImageDrawable(drawable);
     }
 
