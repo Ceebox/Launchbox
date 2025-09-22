@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.chadderbox.launchbox.components.AlphabetIndexView;
 import com.chadderbox.launchbox.data.AppItem;
 
 public abstract class AppListFragmentBase extends Fragment {
@@ -73,11 +74,15 @@ public abstract class AppListFragmentBase extends Fragment {
         }
 
         for (var i = items.size() - 1; i >= 0; i--) {
-            var item = items.get(i);
+            final var item = items.get(i);
             if (item instanceof AppItem appItem) {
-                var label = appItem.getAppInfo().getLabel();
+                final var label = appItem.getAppInfo().getLabel();
                 if (label != null && !label.isEmpty()) {
-                    lastLetter = Character.toUpperCase(label.charAt(0));
+                    final var lastChar = label.charAt(0);
+                    lastLetter = Character.isDigit(lastChar)
+                        ? AlphabetIndexView.NUMBER_CHARACTER
+                        : Character.toUpperCase(lastChar);
+
                     break;
                 }
             }

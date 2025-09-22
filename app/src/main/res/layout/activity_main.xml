@@ -39,7 +39,7 @@
         android:layout_gravity="end|center_vertical"
         android:paddingStart="0dp"
         android:paddingEnd="16dp"
-        android:paddingTop="288dp"
+        android:paddingTop="324dp"
         android:paddingBottom="32dp"
         android:clickable="true"
         android:focusable="true"

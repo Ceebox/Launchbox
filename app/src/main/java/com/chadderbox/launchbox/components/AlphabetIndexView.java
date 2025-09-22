@@ -13,11 +13,13 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
 import androidx.annotation.NonNull;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 
 import com.chadderbox.launchbox.settings.SettingsManager;
@@ -29,13 +31,17 @@ import java.util.Map;
 public final class AlphabetIndexView
     extends View
     implements SharedPreferences.OnSharedPreferenceChangeListener {
-    public static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public static final char FAVOURITES_CHARACTER = '*';
+    public static final char NUMBER_CHARACTER = '#';
+    public static final String LETTERS = String.valueOf(FAVOURITES_CHARACTER)
+        + NUMBER_CHARACTER
+        + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
     private static final boolean EXPERIMENT_BUBBLE_ENABLED = false;
     private static final int ANIMATION_DURATION = 185;
     private static final float ANIMATION_ORIGINAL_SIZE = 1f;
     private static final float ANIMATION_SCALED_SIZE = 1.55f;
     private static final float ANIMATION_TEXT_OFFSET = 90f;
-
     private final Map<Integer, ValueAnimator> mAnimators = new HashMap<>();
     private final float[] mLetterPositions = new float[LETTERS.length()];
     private final float[] mLetterScales = new float[LETTERS.length()];
@@ -55,6 +61,7 @@ public final class AlphabetIndexView
         super(context, attrs);
 
         SettingsManager.registerChangeListener(this);
+        mLeftHanded = SettingsManager.getLeftHanded();
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setTextSize(48f * getResources().getDisplayMetrics().density / 3);
@@ -72,6 +79,12 @@ public final class AlphabetIndexView
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        adjustPositionForHandedness();
+    }
+
+    @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
@@ -79,8 +92,8 @@ public final class AlphabetIndexView
         var cellHeight = (float) availableHeight / LETTERS.length();
 
         for (var i = 0; i < LETTERS.length(); i++) {
-            var x = mLeftHanded ? getPaddingLeft() : getWidth() - getPaddingRight();
-            var y = getPaddingTop() + cellHeight * i + cellHeight / 2f + mPaint.getTextSize() / 2f;
+            final var x = mLeftHanded ? getPaddingLeft() : getWidth() - getPaddingRight();
+            final var y = getPaddingTop() + cellHeight * i + cellHeight / 2f + mPaint.getTextSize() / 2f;
 
             canvas.save();
 
@@ -120,7 +133,7 @@ public final class AlphabetIndexView
             mPaint.setFakeBoldText(true);
             canvas.drawText(String.valueOf(letter), mBubbleX, mBubbleY + mPaint.getTextSize() / 3, mPaint);
 
-            mPaint.setTextSize(48f * getResources().getDisplayMetrics().density / 3);
+            mPaint.setTextSize(54f * getResources().getDisplayMetrics().density / 3);
             mPaint.setFakeBoldText(false);
         }
     }
@@ -166,7 +179,9 @@ public final class AlphabetIndexView
                 mShowBubble = index >= 0;
 
                 if (mShowBubble) {
-                    mBubbleX = getWidth() - getPaddingRight() - mBubbleRadius * 2.5f;
+                    mBubbleX = mLeftHanded
+                        ? getPaddingLeft() + mBubbleRadius * 2.5f
+                        : getWidth() - getPaddingRight() - mBubbleRadius * 2.5f;
                     mBubbleY = y;
                 }
 
@@ -287,6 +302,23 @@ public final class AlphabetIndexView
         invalidate();
     }
 
+    private void adjustPositionForHandedness() {
+        if (getLayoutParams() instanceof CoordinatorLayout.LayoutParams params) {
+            params.gravity = mLeftHanded
+                ? Gravity.START | Gravity.CENTER_VERTICAL
+                : Gravity.END | Gravity.CENTER_VERTICAL;
+
+            setLayoutParams(params);
+        }
+
+        setPadding(
+            mLeftHanded ? 16 : 0,
+            getPaddingTop(),
+            mLeftHanded ? 0 : 16,
+            getPaddingBottom()
+        );
+    }
+
     private void resetLetterScale() {
         for (var i = 0; i < LETTERS.length(); i++) {
             mLetterScales[i] = ANIMATION_ORIGINAL_SIZE;
@@ -302,6 +334,13 @@ public final class AlphabetIndexView
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (SettingsManager.KEY_FONT.equals(key)) {
             applyCurrentFont();
+        }
+
+        if (SettingsManager.KEY_LEFT_HANDED.equals(key)) {
+            mLeftHanded = SettingsManager.getLeftHanded();
+            mPaint.setTextAlign(mLeftHanded ? Paint.Align.LEFT : Paint.Align.RIGHT);
+            adjustPositionForHandedness();
+            invalidate();
         }
     }
 

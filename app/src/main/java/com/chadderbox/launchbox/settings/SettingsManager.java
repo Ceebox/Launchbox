@@ -11,6 +11,7 @@ public final class SettingsManager {
     public static final String PREFS_NAME = "cbxlauncher_prefs";
     public static final String KEY_CHARACTER_HEADINGS = "character_headings";
     public static final String KEY_ICON_PACK = "icon_pack";
+    public static final String KEY_LEFT_HANDED = "left_handed";
     public static final String KEY_FONT = "font";
     public static final String KEY_FONT_SIZE = "font_size";
     public static final String KEY_FAVORITES = "favorites";
@@ -47,6 +48,14 @@ public final class SettingsManager {
 
     public static String getIconPack() {
         return sPrefs.getString(KEY_ICON_PACK, "System Default");
+    }
+
+    public static void setLeftHanded(boolean leftHanded) {
+        sPrefs.edit().putBoolean(KEY_LEFT_HANDED, leftHanded).apply();
+    }
+
+    public static boolean getLeftHanded() {
+        return sPrefs.getBoolean(KEY_LEFT_HANDED, false);
     }
 
     public static void setFont(String fontName) {

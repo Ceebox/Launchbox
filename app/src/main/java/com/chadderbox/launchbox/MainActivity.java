@@ -186,10 +186,13 @@ public final class MainActivity
 
         var indexView = (AlphabetIndexView)findViewById(R.id.alphabet_index);
         indexView.setOnLetterSelectedListener(letter -> {
-            var lastPos = mPagerAdapter.getItemCount() - 1;
-            mViewPager.setCurrentItem(lastPos);
+            var position = letter == AlphabetIndexView.FAVOURITES_CHARACTER
+                ? 0
+                : mPagerAdapter.getItemCount() - 1;
 
-            var fragment = findPagerFragment(lastPos);
+            mViewPager.setCurrentItem(position);
+
+            var fragment = findPagerFragment(position);
             if (fragment instanceof AppsFragment appsFragment) {
                 appsFragment.scrollToLetter(letter);
             }
