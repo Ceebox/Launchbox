@@ -3,7 +3,8 @@ package com.chadderbox.launchbox;
 import android.annotation.SuppressLint;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import java.util.ArrayList;
@@ -14,8 +15,8 @@ public final class MainPagerAdapter extends FragmentStateAdapter {
     private final List<Class<? extends AppListFragmentBase>> mFragmentClasses;
     private final List<Class<? extends AppListFragmentBase>> mVisibleFragmentClasses;
 
-    public MainPagerAdapter(@NonNull FragmentActivity fragmentActivity, List<Class<? extends AppListFragmentBase>> fragmentClasses) {
-        super(fragmentActivity);
+    public MainPagerAdapter(@NonNull FragmentManager fragmentManager, Lifecycle lifecycle, List<Class<? extends AppListFragmentBase>> fragmentClasses) {
+        super(fragmentManager, lifecycle);
         mFragmentClasses = new ArrayList<>(fragmentClasses);
         mVisibleFragmentClasses = new ArrayList<>(fragmentClasses);
     }

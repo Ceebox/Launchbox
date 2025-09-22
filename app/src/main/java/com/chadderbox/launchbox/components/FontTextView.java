@@ -1,15 +1,18 @@
 package com.chadderbox.launchbox.components;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatTextView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.utils.ThemeHelper;
 
-public final class FontTextView extends AppCompatTextView {
+@SuppressLint("AppCompatCustomView")
+public final class FontTextView extends TextView {
 
     private final CustomFontManager mFontManager;
 
@@ -57,6 +60,8 @@ public final class FontTextView extends AppCompatTextView {
                 } catch (Exception ignored) { }
             }
         }
+
+        setTextColor(ThemeHelper.resolveColorAttr(getContext(), android.R.attr.textColorPrimary));
     }
 
     public void setIsHeading(boolean isHeading) {

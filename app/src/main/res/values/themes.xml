@@ -1,12 +1,10 @@
 <resources>
-    <style name="Base.Theme.Launcherbox" parent="Theme.Material3.DayNight.NoActionBar">
-<!--        <item name="android:windowBackground">@android:color/transparent</item>-->
-
+    <style name="Base.Theme.Launcherbox" parent="android:Theme.Material.Wallpaper.NoTitleBar">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-
-        <item name="android:textColorPrimary">?attr/colorOnBackground</item>
-        <item name="android:textColorSecondary">?attr/colorSecondary</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
     </style>
 
     <style name="Theme.Launcherbox.Launcher" parent="Base.Theme.Launcherbox">
@@ -15,17 +13,13 @@
 
         <item name="selectableItemBackground">@android:attr/selectableItemBackground</item>
         <item name="selectableItemBackgroundBorderless">@android:attr/selectableItemBackgroundBorderless</item>
+
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
     </style>
 
-    <style name="Theme.Launcherbox.Settings" parent="Base.Theme.Launcherbox">
-        <item name="android:windowBackground">?attr/colorSurface</item>
-        <item name="android:windowIsTranslucent">false</item>
-        <item name="android:windowContentOverlay">@null</item>
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#666666</color>
+    <color name="color_background">#FAFAFA</color>
 
-        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
-        <item name="android:textColorSecondary">?attr/colorOnSurfaceVariant</item>
-
-        <item name="textAppearanceHeadline6">@style/TextAppearance.Material3.HeadlineMedium</item>
-        <item name="textAppearanceBody1">@style/TextAppearance.Material3.BodyMedium</item>
-    </style>
 </resources>

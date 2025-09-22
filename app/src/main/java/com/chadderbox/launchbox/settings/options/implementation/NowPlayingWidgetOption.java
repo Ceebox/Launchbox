@@ -3,7 +3,7 @@ package com.chadderbox.launchbox.settings.options.implementation;
 import android.content.Intent;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
+import android.app.AlertDialog;
 
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
@@ -34,14 +34,14 @@ public final class NowPlayingWidgetOption
             return;
         }
 
-        var options = new String[] { "On", "Off" };
+        var options = new String[] { "Off", "On" };
         var initiallyEnabled = SettingsManager.getNowPlayingEnabled();
         var checkedItem = initiallyEnabled ? 1 : 0;
 
         new AlertDialog.Builder(activity)
             .setTitle("Now Playing Widget")
             .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
-                var enabled = which == 0;
+                var enabled = which == 1;
                 if (enabled == initiallyEnabled) {
                     return;
                 }

@@ -3,6 +3,7 @@ package com.chadderbox.launchbox.components;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -24,7 +25,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public final class NowPlayingView extends LinearLayout {
+public final class NowPlayingView
+    extends LinearLayout
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private MediaSessionManager mSessionManager;
     private MediaController mController;
@@ -62,10 +65,7 @@ public final class NowPlayingView extends LinearLayout {
 
     public void initialise(Context context) {
 
-        if (!SettingsManager.getNowPlayingEnabled()) {
-            // NO!
-            return;
-        }
+        SettingsManager.registerChangeListener(this);
 
         LayoutInflater.from(context).inflate(R.layout.now_playing_layout, this, true);
 
@@ -129,7 +129,7 @@ public final class NowPlayingView extends LinearLayout {
     }
 
     private void updateNowPlayingUI() {
-        if (mController == null) {
+        if (mController == null || !SettingsManager.getNowPlayingEnabled()) {
             mContainer.setVisibility(View.GONE);
             return;
         }
@@ -187,5 +187,14 @@ public final class NowPlayingView extends LinearLayout {
                 mController.getTransportControls().skipToPrevious();
             }
         });
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (SettingsManager.KEY_NOW_PLAYING_WIDGET.equals(key)) {
+            var ctx = getContext();
+            setupMediaController(ctx);
+            updateNowPlayingUI();
+        }
     }
 }

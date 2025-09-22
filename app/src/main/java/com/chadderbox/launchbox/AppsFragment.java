@@ -2,6 +2,7 @@ package com.chadderbox.launchbox;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +14,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.chadderbox.launchbox.utils.AppLoader;
 
-public final class AppsFragment extends AppListFragmentBase {
+public final class AppsFragment
+    extends AppListFragmentBase {
 
     private AppsViewModel mViewModel;
 

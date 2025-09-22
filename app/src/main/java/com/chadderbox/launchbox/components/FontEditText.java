@@ -3,13 +3,14 @@ package com.chadderbox.launchbox.components;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.EditText;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatEditText;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.utils.ThemeHelper;
 
-public final class FontEditText extends AppCompatEditText {
+public final class FontEditText extends EditText {
 
     private final CustomFontManager mFontManager;
 
@@ -19,13 +20,13 @@ public final class FontEditText extends AppCompatEditText {
         initialise(null);
     }
 
-    public FontEditText(Context context, AttributeSet attrs) {
+    public FontEditText(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mFontManager = new CustomFontManager(this);
         initialise(attrs);
     }
 
-    public FontEditText(Context context, AttributeSet attrs, int defStyleAttr) {
+    public FontEditText(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mFontManager = new CustomFontManager(this);
         initialise(attrs);
@@ -38,5 +39,7 @@ public final class FontEditText extends AppCompatEditText {
                 mFontManager.setIsHeading(a.getBoolean(R.styleable.FontTextView_isHeading, false));
             } catch (Exception ignored) { }
         }
+
+        setTextColor(ThemeHelper.resolveColorAttr(getContext(), android.R.attr.textColorPrimary));
     }
 }

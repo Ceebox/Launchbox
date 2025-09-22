@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,12 +25,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.view.WindowCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -48,6 +46,7 @@ import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.utils.IconPackLoader;
+import com.chadderbox.launchbox.utils.ThemeHelper;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
@@ -57,10 +56,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class MainActivity
-    extends AppCompatActivity
+    extends FragmentActivity
     implements View.OnLongClickListener,
-        IAdapterFetcher,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+    IAdapterFetcher,
+    SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final long SEARCH_DELAY_MS = 300;
 
@@ -100,12 +99,19 @@ public final class MainActivity
         }
     };
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+
+        // If we don't init this here, we get a crash
+        SettingsManager.initialiseSettingsManager(newBase);
+        SettingsManager.registerChangeListener(this);
+
+        super.attachBaseContext(ThemeHelper.getContextWithTheme(newBase));
+    }
+
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        SettingsManager.initialiseSettingsManager(getApplicationContext());
-        SettingsManager.registerChangeListener(this);
 
         mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack());
         mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler);
@@ -120,8 +126,6 @@ public final class MainActivity
         );
 
         mSearchManager = new SearchManager(searchProviders);
-
-        AppCompatDelegate.setDefaultNightMode(SettingsManager.getTheme());
 
         super.onCreate(savedInstanceState);
         getWindow().setDimAmount(0f);
@@ -164,7 +168,7 @@ public final class MainActivity
             AppsFragment.class
         );
 
-        mPagerAdapter = new MainPagerAdapter(this, fragments);
+        mPagerAdapter = new MainPagerAdapter(getSupportFragmentManager(), getLifecycle(), fragments);
 
         refreshFavouritesFragment();
 
@@ -191,28 +195,23 @@ public final class MainActivity
             }
         });
 
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                // NOTE: Don't call super on this to prevent weird back animation
-                // Close the search if we press the back button
-                if (mSearchSheet.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                    closeSearchSheet();
-                }
+        getOnBackInvokedDispatcher().registerOnBackInvokedCallback(0, () -> {
+            // NOTE: Don't call super on this to prevent weird back animation
+            // Close the search if we press the back button
+            if (mSearchSheet.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                closeSearchSheet();
+            }
 
-                // Otherwise take us to the favourites section
-                var firstFragment = findPagerFragment(0);
-                if (mCurrentFragment != firstFragment) {
-                    mViewPager.setCurrentItem(0, true);
-                    mCurrentFragment = firstFragment;
+            // Otherwise take us to the favourites section
+            var firstFragment = findPagerFragment(0);
+            if (mCurrentFragment != firstFragment) {
+                mViewPager.setCurrentItem(0, true);
+                mCurrentFragment = firstFragment;
 
-                    // This doesn't really work
-                    // TODO: Figure out why?
-                    if (mCurrentFragment instanceof AppsFragment appsFragment) {
-                        appsFragment.scrollToPosition(0);
-                    }
-                } else {
-                    setEnabled(false);
+                // This doesn't really work
+                // TODO: Figure out why?
+                if (mCurrentFragment instanceof AppsFragment appsFragment) {
+                    appsFragment.scrollToPosition(0);
                 }
             }
         });
@@ -303,45 +302,45 @@ public final class MainActivity
     public void showAppMenu(AppInfo app) {
         var appName = app.getLabel();
         var options = new String[] {
-                mFavouritesHelper.isFavourite(app.getPackageName()) ? "Unfavourite " + appName : "Favourite " + appName,
-                "Uninstall " + app.getLabel(),
-                "Launcher Settings",
+            mFavouritesHelper.isFavourite(app.getPackageName()) ? "Unfavourite " + appName : "Favourite " + appName,
+            "Uninstall " + app.getLabel(),
+            "Launcher Settings",
         };
 
         new android.app.AlertDialog.Builder(this)
-                .setTitle(app.getLabel())
-                .setItems(options, (dialog, which) -> {
-                    switch (which) {
-                        case 0: // Toggle favourites
-                            mFavouritesHelper.loadFavouritesAsync(currentFavourites -> {
-                                if (currentFavourites.contains(app.getPackageName())) {
-                                    currentFavourites.remove(app.getPackageName());
-                                } else {
-                                    currentFavourites.add(app.getPackageName());
-                                }
+            .setTitle(app.getLabel())
+            .setItems(options, (dialog, which) -> {
+                switch (which) {
+                    case 0: // Toggle favourites
+                        mFavouritesHelper.loadFavouritesAsync(currentFavourites -> {
+                            if (currentFavourites.contains(app.getPackageName())) {
+                                currentFavourites.remove(app.getPackageName());
+                            } else {
+                                currentFavourites.add(app.getPackageName());
+                            }
 
-                                mFavouritesHelper.saveFavourites(currentFavourites);
-                                refreshFavouritesFragment();
+                            mFavouritesHelper.saveFavourites(currentFavourites);
+                            refreshFavouritesFragment();
 
-                                mMainHandler.post(this::refreshAllVisibleFragments);
-                            });
-                            break;
+                            mMainHandler.post(this::refreshAllVisibleFragments);
+                        });
+                        break;
 
-                        case 1: // Uninstall
-                            var packageUri = Uri.parse("package:" + app.getPackageName());
-                            Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageUri);
-                            uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
-                            uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(uninstallIntent);
-                            break;
+                    case 1: // Uninstall
+                        var packageUri = Uri.parse("package:" + app.getPackageName());
+                        Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageUri);
+                        uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+                        uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(uninstallIntent);
+                        break;
 
-                        case 2: // Launcher Settings
-                            var settingsIntent = new Intent(this, SettingsActivity.class);
-                            startActivity(settingsIntent);
-                            break;
-                    }
-                })
-                .show();
+                    case 2: // Launcher Settings
+                        var settingsIntent = new Intent(this, SettingsActivity.class);
+                        startActivity(settingsIntent);
+                        break;
+                }
+            })
+            .show();
     }
 
     private void refreshUi() {
@@ -482,31 +481,36 @@ public final class MainActivity
         });
     }
 
+    /** Either load in the wallpaper, or use a blank one so we can dim it. */
     private void loadWallpaperBackground() {
         var wallpaperPath = SettingsManager.getWallpaper();
-        if (wallpaperPath == null || wallpaperPath.isEmpty()) {
-            return;
+        Drawable loadedDrawable = null;
+
+        if (wallpaperPath != null && !wallpaperPath.isEmpty()) {
+            var wallpaperUri = Uri.parse(wallpaperPath);
+            try (var inputStream = getContentResolver().openInputStream(wallpaperUri)) {
+                if (inputStream != null) {
+                    loadedDrawable = Drawable.createFromStream(inputStream, wallpaperUri.toString());
+                }
+            } catch (Exception ignored) { }
         }
 
-        var wallpaperUri = Uri.parse(wallpaperPath);
-        try (var inputStream = getContentResolver().openInputStream(wallpaperUri)) {
-            if (inputStream != null) {
-                mWallpaperDrawable = Drawable.createFromStream(inputStream, wallpaperUri.toString());
-                if (mWallpaperDrawable == null) {
-                    return;
-                }
+        if (loadedDrawable == null) {
+            loadedDrawable = new ColorDrawable(0xFF000000);
+        }
 
-                setWallpaperDim();
-            }
-        } catch (Exception ignored) { }
+        mWallpaperDrawable = loadedDrawable;
+        setWallpaperDim();
     }
 
     private void setWallpaperDim() {
-        var dimColor = getDimColour(SettingsManager.getWallpaperDimAmount());
-        var filter = new BlendModeColorFilter(dimColor, BlendMode.SRC_ATOP);
-        mWallpaperDrawable.setColorFilter(filter);
+        var dimAmount = SettingsManager.getWallpaperDimAmount();
+        var dimColor = (int) (dimAmount * 255) << 24;
         var wallpaperHost = (ImageView) findViewById(R.id.wallpaper_image);
-        wallpaperHost.setImageDrawable(mWallpaperDrawable);
+
+        var drawable = mWallpaperDrawable.mutate();
+        drawable.setColorFilter(new BlendModeColorFilter(dimColor, BlendMode.SRC));
+        wallpaperHost.setImageDrawable(drawable);
     }
 
     private Fragment findPagerFragment(final int position) {
@@ -522,13 +526,19 @@ public final class MainActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+        if (SettingsManager.KEY_THEME.equals(key)) {
+            recreate();
+            return;
+        }
+
         if (SettingsManager.KEY_ICON_PACK.equals(key) ||
             SettingsManager.KEY_CHARACTER_HEADINGS.equals(key) ||
             SettingsManager.KEY_FONT_SIZE.equals(key) ||
-            SettingsManager.KEY_FONT.equals(key) ||
-            SettingsManager.KEY_THEME.equals(key)
+            SettingsManager.KEY_FONT.equals(key)
         ) {
             refreshUi();
+            return;
         }
 
         if (SettingsManager.KEY_WALLPAPER.equals(key) ||

@@ -6,19 +6,19 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AlertDialog;
+import android.app.AlertDialog;
 
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
 import com.chadderbox.launchbox.utils.FileHelpers;
 
-public final class WallpaperOption
+public final class WallpaperOverrideOption
     implements ISettingOption {
 
     private final ActivityResultLauncher<Intent> mWallpaperPickerLauncher;
 
-    public WallpaperOption(SettingsActivity activity) {
+    public WallpaperOverrideOption(SettingsActivity activity) {
         mWallpaperPickerLauncher = activity.registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -41,7 +41,7 @@ public final class WallpaperOption
 
     @Override
     public String getTitle() {
-        return "Wallpaper";
+        return "Wallpaper Override";
     }
 
     @Override
@@ -65,7 +65,7 @@ public final class WallpaperOption
 
     private void showWallpaperDialog(final SettingsActivity activity) {
 
-        var options = new String[]{
+        var options = new String[] {
             "Choose Wallpaper",
             "Clear Wallpaper"
         };

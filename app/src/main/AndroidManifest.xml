@@ -31,7 +31,7 @@
             android:name="com.chadderbox.launchbox.settings.SettingsActivity"
             android:exported="true"
             android:label="Settings"
-            android:theme="@style/Theme.Launcherbox.Settings"/>
+            android:theme="@style/Theme.Launcherbox.Launcher"/>
 
         <service
             android:name="com.chadderbox.launchbox.utils.NotificationListener"

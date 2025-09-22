@@ -2,8 +2,7 @@ package com.chadderbox.launchbox.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-
-import androidx.appcompat.app.AppCompatDelegate;
+import android.content.res.Configuration;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -79,7 +78,7 @@ public final class SettingsManager {
     }
 
     public static int getTheme() {
-        return sPrefs.getInt(KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        return sPrefs.getInt(KEY_THEME, Configuration.UI_MODE_NIGHT_UNDEFINED);
     }
 
     public static void setWallpaper(String wallpaper) {
@@ -95,7 +94,7 @@ public final class SettingsManager {
     }
 
     public static float getWallpaperDimAmount() {
-        return sPrefs.getFloat(KEY_WALLPAPER_DIM_AMOUNT, 0.375f);
+        return sPrefs.getFloat(KEY_WALLPAPER_DIM_AMOUNT, 0.25f);
     }
 
     public static void setNowPlayingEnabled(boolean enabled) {

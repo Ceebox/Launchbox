@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
+import android.app.AlertDialog;
 
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
