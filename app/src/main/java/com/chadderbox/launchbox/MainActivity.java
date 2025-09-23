@@ -544,7 +544,6 @@ public final class MainActivity
         var chars = new HashSet<Character>();
         var apps = mAppLoader.getInstalledApps();
 
-        chars.add(AlphabetIndexView.FAVOURITES_CHARACTER);
         for (var app : apps) {
             var label = app.getLabel();
             if (label == null || label.isEmpty()) {
@@ -565,6 +564,7 @@ public final class MainActivity
 
         var newChars = chars.stream().sorted().toList();
         var result = new StringBuilder();
+        result.append(AlphabetIndexView.FAVOURITES_CHARACTER);
         for (var character : newChars) {
             result.append(character);
         }

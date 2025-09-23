@@ -65,14 +65,12 @@ public class AppsViewModel extends AndroidViewModel
         var lastHeading = ' ';
         for (var app : apps) {
             var appName = app.getLabel();
-            if (characterHeadings && lastHeading != appName.charAt(0)) {
+            var appCharacter = Character.toUpperCase(appName.charAt(0));
+            if (characterHeadings && lastHeading != appCharacter) {
                 if (!Character.isDigit(appName.charAt(0))) {
-                    list.add(new HeaderItem(String.valueOf(appName.charAt(0))));
-                    lastHeading = appName.charAt(0);
-                    continue;
-                }
-
-                if (!hasNumber) {
+                    list.add(new HeaderItem(String.valueOf(appCharacter)));
+                    lastHeading = appCharacter;
+                } else if (!hasNumber) {
                     hasNumber = true;
                     list.add(new HeaderItem("#"));
                     lastHeading = '#';
