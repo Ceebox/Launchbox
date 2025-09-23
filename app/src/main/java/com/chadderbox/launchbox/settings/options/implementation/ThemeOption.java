@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.res.Configuration;
 import android.widget.Toast;
 
+import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
@@ -29,7 +30,7 @@ public final class ThemeOption implements ISettingOption {
         final var themes = new String[] { "System Default", "Light", "Dark" };
         final var themePrefs = new int[] { Configuration.UI_MODE_NIGHT_UNDEFINED, Configuration.UI_MODE_NIGHT_NO, Configuration.UI_MODE_NIGHT_YES };
 
-        new AlertDialog.Builder(activity)
+        new AlertDialog.Builder(activity, R.style.Theme_Launcherbox_Dialog)
             .setTitle("Select Theme")
             .setItems(themes, (dialog, which) -> {
                 final var chosen = themePrefs[which];

@@ -4,6 +4,7 @@ import android.widget.Toast;
 
 import android.app.AlertDialog;
 
+import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
@@ -34,7 +35,7 @@ public final class FontOption
             "Monospace"
         };
 
-        new AlertDialog.Builder(activity)
+        new AlertDialog.Builder(activity, R.style.Theme_Launcherbox_Dialog)
             .setTitle("Select Font")
             .setItems(fonts, (dialog, which) -> {
                 var chosenFont = fonts[which];

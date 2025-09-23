@@ -1,4 +1,5 @@
 <resources>
+    <color name="image_tint">#FAFAFA</color>
     <color name="text_primary">#FAFAFA</color>
     <color name="text_secondary">#CCCCCC</color>
     <color name="color_background">#1A1A1A</color>

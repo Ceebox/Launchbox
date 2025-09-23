@@ -6,6 +6,7 @@ import android.widget.Toast;
 
 import android.app.AlertDialog;
 
+import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
@@ -59,7 +60,7 @@ public final class IconPackOption implements ISettingOption {
             packageNames.add(info.activityInfo.packageName);
         }
 
-        new AlertDialog.Builder(activity)
+        new AlertDialog.Builder(activity, R.style.Theme_Launcherbox_Dialog)
             .setTitle("Select Icon Pack")
             .setItems(names.toArray(new String[0]), (dialog, which) -> {
                 var chosenPackage = packageNames.get(which);

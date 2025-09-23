@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import android.app.AlertDialog;
 
+import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
@@ -70,7 +71,7 @@ public final class WallpaperOverrideOption
             "Clear Wallpaper"
         };
 
-        new AlertDialog.Builder(activity)
+        new AlertDialog.Builder(activity, R.style.Theme_Launcherbox_Dialog)
             .setTitle("Select Wallpaper")
             .setItems(options, (dialog, which) -> {
                 switch (which) {
@@ -83,7 +84,7 @@ public final class WallpaperOverrideOption
                         break;
 
                     case 1:
-                        new AlertDialog.Builder(activity)
+                        new AlertDialog.Builder(activity, R.style.Theme_Launcherbox_Dialog)
                             .setTitle("Clear Wallpaper")
                             .setMessage("Are you sure you want to remove the current wallpaper?")
                             .setPositiveButton("Yes", (d, w) -> {

@@ -18,6 +18,44 @@
         <item name="android:textColorSecondary">@color/text_secondary</item>
     </style>
 
+    <style name="Theme.Launcherbox.Dialog" parent="Theme.Material3.DayNight.Dialog.Alert">
+        <item name="android:windowTitleStyle">@style/Theme.Launcherbox.Dialog.Title</item>
+        <item name="android:textAppearanceListItem">@style/Theme.Launcherbox.Dialog.Item</item>
+        <item name="shapeAppearanceOverlay">@style/Theme.Launcherbox.Dialog.Shape</item>
+
+        <item name="android:windowBackground">@color/color_background</item>
+        <!-- The window title has the primary font colour -->
+        <item name="android:textColorPrimary">@color/text_secondary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textFontWeight">400</item>
+
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
+    </style>
+
+    <style name="Theme.Launcherbox.Dialog.Title" parent="@style/TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textFontWeight">700</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
+    </style>
+
+    <style name="Theme.Launcherbox.Dialog.Item" parent="@style/TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textFontWeight">400</item>
+    </style>
+
+    <style name="Theme.Launcherbox.Dialog.Shape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <color name="image_tint">#1A1A1A</color>
     <color name="text_primary">#1A1A1A</color>
     <color name="text_secondary">#666666</color>
     <color name="color_background">#FAFAFA</color>

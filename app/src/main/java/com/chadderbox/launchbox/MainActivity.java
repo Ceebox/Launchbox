@@ -317,7 +317,7 @@ public final class MainActivity
             "Launcher Settings",
         };
 
-        new android.app.AlertDialog.Builder(this)
+        new android.app.AlertDialog.Builder(this, R.style.Theme_Launcherbox_Dialog)
             .setTitle(app.getLabel())
             .setItems(options, (dialog, which) -> {
                 switch (which) {

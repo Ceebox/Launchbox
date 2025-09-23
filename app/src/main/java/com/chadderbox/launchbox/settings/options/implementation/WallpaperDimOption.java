@@ -60,7 +60,7 @@ public final class WallpaperDimOption
         layout.addView(preview);
         layout.addView(seekBar);
 
-        new AlertDialog.Builder(activity)
+        new AlertDialog.Builder(activity, R.style.Theme_Launcherbox_Dialog)
             .setTitle("Select Dim Amount")
             .setView(layout)
             .setPositiveButton("Ok", (dialog, which) -> {

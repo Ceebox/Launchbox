@@ -4,6 +4,7 @@ import android.widget.Toast;
 
 import android.app.AlertDialog;
 
+import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
@@ -31,7 +32,7 @@ public final class CharacterHeadingsOption
         var current = SettingsManager.getCharacterHeadings();
         var checkedItem = current ? 0 : 1;
 
-        new AlertDialog.Builder(activity)
+        new AlertDialog.Builder(activity, R.style.Theme_Launcherbox_Dialog)
             .setTitle("Character Headings")
             .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
                 var enabled = which == 0;

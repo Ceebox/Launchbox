@@ -57,7 +57,7 @@ public final class FontSizeOption
         layout.addView(preview);
         layout.addView(seekBar);
 
-        new AlertDialog.Builder(activity)
+        new AlertDialog.Builder(activity, R.style.Theme_Launcherbox_Dialog)
             .setTitle("Select Font Size")
             .setView(layout)
             .setPositiveButton("Ok", (dialog, which) -> {
