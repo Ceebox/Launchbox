@@ -252,7 +252,10 @@ public final class MainActivity
         super.onNewIntent(intent);
 
         // Scroll to top when the home button is pressed
-        if (mCurrentFragment instanceof AppsFragment appsFragment) {
+        if (Intent.ACTION_MAIN.equals(intent.getAction()) &&
+            intent.hasCategory(Intent.CATEGORY_HOME) &&
+            mCurrentFragment instanceof AppsFragment appsFragment
+        ) {
             appsFragment.smoothScrollToPosition(0);
         }
     }
