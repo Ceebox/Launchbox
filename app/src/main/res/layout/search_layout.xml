@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="?android:attr/colorBackground"
+    android:background="@color/color_background"
     android:elevation="16dp"
     app:behavior_hideable="true"
     app:behavior_peekHeight="60dp"
@@ -18,8 +18,7 @@
         android:layout_width="40dp"
         android:layout_height="20dp"
         android:layout_gravity="center"
-        android:layout_margin="16dp"
-        android:tint="?android:colorAccent"/>
+        android:layout_margin="16dp"/>
 
     <com.chadderbox.launchbox.components.FontEditText
         android:id="@+id/search_input"
