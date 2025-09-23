@@ -17,6 +17,7 @@
         <activity
             android:name="com.chadderbox.launchbox.MainActivity"
             android:launchMode="singleTask"
+            android:enableOnBackInvokedCallback="true"
             android:exported="true"
             android:windowSoftInputMode="adjustNothing"
             android:theme="@style/Theme.Launcherbox.Launcher">
