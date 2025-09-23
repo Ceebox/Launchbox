@@ -11,7 +11,7 @@ public final class ShowOnlyInstalledOption implements ISettingOption {
 
     @Override
     public String getTitle() {
-        return "Show Only Installed Apps";
+        return "Installed App Letters Only";
     }
 
     @Override
@@ -26,7 +26,7 @@ public final class ShowOnlyInstalledOption implements ISettingOption {
         var checkedItem = initiallyEnabled ? 1 : 0;
 
         new AlertDialog.Builder(activity)
-            .setTitle("Show Only Installed Apps")
+            .setTitle("Installed App Letters Only")
             .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
                 var enabled = which == 1;
                 if (enabled == initiallyEnabled) {
