@@ -21,7 +21,7 @@ import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.NotificationListener;
 import com.chadderbox.launchbox.R;
 
-import org.jetbrains.annotations.Nullable;
+import androidx.annotation.Nullable;
 
 import java.util.List;
 
