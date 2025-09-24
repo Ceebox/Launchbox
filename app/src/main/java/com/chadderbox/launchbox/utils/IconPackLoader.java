@@ -3,6 +3,7 @@ package com.chadderbox.launchbox.utils;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.util.LruCache;
@@ -45,7 +46,6 @@ public final class IconPackLoader
         }
     }
 
-    @SuppressLint("DiscouragedApi")
     private void loadDefaultMissingIcon() {
         if (mIconPackPackage == null) {
             mDefaultMissingIcon = null;
@@ -53,6 +53,8 @@ public final class IconPackLoader
         }
         try {
             var res = mPackageManager.getResourcesForApplication(mIconPackPackage);
+
+            @SuppressLint("DiscouragedApi")
             var resId = res.getIdentifier("icon_missing", "drawable", mIconPackPackage);
             if (resId != 0) {
                 mDefaultMissingIcon = ResourcesCompat.getDrawable(res, resId, mContext.getTheme());
@@ -64,7 +66,7 @@ public final class IconPackLoader
         }
     }
 
-    public Drawable loadAppIcon(String packageName) {
+    public Drawable loadAppIcon(final String packageName, final int category) {
 
         // No icon pack
         if (mIconPackPackage == null || "None".equals(mIconPackPackage)) {
@@ -101,6 +103,18 @@ public final class IconPackLoader
                     icon = ResourcesCompat.getDrawable(res, resId, mContext.getTheme());
                 }
             }
+
+            if (icon == null) {
+                var categoryDrawableName = getDrawableNameForCategory(category);
+                if (categoryDrawableName != null) {
+                    @SuppressLint("DiscouragedApi")
+                    var resId = res.getIdentifier(categoryDrawableName, "drawable", mIconPackPackage);
+                    if (resId != 0) {
+                        icon = ResourcesCompat.getDrawable(res, resId, mContext.getTheme());
+                    }
+                }
+            }
+
         } catch (Exception ignored) {
         }
 
@@ -113,6 +127,20 @@ public final class IconPackLoader
         sIconCache.put(packageName, icon);
 
         return icon;
+    }
+
+    private static String getDrawableNameForCategory(int category) {
+        return switch (category) {
+            case ApplicationInfo.CATEGORY_SOCIAL -> "category_social";
+            case ApplicationInfo.CATEGORY_PRODUCTIVITY -> "category_productivity";
+            case ApplicationInfo.CATEGORY_GAME -> "category_games";
+            case ApplicationInfo.CATEGORY_NEWS -> "category_news";
+            case ApplicationInfo.CATEGORY_MAPS -> "category_maps";
+            case ApplicationInfo.CATEGORY_VIDEO -> "category_video";
+            case ApplicationInfo.CATEGORY_AUDIO -> "category_music";
+            case ApplicationInfo.CATEGORY_IMAGE -> "category_photos";
+            default -> null;
+        };
     }
 
     @Override

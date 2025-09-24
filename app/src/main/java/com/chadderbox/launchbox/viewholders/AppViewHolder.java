@@ -71,7 +71,7 @@ public class AppViewHolder
 
     private void loadIcon() {
         mIconExecutor.submit(() -> {
-            var drawable = mIconPackLoader.loadAppIcon(mAppItem.getAppInfo().getPackageName());
+            var drawable = mIconPackLoader.loadAppIcon(mAppItem.getAppInfo().getPackageName(), mAppItem.getAppInfo().getCategory());
             mMainHandler.post(() -> {
                 // Verify the same item is still bound, we could have been reused
                 if (itemView.getTag() == mAppItem) {

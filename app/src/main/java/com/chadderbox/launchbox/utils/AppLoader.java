@@ -2,6 +2,7 @@ package com.chadderbox.launchbox.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
 import com.chadderbox.launchbox.data.AppInfo;
@@ -25,7 +26,16 @@ public final class AppLoader {
         var resolveInfos = mPackageManager.queryIntentActivities(intent, 0);
         mInstalledApps.clear();
         for (var info : resolveInfos) {
-            mInstalledApps.add(new AppInfo(info.loadLabel(mPackageManager).toString(), info.activityInfo.packageName));
+            var label = info.loadLabel(mPackageManager).toString();
+            var packageName = info.activityInfo.packageName;
+
+            var category = ApplicationInfo.CATEGORY_UNDEFINED;
+            try {
+                var appInfo = mPackageManager.getApplicationInfo(packageName, 0);
+                category = appInfo.category;
+            } catch (PackageManager.NameNotFoundException ignored) { }
+
+            mInstalledApps.add(new AppInfo(label, packageName, category));
         }
     }
 
