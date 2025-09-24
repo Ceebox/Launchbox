@@ -12,10 +12,12 @@ import java.util.List;
 
 public final class AppLoader {
     private final PackageManager mPackageManager;
+    private final AppAliasProvider mAliasProvider;
     private final ArrayList<AppInfo> mInstalledApps = new ArrayList<>();
 
-    public AppLoader(Context context) {
+    public AppLoader(Context context, AppAliasProvider appAliasProvider) {
         mPackageManager = context.getPackageManager();
+        mAliasProvider = appAliasProvider;
         refreshInstalledApps();
     }
 
@@ -35,7 +37,8 @@ public final class AppLoader {
                 category = appInfo.category;
             } catch (PackageManager.NameNotFoundException ignored) { }
 
-            mInstalledApps.add(new AppInfo(label, packageName, category));
+            var alias = mAliasProvider.getAlias(packageName);
+            mInstalledApps.add(new AppInfo(label, packageName, category, alias));
         }
     }
 

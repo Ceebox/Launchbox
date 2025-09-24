@@ -2,8 +2,6 @@ package com.chadderbox.launchbox;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,15 +12,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.chadderbox.launchbox.utils.ServiceManager;
 
 public final class FavouritesFragment
     extends AppListFragmentBase {
 
-    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
     private FavouritesViewModel mViewModel;
 
     public FavouritesFragment() {
@@ -49,8 +43,8 @@ public final class FavouritesFragment
             requireActivity(),
             new FavouritesViewModel.Factory(
                 requireActivity().getApplication(),
-                new AppLoader(requireContext()),
-                new FavouritesRepository(mExecutor, mMainHandler)
+                ServiceManager.resolve(AppLoader.class),
+                ServiceManager.resolve(FavouritesRepository.class)
             )
         ).get(FavouritesViewModel.class);
 

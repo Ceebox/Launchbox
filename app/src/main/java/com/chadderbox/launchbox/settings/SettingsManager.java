@@ -9,13 +9,14 @@ import java.util.Set;
 
 public final class SettingsManager {
     public static final String PREFS_NAME = "cbxlauncher_prefs";
+    public static final String KEY_APP_ALIAS_PREFIX = "app_alias_";
+    public static final String KEY_FAVORITES = "favorites";
     public static final String KEY_CHARACTER_HEADINGS = "character_headings";
     public static final String KEY_ICON_PACK = "icon_pack";
     public static final String KEY_SHOW_ONLY_INSTALLED = "show_only_installed";
     public static final String KEY_LEFT_HANDED = "left_handed";
     public static final String KEY_FONT = "font";
     public static final String KEY_FONT_SIZE = "font_size";
-    public static final String KEY_FAVORITES = "favorites";
     public static final String KEY_THEME = "theme";
     public static final String KEY_WALLPAPER = "wallpaper";
     public static final String KEY_WALLPAPER_DIM_AMOUNT = "wallpaper_dim_amount";
@@ -33,6 +34,22 @@ public final class SettingsManager {
 
     public static void unregisterChangeListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
         sPrefs.unregisterOnSharedPreferenceChangeListener(listener);
+    }
+
+    public static void setAppAlias(String packageName, String newAlias) {
+        sPrefs.edit().putString(KEY_APP_ALIAS_PREFIX + packageName, newAlias).apply();
+    }
+
+    public static String getAppAlias(String packageName) {
+        return sPrefs.getString(KEY_APP_ALIAS_PREFIX + packageName, null);
+    }
+
+    public static void setFavourites(Set<String> newFavourites) {
+        sPrefs.edit().putStringSet(KEY_FAVORITES, newFavourites).apply();
+    }
+
+    public static HashSet<String> getFavourites() {
+        return new HashSet<>(sPrefs.getStringSet(KEY_FAVORITES, new HashSet<>()));
     }
 
     public static void setCharacterHeadings(boolean hasCharacterHeadings) {
@@ -81,14 +98,6 @@ public final class SettingsManager {
 
     public static int getFontSize() {
         return sPrefs.getInt(KEY_FONT_SIZE, 16);
-    }
-
-    public static void setFavourites(Set<String> newFavourites) {
-        sPrefs.edit().putStringSet(KEY_FAVORITES, newFavourites).apply();
-    }
-
-    public static HashSet<String> getFavourites() {
-        return new HashSet<>(sPrefs.getStringSet(KEY_FAVORITES, new HashSet<>()));
     }
 
     public static void setTheme(int mode) {

@@ -40,20 +40,31 @@ public final class AppSearchProvider implements ISearchProvider {
             var searchQuery = query.toLowerCase(Locale.getDefault());
 
             var favourites = mFavouritesRepository.loadFavourites();
+            var apps = mAppLoader.getInstalledApps();
 
             var results = new ArrayList<ListItem>();
             var favouriteResults = new ArrayList<ListItem>();
             var normalResults = new ArrayList<ListItem>();
             var fuzzyResults = new ArrayList<ListItem>();
-            var apps = mAppLoader.getInstalledApps();
+
             for (var app : apps) {
-                if (app.getLabel().toLowerCase(Locale.getDefault()).contains(searchQuery)) {
+                var labelForSearch = app.getLabel().toLowerCase(Locale.getDefault());
+                var packageForSearch = formatPackageName(app.getPackageName());
+
+                var matchesLabel = labelForSearch.contains(searchQuery);
+                var matchesPackage = packageForSearch.contains(searchQuery);
+
+                if (matchesLabel || matchesPackage) {
                     if (favourites.contains(app.getPackageName())) {
                         favouriteResults.add(new AppItem(app));
                     } else {
                         normalResults.add(new AppItem(app));
                     }
-                } else if (searchQuery.length() > 3 && SearchHelpers.calculateLevenshteinDistance(searchQuery, app.getLabel().toLowerCase(Locale.getDefault())) < LEVENSHTEIN_HEURISTIC) {
+                } else if (searchQuery.length() > 3 &&
+                    SearchHelpers.calculateLevenshteinDistance(searchQuery, app.getLabel().toLowerCase(Locale.getDefault())) < LEVENSHTEIN_HEURISTIC
+                ) {
+                    // TODO: Possibly do this comparison of after the last "." in the package name?
+                    // NOTE: It may be faster to ignore the search query if it is longer than the longest package name + 2?
                     fuzzyResults.add(new AppItem(app));
                 }
             }
@@ -65,5 +76,21 @@ public final class AppSearchProvider implements ISearchProvider {
 
             new Handler(Looper.getMainLooper()).post(() -> callback.accept(results));
         });
+    }
+
+    private static String formatPackageName(String packageName) {
+        packageName = packageName.toLowerCase(Locale.getDefault());
+
+        if (packageName.startsWith("com.")) {
+            packageName = packageName.substring(4);
+        }
+        else if (packageName.startsWith("org.")) {
+            packageName = packageName.substring(4);
+        }
+        else if (packageName.startsWith("net.")) {
+            packageName = packageName.substring(4);
+        }
+
+        return packageName;
     }
 }

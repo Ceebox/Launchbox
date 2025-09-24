@@ -15,14 +15,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,6 +36,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.chadderbox.launchbox.components.AlphabetIndexView;
+import com.chadderbox.launchbox.components.FontEditText;
 import com.chadderbox.launchbox.data.AppInfo;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.SettingItem;
@@ -43,9 +47,11 @@ import com.chadderbox.launchbox.search.WebSearchProvider;
 import com.chadderbox.launchbox.search.WebSuggestionProvider;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
+import com.chadderbox.launchbox.utils.AppAliasProvider;
 import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.utils.IconPackLoader;
+import com.chadderbox.launchbox.utils.ServiceManager;
 import com.chadderbox.launchbox.utils.ThemeHelper;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
@@ -69,6 +75,7 @@ public final class MainActivity
     private final Handler mSearchHandler = new Handler(Looper.getMainLooper());
     private final HashMap<Class<? extends AppListFragmentBase>, CombinedAdapter> mAdapters = new HashMap<>();
     private AppLoader mAppLoader;
+    private AppAliasProvider mAppAliasHelper;
     private SearchManager mSearchManager;
     private Runnable mSearchRunnable;
     private AlphabetIndexView mIndexView;
@@ -94,6 +101,7 @@ public final class MainActivity
             switch (action) {
                 case Intent.ACTION_PACKAGE_ADDED:
                 case Intent.ACTION_PACKAGE_REMOVED:
+                    // TODO: Probably remove this from favourites and aliases
                 case Intent.ACTION_PACKAGE_CHANGED:
                     populateAlphabetViewLetters();
                     refreshAllVisibleFragments();
@@ -116,10 +124,12 @@ public final class MainActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack());
-        mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler);
+        ServiceManager.register(IconPackLoader.class, () -> mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack()));
+        ServiceManager.register(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler));
+        ServiceManager.register(AppAliasProvider.class, () -> mAppAliasHelper = new AppAliasProvider());
+        ServiceManager.register(AppLoader.class, () -> mAppLoader = new AppLoader(this, mAppAliasHelper));
 
-        mAppLoader = new AppLoader(this);
+        // TODO: Possibly integrate these into DI, either with an activity part of ServiceManager or separately
         var appSearchProvider = new AppSearchProvider(mAppLoader, mFavouritesHelper);
         var searchProviders = List.of(
             appSearchProvider,
@@ -128,7 +138,7 @@ public final class MainActivity
             new SettingsSearchProvider(getApplicationContext())
         );
 
-        mSearchManager = new SearchManager(searchProviders);
+        ServiceManager.register(SearchManager.class, () -> mSearchManager = new SearchManager(searchProviders));
 
         super.onCreate(savedInstanceState);
         getWindow().setDimAmount(0f);
@@ -295,7 +305,7 @@ public final class MainActivity
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         } else {
-            Toast.makeText(this, "Cannot launch " + app.getLabel(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Cannot launch " + app.getName(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -313,6 +323,7 @@ public final class MainActivity
         var appName = app.getLabel();
         var options = new String[] {
             mFavouritesHelper.isFavourite(app.getPackageName()) ? "Unfavourite " + appName : "Favourite " + appName,
+            "Rename " + app.getLabel(),
             "Uninstall " + app.getLabel(),
             "Launcher Settings",
         };
@@ -336,7 +347,47 @@ public final class MainActivity
                         });
                         break;
 
-                    case 1: // Uninstall
+                    case 1: // Rename
+                        var textEditor = new FontEditText(this);
+                        textEditor.setHint(app.getName());
+                        textEditor.setLayoutParams(new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        ));
+
+                        var padding = (int) (16 * getResources().getDisplayMetrics().density);
+                        textEditor.setMinWidth((int) (240 * getResources().getDisplayMetrics().density));
+                        textEditor.setPadding(padding, padding, padding, padding);
+                        textEditor.setSingleLine(true);
+
+                        // Make this single line and prevent adding a new line
+                        textEditor.setMaxLines(1);
+                        textEditor.setLines(1);
+                        textEditor.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+                        textEditor.setImeOptions(EditorInfo.IME_ACTION_DONE);
+
+                        var layout = new LinearLayout(this);
+                        layout.setOrientation(LinearLayout.VERTICAL);
+                        layout.setPadding(padding, padding, padding, padding);
+                        layout.addView(textEditor);
+
+                        new android.app.AlertDialog.Builder(this, R.style.Theme_Launcherbox_Dialog)
+                            .setTitle("Rename " + app.getLabel())
+                            .setView(layout)
+                            .setNegativeButton("Cancel", null)
+                            .setPositiveButton("Ok", (otherDialog, otherWhich) -> {
+                                var newAlias = textEditor.getText().toString();
+                                mAppAliasHelper.setAlias(app.getPackageName(), newAlias);
+                                app.setAlias(newAlias);
+
+                                refreshUi();
+                            })
+                            .show();
+
+                        textEditor.setActivated(true);
+                        break;
+
+                    case 2: // Uninstall
                         var packageUri = Uri.parse("package:" + app.getPackageName());
                         Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageUri);
                         uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
@@ -344,7 +395,7 @@ public final class MainActivity
                         startActivity(uninstallIntent);
                         break;
 
-                    case 2: // Launcher Settings
+                    case 3: // Launcher Settings
                         var settingsIntent = new Intent(this, SettingsActivity.class);
                         startActivity(settingsIntent);
                         break;
