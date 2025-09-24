@@ -32,8 +32,8 @@ public final class SettingOptionAdapter extends RecyclerView.Adapter<SettingOpti
     @Override
     public void onBindViewHolder(@NonNull SettingItemHolder holder, int position) {
         var option = mItems.get(position);
-        holder.title.setText(option.getTitle());
-        holder.subtitle.setText(option.getSubtitle((SettingsActivity)holder.itemView.getContext()));
+        holder.getTitle().setText(option.getTitle());
+        holder.getSubtitle().setText(option.getSubtitle((SettingsActivity)holder.itemView.getContext()));
         holder.itemView.setOnClickListener(v -> option.performClick((SettingsActivity)v.getContext()));
     }
 
@@ -43,13 +43,21 @@ public final class SettingOptionAdapter extends RecyclerView.Adapter<SettingOpti
     }
 
     public static class SettingItemHolder extends RecyclerView.ViewHolder {
-        TextView title;
-        TextView subtitle;
+        private final TextView mTitle;
+        private final TextView mSubtitle;
+
+        public TextView getTitle() {
+            return mTitle;
+        }
+
+        public TextView getSubtitle() {
+            return mSubtitle;
+        }
 
         SettingItemHolder(@NonNull View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.title);
-            subtitle = itemView.findViewById(R.id.subtitle);
+            mTitle = itemView.findViewById(R.id.title);
+            mSubtitle = itemView.findViewById(R.id.subtitle);
         }
     }
 }

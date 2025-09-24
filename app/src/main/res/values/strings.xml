@@ -11,4 +11,7 @@
     <string name="font_size_pick">"Font Size: \"%1$s\"</string>
     <string name="wallpaper_dim_pick">"Wallpaper: \"%1$s\"</string>
     <string name="wallpaper_background">Wallpaper Background</string>
+    <string name="accessibility">Accessibility</string>
+    <string name="appearance">Appearance</string>
+    <string name="functionality">Functionality</string>
 </resources>

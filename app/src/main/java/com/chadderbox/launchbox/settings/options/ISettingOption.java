@@ -1,7 +1,9 @@
 package com.chadderbox.launchbox.settings.options;
 
+import com.chadderbox.launchbox.settings.SettingCategory;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 
+@SettingCategory()
 public interface ISettingOption {
 
     String getTitle();

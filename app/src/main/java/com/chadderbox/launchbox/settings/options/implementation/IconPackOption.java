@@ -7,6 +7,8 @@ import android.widget.Toast;
 import android.app.AlertDialog;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.settings.SettingCategory;
+import com.chadderbox.launchbox.settings.SettingGroup;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
@@ -14,7 +16,9 @@ import com.chadderbox.launchbox.settings.options.ISettingOption;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public final class IconPackOption implements ISettingOption {
+@SettingCategory(category = SettingGroup.APPEARANCE)
+public final class IconPackOption
+    implements ISettingOption {
 
     @Override
     public String getTitle() {

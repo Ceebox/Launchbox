@@ -5,10 +5,13 @@ import android.content.res.Configuration;
 import android.widget.Toast;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.settings.SettingCategory;
+import com.chadderbox.launchbox.settings.SettingGroup;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
 
+@SettingCategory(category = SettingGroup.APPEARANCE)
 public final class ThemeOption implements ISettingOption {
 
     @Override
