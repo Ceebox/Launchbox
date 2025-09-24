@@ -2,6 +2,7 @@ package com.chadderbox.launchbox.components;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaMetadata;
 import android.media.session.MediaController;
@@ -74,6 +75,10 @@ public final class NowPlayingView
         mBtnPrevious = findViewById(R.id.btn_prev);
         mBtnPlayPause = findViewById(R.id.btn_play_pause);
         mBtnNext = findViewById(R.id.btn_next);
+
+        mSongArt.setOnClickListener(v -> openCurrentlyPlayingApp());
+        mSongTitle.setOnClickListener(v -> openCurrentlyPlayingApp());
+        mSongArtist.setOnClickListener(v -> openCurrentlyPlayingApp());
 
         if (mContainer == null) {
             throw new IllegalStateException("NowPlayingView: container not found in layout!");
@@ -185,6 +190,25 @@ public final class NowPlayingView
                 mController.getTransportControls().skipToPrevious();
             }
         });
+    }
+
+    private void openCurrentlyPlayingApp() {
+        if (mController != null) {
+            var pkg = mController.getPackageName();
+            var ctx = getContext();
+
+            try {
+                var launchIntent = ctx.getPackageManager().getLaunchIntentForPackage(pkg);
+                if (launchIntent != null) {
+                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    ctx.startActivity(launchIntent);
+                } else {
+                    Log.w("NowPlayingView", "No launch intent for package: " + pkg);
+                }
+            } catch (Exception e) {
+                Log.e("NowPlayingView", "Failed to open app: " + pkg, e);
+            }
+        }
     }
 
     @Override
