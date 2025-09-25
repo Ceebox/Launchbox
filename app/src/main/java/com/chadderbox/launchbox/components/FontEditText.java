@@ -8,39 +8,34 @@ import android.widget.EditText;
 import androidx.annotation.Nullable;
 
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.utils.ThemeHelper;
 
 @SuppressLint("AppCompatCustomView")
 public final class FontEditText extends EditText {
 
+    private static final int DEFAULT_STYLE_ATTR = R.attr.fontEditTextStyle;
+    private static final int DEFAULT_STYLE_RES = R.style.Theme_Launcherbox_FontEditText;
+
     private final CustomFontManager mFontManager;
 
     public FontEditText(Context context) {
-        super(context);
-        mFontManager = new CustomFontManager(this);
-        initialise(null);
+        this(context, null);
     }
 
     public FontEditText(Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
-        mFontManager = new CustomFontManager(this);
-        initialise(attrs);
+        this(context, attrs, DEFAULT_STYLE_ATTR);
     }
 
     public FontEditText(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+        super(context, attrs, defStyleAttr, DEFAULT_STYLE_RES);
         mFontManager = new CustomFontManager(this);
-        initialise(attrs);
+        initialise(attrs, defStyleAttr);
     }
 
-    private void initialise(@Nullable AttributeSet attrs) {
+    private void initialise(@Nullable AttributeSet attrs, int defStyleAttr) {
         if (attrs != null) {
-            // I can't see myself ever doing this, and I'm not actually sure if it works lol
-            try (@SuppressLint("CustomViewStyleable") var a = getContext().obtainStyledAttributes(attrs, R.styleable.FontTextView)) {
-                mFontManager.setIsHeading(a.getBoolean(R.styleable.FontTextView_isHeading, false));
+            try (@SuppressLint("CustomViewStyleable") var a = getContext().obtainStyledAttributes(attrs, R.styleable.FontEditText, defStyleAttr, DEFAULT_STYLE_RES)) {
+                mFontManager.setIsHeading(a.getBoolean(R.styleable.FontEditText_isHeading, false));
             } catch (Exception ignored) { }
         }
-
-        setTextColor(ThemeHelper.resolveColorAttr(getContext(), android.R.attr.textColorPrimary));
     }
 }

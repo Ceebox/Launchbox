@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <attr name="isHeading" format="boolean" />
+    <attr name="overrideFontSize" format="boolean" />
+
     <declare-styleable name="FontTextView">
-        <attr name="isHeading" format="boolean" />
-        <attr name="overrideFontSize" format="boolean" />
+        <attr name="isHeading" />
+        <attr name="overrideFontSize" />
+    </declare-styleable>
+
+    <attr name="fontEditTextStyle" format="reference"/>
+    <declare-styleable name="FontEditText">
+        <attr name="isHeading" />
     </declare-styleable>
 </resources>

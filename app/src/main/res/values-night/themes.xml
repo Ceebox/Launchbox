@@ -1,6 +1,6 @@
 <resources>
-    <color name="image_tint">#FAFAFA</color>
-    <color name="text_primary">#FAFAFA</color>
-    <color name="text_secondary">#CCCCCC</color>
-    <color name="color_background">#1A1A1A</color>
+    <color name="image_tint">@android:color/system_neutral1_100</color>
+    <color name="text_primary">@android:color/system_neutral1_100</color>
+    <color name="text_secondary">@android:color/system_neutral1_400</color>
+    <color name="color_background">@android:color/system_neutral1_900</color>
 </resources>
