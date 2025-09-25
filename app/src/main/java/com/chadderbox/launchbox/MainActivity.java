@@ -348,68 +348,8 @@ public final class MainActivity
                         });
                         break;
 
-                    case 1: // Rename
-                        var textEditor = new FontEditText(this);
-                        textEditor.setHint(app.getName());
-                        textEditor.setLayoutParams(new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                        ));
-
-                        var padding = (int) (16 * getResources().getDisplayMetrics().density);
-                        textEditor.setMinWidth((int) (240 * getResources().getDisplayMetrics().density));
-                        textEditor.setPadding(padding, padding, padding, padding);
-                        textEditor.setSingleLine(true);
-
-                        // Make this single line and prevent adding a new line
-                        textEditor.setMaxLines(1);
-                        textEditor.setLines(1);
-                        textEditor.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-                        textEditor.setImeOptions(EditorInfo.IME_ACTION_DONE);
-
-                        var layout = new LinearLayout(this);
-                        layout.setOrientation(LinearLayout.VERTICAL);
-                        layout.setPadding(padding, padding, padding, padding);
-                        layout.addView(textEditor);
-
-                        var otherDialog = new android.app.AlertDialog.Builder(this, R.style.Theme_Launcherbox_Dialog)
-                            .setTitle("Rename " + app.getLabel())
-                            .setView(layout)
-                            .setNegativeButton("Cancel", null)
-                            .setPositiveButton("Ok", (otherDialogInternal, otherWhich) -> {
-                                var newAlias = textEditor.getText().toString();
-                                mAppAliasHelper.setAlias(app.getPackageName(), newAlias);
-                                app.setAlias(newAlias);
-
-                                refreshUi();
-                            })
-                            .show();
-
-                        final var positiveButton = otherDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                        positiveButton.setEnabled(false);
-
-                        // We don't want to allow this if the text is empty
-                        textEditor.addTextChangedListener(new TextWatcher() {
-
-                            @Override
-                            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                                var input = s.toString().trim();
-                                positiveButton.setEnabled(!input.isEmpty());
-                            }
-
-                            @Override
-                            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-                            @Override
-                            public void afterTextChanged(Editable s) { }
-                        });
-
-                        textEditor.requestFocus();
-                        var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                        if (imm != null) {
-                            imm.showSoftInput(textEditor, InputMethodManager.SHOW_IMPLICIT);
-                        }
-
+                    case 1: // Rename (alias)
+                        showAliasDialog(app);
                         break;
 
                     case 2: // Uninstall
@@ -646,6 +586,74 @@ public final class MainActivity
         }
 
         return result.toString();
+    }
+
+    private void showAliasDialog(AppInfo app) {
+        var textEditor = new FontEditText(this);
+        textEditor.setHint(app.getName());
+        textEditor.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+
+        var padding = (int) (16 * getResources().getDisplayMetrics().density);
+        textEditor.setMinWidth((int) (240 * getResources().getDisplayMetrics().density));
+        textEditor.setPadding(padding, padding, padding, padding);
+        textEditor.setSingleLine(true);
+
+        // Make this single line and prevent adding a new line
+        textEditor.setMaxLines(1);
+        textEditor.setLines(1);
+        textEditor.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        textEditor.setImeOptions(EditorInfo.IME_ACTION_DONE);
+
+        var layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(padding, padding, padding, padding);
+        layout.addView(textEditor);
+
+        var aliasDialog = new android.app.AlertDialog.Builder(this, R.style.Theme_Launcherbox_Dialog)
+            .setTitle("Rename " + app.getLabel())
+            .setView(layout)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Ok", (otherDialogInternal, otherWhich) -> {
+                var newAlias = textEditor.getText().toString();
+                mAppAliasHelper.setAlias(app.getPackageName(), newAlias);
+                app.setAlias(newAlias);
+
+                refreshUi();
+            })
+            .create();
+
+        aliasDialog.show();
+
+        // Try to get the keyboard up
+        textEditor.requestFocus();
+        textEditor.post(() -> {
+            var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.showSoftInput(textEditor, InputMethodManager.SHOW_IMPLICIT);
+            }
+        });
+
+        final var positiveButton = aliasDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        positiveButton.setEnabled(false);
+
+        // We don't want to allow this if the text is empty
+        textEditor.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                var input = s.toString().trim();
+                positiveButton.setEnabled(!input.isEmpty());
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
     }
 
     @Override

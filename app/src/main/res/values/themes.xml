@@ -35,6 +35,8 @@
         <item name="android:paddingEnd">0dp</item>
         <item name="android:layout_marginStart">0dp</item>
         <item name="android:layout_marginEnd">0dp</item>
+
+        <item name="android:minWidth">300dp</item>
     </style>
 
     <style name="Theme.Launcherbox.Dialog.Title" parent="@style/TextAppearance.Material3.TitleMedium">

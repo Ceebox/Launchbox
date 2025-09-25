@@ -39,9 +39,7 @@ public final class ThemeOption implements ISettingOption {
                 final var chosen = themePrefs[which];
                 SettingsManager.setTheme(chosen);
 
-                Toast.makeText(activity,
-                    "Theme applied: " + themes[which],
-                    Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity, "Theme applied: " + themes[which], Toast.LENGTH_SHORT).show();
 
                 activity.recreate();
             })
