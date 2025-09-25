@@ -19,6 +19,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,6 +51,7 @@ import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.AppAliasProvider;
 import com.chadderbox.launchbox.utils.AppLoader;
+import com.chadderbox.launchbox.utils.CustomFontFactory;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.utils.IconPackLoader;
 import com.chadderbox.launchbox.utils.ServiceManager;
@@ -124,6 +126,8 @@ public final class MainActivity
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        CustomFontFactory.initialise(this);
 
         ServiceManager.register(IconPackLoader.class, () -> mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack()));
         ServiceManager.register(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler));

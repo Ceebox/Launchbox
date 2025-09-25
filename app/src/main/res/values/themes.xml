@@ -21,22 +21,33 @@
     </style>
 
     <style name="Theme.Launcherbox.Dialog" parent="Theme.Material3.DayNight.Dialog.Alert">
+
         <item name="android:windowTitleStyle">@style/Theme.Launcherbox.Dialog.Title</item>
         <item name="android:textAppearanceListItem">@style/Theme.Launcherbox.Dialog.Item</item>
         <item name="shapeAppearanceOverlay">@style/Theme.Launcherbox.Dialog.Shape</item>
 
+        <item name="android:windowIsFloating">true</item>
         <item name="android:windowBackground">@color/color_background</item>
+
         <!-- The window title has the primary font colour -->
         <item name="android:textColorPrimary">@color/text_secondary</item>
         <item name="android:textColorSecondary">@color/text_secondary</item>
         <item name="android:textFontWeight">400</item>
 
-        <item name="android:paddingStart">0dp</item>
-        <item name="android:paddingEnd">0dp</item>
         <item name="android:layout_marginStart">0dp</item>
         <item name="android:layout_marginEnd">0dp</item>
 
-        <item name="android:minWidth">300dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+
+        <item name="android:windowMinWidthMajor">80%</item>
+        <item name="android:windowMinWidthMinor">80%</item>
+
+        <item name="android:minWidth">200dp</item>
     </style>
 
     <style name="Theme.Launcherbox.Dialog.Title" parent="@style/TextAppearance.Material3.TitleMedium">

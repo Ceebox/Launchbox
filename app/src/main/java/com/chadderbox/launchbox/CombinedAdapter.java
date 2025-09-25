@@ -106,6 +106,7 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (viewType == TYPE_HEADER) {
             var header = new FontTextView(parent.getContext());
             header.setIsHeading(true);
+            header.setTag(R.id.isHeading, true);
 
             // When we don't have icons, it looks weird to have everything floating
             var matchIconPadding = 16;

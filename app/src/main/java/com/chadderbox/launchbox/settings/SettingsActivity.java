@@ -22,6 +22,7 @@ import com.chadderbox.launchbox.settings.options.implementation.ShowOnlyInstalle
 import com.chadderbox.launchbox.settings.options.implementation.ThemeOption;
 import com.chadderbox.launchbox.settings.options.implementation.WallpaperDimOption;
 import com.chadderbox.launchbox.settings.options.implementation.WallpaperOverrideOption;
+import com.chadderbox.launchbox.utils.CustomFontFactory;
 import com.chadderbox.launchbox.utils.ThemeHelper;
 
 import java.util.ArrayList;
@@ -39,6 +40,9 @@ public final class SettingsActivity extends ComponentActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+
+        CustomFontFactory.initialise(this);
+
         SettingsManager.initialiseSettingsManager(getApplicationContext());
 
         super.onCreate(savedInstanceState);
