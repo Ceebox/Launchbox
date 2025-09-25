@@ -1,6 +1,7 @@
 package com.chadderbox.launchbox;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -371,11 +372,11 @@ public final class MainActivity
                         layout.setPadding(padding, padding, padding, padding);
                         layout.addView(textEditor);
 
-                        new android.app.AlertDialog.Builder(this, R.style.Theme_Launcherbox_Dialog)
+                        var otherDialog = new android.app.AlertDialog.Builder(this, R.style.Theme_Launcherbox_Dialog)
                             .setTitle("Rename " + app.getLabel())
                             .setView(layout)
                             .setNegativeButton("Cancel", null)
-                            .setPositiveButton("Ok", (otherDialog, otherWhich) -> {
+                            .setPositiveButton("Ok", (otherDialogInternal, otherWhich) -> {
                                 var newAlias = textEditor.getText().toString();
                                 mAppAliasHelper.setAlias(app.getPackageName(), newAlias);
                                 app.setAlias(newAlias);
@@ -384,7 +385,31 @@ public final class MainActivity
                             })
                             .show();
 
-                        textEditor.setActivated(true);
+                        final var positiveButton = otherDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                        positiveButton.setEnabled(false);
+
+                        // We don't want to allow this if the text is empty
+                        textEditor.addTextChangedListener(new TextWatcher() {
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                var input = s.toString().trim();
+                                positiveButton.setEnabled(!input.isEmpty());
+                            }
+
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+                            @Override
+                            public void afterTextChanged(Editable s) { }
+                        });
+
+                        textEditor.requestFocus();
+                        var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        if (imm != null) {
+                            imm.showSoftInput(textEditor, InputMethodManager.SHOW_IMPLICIT);
+                        }
+
                         break;
 
                     case 2: // Uninstall
