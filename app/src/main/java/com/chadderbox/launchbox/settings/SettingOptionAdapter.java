@@ -3,12 +3,12 @@ package com.chadderbox.launchbox.settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.components.FontTextView;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
 
 import java.util.List;
@@ -43,14 +43,14 @@ public final class SettingOptionAdapter extends RecyclerView.Adapter<SettingOpti
     }
 
     public static class SettingItemHolder extends RecyclerView.ViewHolder {
-        private final TextView mTitle;
-        private final TextView mSubtitle;
+        private final FontTextView mTitle;
+        private final FontTextView mSubtitle;
 
-        public TextView getTitle() {
+        public FontTextView getTitle() {
             return mTitle;
         }
 
-        public TextView getSubtitle() {
+        public FontTextView getSubtitle() {
             return mSubtitle;
         }
 

@@ -2,12 +2,12 @@ package com.chadderbox.launchbox.settings.options.implementation;
 
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import android.app.AlertDialog;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.components.FontTextView;
 import com.chadderbox.launchbox.settings.SettingCategory;
 import com.chadderbox.launchbox.settings.SettingGroup;
 import com.chadderbox.launchbox.settings.SettingsActivity;
@@ -43,7 +43,7 @@ public final class WallpaperDimOption
         seekBar.setProgress((int) (SettingsManager.getWallpaperDimAmount() * 100));
         seekBar.setPadding(40, 40, 40, 40);
 
-        var preview = new TextView(activity);
+        var preview = new FontTextView(activity);
         preview.setText(activity.getString(R.string.wallpaper_dim_pick, SettingsManager.getWallpaperDimAmount() * 100 + "%"));
         preview.setTextSize(16);
         preview.setPadding(40, 20, 40, 20);
