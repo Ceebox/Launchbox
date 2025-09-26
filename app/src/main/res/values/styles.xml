@@ -4,4 +4,75 @@
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorHint">@color/text_secondary</item>
     </style>
+
+    <style name="Base.Theme.Launcherbox" parent="android:Theme.Material.Wallpaper.NoTitleBar">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
+
+    <style name="Theme.Launcherbox.Launcher" parent="Base.Theme.Launcherbox">
+        <item name="textAppearanceHeadline6">@style/TextAppearance.Material3.HeadlineMedium</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.Material3.BodyMedium</item>
+
+        <item name="selectableItemBackground">@android:attr/selectableItemBackground</item>
+        <item name="selectableItemBackgroundBorderless">@android:attr/selectableItemBackgroundBorderless</item>
+
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+
+        <item name="fontEditTextStyle">@style/Theme.Launcherbox.FontEditText</item>
+    </style>
+
+    <style name="Theme.Launcherbox.Dialog" parent="Theme.Material3.DayNight.Dialog.Alert">
+
+        <item name="android:windowTitleStyle">@style/Theme.Launcherbox.Dialog.Title</item>
+        <item name="android:textAppearanceListItem">@style/Theme.Launcherbox.Dialog.Item</item>
+        <item name="shapeAppearanceOverlay">@style/Theme.Launcherbox.Dialog.Shape</item>
+
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowBackground">@color/color_background</item>
+
+        <!-- The window title has the primary font colour -->
+        <item name="android:textColorPrimary">@color/text_secondary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textFontWeight">400</item>
+
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
+
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+
+        <item name="android:windowMinWidthMajor">80%</item>
+        <item name="android:windowMinWidthMinor">80%</item>
+
+        <item name="android:minWidth">200dp</item>
+    </style>
+
+    <style name="Theme.Launcherbox.Dialog.Title" parent="@style/TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textFontWeight">700</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
+    </style>
+
+    <style name="Theme.Launcherbox.Dialog.Item" parent="@style/TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textFontWeight">400</item>
+    </style>
+
+    <style name="Theme.Launcherbox.Dialog.Shape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
 </resources>
