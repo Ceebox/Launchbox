@@ -17,6 +17,11 @@
         <activity
             android:name="com.chadderbox.launchbox.MainActivity"
             android:launchMode="singleTask"
+            android:excludeFromRecents="true"
+            android:resumeWhilePausing="true"
+            android:hardwareAccelerated="true"
+            android:stateNotNeeded="true"
+            android:resizeableActivity="true"
             android:enableOnBackInvokedCallback="true"
             android:exported="true"
             android:windowSoftInputMode="adjustNothing"
