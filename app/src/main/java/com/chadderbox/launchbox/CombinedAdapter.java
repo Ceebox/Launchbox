@@ -1,14 +1,18 @@
 package com.chadderbox.launchbox;
 
 import android.annotation.SuppressLint;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.compose.ui.platform.ViewCompositionStrategy;
+import androidx.lifecycle.ViewTreeLifecycleOwner;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.components.FontTextView;
+import com.chadderbox.launchbox.components.ListItemLayoutKt;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.ListItem;
@@ -17,14 +21,13 @@ import com.chadderbox.launchbox.data.SuggestionItem;
 import com.chadderbox.launchbox.data.WebItem;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.IconPackLoader;
-import com.chadderbox.launchbox.viewholders.AppViewHolder;
+import com.chadderbox.launchbox.viewholders.ComposeRowViewHolder;
 import com.chadderbox.launchbox.viewholders.HeaderViewHolder;
-import com.chadderbox.launchbox.viewholders.SettingViewHolder;
-import com.chadderbox.launchbox.viewholders.SuggestionViewHolder;
-import com.chadderbox.launchbox.viewholders.WebViewHolder;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -35,6 +38,9 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int TYPE_SETTING = 4;
 
     private static final float HEADER_SIZE_MULTIPLIER = 1.5f;
+
+    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     private final List<ListItem> mItems;
     private final IconPackLoader mIconPackLoader;
@@ -108,60 +114,54 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             header.setIsHeading(true);
             header.setTag(R.id.isHeading, true);
 
-            // When we don't have icons, it looks weird to have everything floating
-            var matchIconPadding = 16;
-            if (SettingsManager.getIconPack().equals("None")) {
-                matchIconPadding = 0;
-            }
-
+            var matchIconPadding = SettingsManager.getIconPack().equals("None") ? 0 : 16;
             header.setPadding(matchIconPadding, 16, matchIconPadding, 16);
+
             return new HeaderViewHolder(header);
-        } else if (viewType == TYPE_APP) {
-            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new AppViewHolder(view);
-        } else if (viewType == TYPE_WEB) {
-            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new WebViewHolder(view);
-        } else if (viewType == TYPE_SUGGESTION) {
-            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new SuggestionViewHolder(view);
-        } else if (viewType == TYPE_SETTING) {
-            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new SettingViewHolder(view);
         }
 
-        // Idk
-        return new HeaderViewHolder(new TextView(parent.getContext()));
+        var itemView = LayoutInflater.from(parent.getContext())
+            .inflate(R.layout.list_item_layout, parent, false);
+
+        ListItemLayoutKt.initListItemComposition(itemView.findViewById(R.id.compose_item));
+
+        return new ComposeRowViewHolder(itemView);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         var item = mItems.get(position);
-
-        if (holder instanceof HeaderViewHolder headerHolder) {
-            if (item instanceof HeaderItem headerItem) {
-                headerHolder.bind(headerItem.getHeader());
+        mExecutor.execute(() -> {
+            if (holder instanceof ComposeRowViewHolder composeHolder) {
+                var composeView = composeHolder.getComposeView();
+                switch (item.getType()) {
+                    case APP -> {
+                        if (item instanceof AppItem appItem) {
+                            mMainHandler.post(() -> ListItemLayoutKt.setAppRow(composeView, appItem, mIconPackLoader));
+                        }
+                    }
+                    case WEB -> {
+                        if (item instanceof WebItem webItem) {
+                            mMainHandler.post(() -> ListItemLayoutKt.setWebRow(composeView, webItem));
+                        }
+                    }
+                    case SUGGESTION -> {
+                        if (item instanceof SuggestionItem suggestionItem) {
+                            mMainHandler.post(() -> ListItemLayoutKt.setSuggestionRow(composeView, suggestionItem));
+                        }
+                    }
+                    case SETTING -> {
+                        if (item instanceof SettingItem settingItem) {
+                            mMainHandler.post(() -> ListItemLayoutKt.setSettingRow(composeView, settingItem));
+                        }
+                    }
+                }
             }
-        }
-        else if (holder instanceof AppViewHolder appHolder) {
-            if (item instanceof AppItem appItem) {
-                appHolder.bind(appItem, mIconPackLoader);
+            else if (holder instanceof HeaderViewHolder headerHolder) {
+                if (item instanceof HeaderItem headerItem) {
+                    mMainHandler.post(() -> headerHolder.bind(headerItem.getHeader()));
+                }
             }
-        }
-        else if (holder instanceof WebViewHolder webHolder) {
-            if (item instanceof WebItem webItem) {
-                webHolder.bind(webItem);
-            }
-        }
-        else if (holder instanceof SuggestionViewHolder suggestionHolder) {
-            if (item instanceof SuggestionItem suggestionItem) {
-                suggestionHolder.bind(suggestionItem);
-            }
-        }
-        else if (holder instanceof SettingViewHolder settingHolder) {
-            if (item instanceof SettingItem settingItem) {
-                settingHolder.bind(settingItem);
-            }
-        }
+        });
     }
 }

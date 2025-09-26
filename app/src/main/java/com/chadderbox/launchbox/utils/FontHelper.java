@@ -1,6 +1,11 @@
 package com.chadderbox.launchbox.utils;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,5 +40,23 @@ public final class FontHelper {
         }
 
         return Typeface.DEFAULT;
+    }
+
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable bitmapDrawable) {
+            if (bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        var width = drawable.getIntrinsicWidth() > 0 ? drawable.getIntrinsicWidth() : 1;
+        var height = drawable.getIntrinsicHeight() > 0 ? drawable.getIntrinsicHeight() : 1;
+
+        var bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        var canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 }

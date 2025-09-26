@@ -1,41 +1,46 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/search_sheet"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/color_background"
-    android:elevation="16dp"
-    app:behavior_hideable="true"
-    app:behavior_peekHeight="60dp"
-    android:clickable="true"
-    android:focusable="true"
-    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+    android:layout_height="match_parent">
 
-    <!-- Handle -->
-    <View
-        android:layout_width="40dp"
-        android:layout_height="20dp"
-        android:layout_gravity="center"
-        android:layout_margin="16dp"/>
-
-    <com.chadderbox.launchbox.components.FontEditText
-        android:id="@+id/search_input"
+    <LinearLayout
+        android:id="@+id/search_sheet"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:importantForAutofill="no"
-        android:hint="@string/search_prompt"
-        android:imeOptions="actionSearch"
-        android:inputType="text"
-        android:padding="12dp"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/color_background"
+        android:elevation="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="60dp">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/search_results"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_margin="16dp"
-        android:layout_weight="1" />
+        <!-- Handle -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:layout_margin="16dp"/>
 
-</LinearLayout>
+        <com.chadderbox.launchbox.components.FontEditText
+            android:id="@+id/search_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:importantForAutofill="no"
+            android:hint="@string/search_prompt"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:padding="12dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_results"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="16dp"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

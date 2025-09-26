@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.LruCache;
 
@@ -51,6 +54,14 @@ public final class IconPackLoader
             mDefaultMissingIcon = null;
             return;
         }
+
+        try {
+            mPackageManager.getPackageInfo(mIconPackPackage, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            mDefaultMissingIcon = null;
+            return;
+        }
+
         try {
             var res = mPackageManager.getResourcesForApplication(mIconPackPackage);
 
@@ -124,9 +135,38 @@ public final class IconPackLoader
             icon = mDefaultMissingIcon;
         }
 
-        sIconCache.put(packageName, icon);
+        if (icon != null) {
+            // The default missing icon can still be null
+            sIconCache.put(packageName, icon);
+        }
 
         return icon;
+    }
+
+    public Bitmap loadAppIconBitmap(final String packageName, final int category) {
+        var drawable = loadAppIcon(packageName, category);
+
+        if (drawable == null) {
+            // Empty bitmap, we shouldn't return null
+            return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        }
+
+        if (drawable instanceof BitmapDrawable bitmapDrawable) {
+            var bitmap = bitmapDrawable.getBitmap();
+            if (bitmap != null) {
+                return bitmap;
+            }
+        }
+
+        var width = drawable.getIntrinsicWidth() > 0 ? drawable.getIntrinsicWidth() : 48;
+        var height = drawable.getIntrinsicHeight() > 0 ? drawable.getIntrinsicHeight() : 48;
+
+        var bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        var canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 
     private static String getDrawableNameForCategory(int category) {
