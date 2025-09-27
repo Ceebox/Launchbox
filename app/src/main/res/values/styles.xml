@@ -3,6 +3,7 @@
     <style name="Theme.Launcherbox.FontEditText" parent="Widget.AppCompat.EditText">
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="android:textCursorDrawable">@drawable/ic_cursor_caret</item>
         <item name="android:backgroundTint">@color/accent</item>
     </style>
 
