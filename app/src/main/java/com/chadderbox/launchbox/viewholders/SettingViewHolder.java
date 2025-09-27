@@ -11,16 +11,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SettingItem;
+import com.chadderbox.launchbox.utils.ShadowHelper;
 import com.chadderbox.launchbox.utils.TintHelper;
 
-import java.util.function.Consumer;
-
-public class SettingViewHolder extends RecyclerView.ViewHolder {
-    private final TextView mTextview;
+public final class SettingViewHolder extends RecyclerView.ViewHolder {
+    private final TextView mTextView;
 
     public SettingViewHolder(@NonNull View itemView) {
         super(itemView);
-        mTextview = itemView.findViewById(R.id.item_name);
+        mTextView = itemView.findViewById(R.id.item_name);
+
+        ShadowHelper.applySettings(mTextView);
 
         itemView.setOnClickListener(v -> {
             var tag = v.getTag();
@@ -47,6 +48,6 @@ public class SettingViewHolder extends RecyclerView.ViewHolder {
         var icon = (ImageView)itemView.findViewById(R.id.item_icon);
         var drawable = AppCompatResources.getDrawable(context, R.drawable.ic_settings);
         icon.setImageDrawable(TintHelper.tryTintIcon(context, drawable));
-        mTextview.setText(item.getTitle());
+        mTextView.setText(item.getTitle());
     }
 }

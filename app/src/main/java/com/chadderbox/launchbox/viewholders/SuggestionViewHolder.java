@@ -11,17 +11,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SuggestionItem;
+import com.chadderbox.launchbox.utils.ShadowHelper;
 import com.chadderbox.launchbox.utils.TintHelper;
 
-import java.util.function.Consumer;
-
-public class SuggestionViewHolder extends RecyclerView.ViewHolder {
-    private final TextView textView;
-    private String mSuggestion;
+public final class SuggestionViewHolder extends RecyclerView.ViewHolder {
+    private final TextView mTextView;
 
     public SuggestionViewHolder(@NonNull View itemView) {
         super(itemView);
-        textView = itemView.findViewById(R.id.item_name);
+        mTextView = itemView.findViewById(R.id.item_name);
+
+        ShadowHelper.applySettings(mTextView);
 
         itemView.setOnClickListener(v -> {
             var tag = v.getTag();
@@ -42,13 +42,13 @@ public class SuggestionViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(SuggestionItem item) {
-        mSuggestion = item.getSuggestion();
+        var suggestion = item.getSuggestion();
         itemView.setTag(item);
 
         var context = itemView.getContext();
         var icon = (ImageView)itemView.findViewById(R.id.item_icon);
         var drawable = AppCompatResources.getDrawable(context, R.drawable.ic_browse_suggestion);
         icon.setImageDrawable(TintHelper.tryTintIcon(context, drawable));
-        textView.setText(mSuggestion);
+        mTextView.setText(suggestion);
     }
 }

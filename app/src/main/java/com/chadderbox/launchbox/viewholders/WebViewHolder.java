@@ -13,15 +13,12 @@ import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.WebItem;
 import com.chadderbox.launchbox.utils.TintHelper;
 
-import java.util.function.Consumer;
-
-public class WebViewHolder extends RecyclerView.ViewHolder {
-    private final TextView textView;
-    private String mQuery;
+public final class WebViewHolder extends RecyclerView.ViewHolder {
+    private final TextView mTextView;
 
     public WebViewHolder(@NonNull View itemView) {
         super(itemView);
-        textView = itemView.findViewById(R.id.item_name);
+        mTextView = itemView.findViewById(R.id.item_name);
 
         itemView.setOnClickListener(v -> {
             var tag = v.getTag();
@@ -42,13 +39,13 @@ public class WebViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(WebItem item) {
-        mQuery = item.getQuery();
+        final var query = item.getQuery();
 
         itemView.setTag(item);
-        var context = itemView.getContext();
-        var icon = (ImageView)itemView.findViewById(R.id.item_icon);
-        var drawable = AppCompatResources.getDrawable(context, R.drawable.ic_browse);
+        final var context = itemView.getContext();
+        final var icon = (ImageView)itemView.findViewById(R.id.item_icon);
+        final var drawable = AppCompatResources.getDrawable(context, R.drawable.ic_browse);
         icon.setImageDrawable(TintHelper.tryTintIcon(context, drawable));
-        textView.setText(context.getString(R.string.search_the_web_for, mQuery));
+        mTextView.setText(context.getString(R.string.search_the_web_for, query));
     }
 }

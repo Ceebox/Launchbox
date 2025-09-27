@@ -8,16 +8,15 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.utils.ShadowHelper;
 
-public class HeaderViewHolder extends RecyclerView.ViewHolder {
+public final class HeaderViewHolder extends RecyclerView.ViewHolder {
     private final TextView mHeader;
     public HeaderViewHolder(@NonNull View itemView) {
         super(itemView);
         mHeader = (TextView) itemView;
 
-        // These are copied from list_item_layout
-        var shadowColor = ContextCompat.getColor(mHeader.getContext(), R.color.text_shadow);
-        mHeader.setShadowLayer(2f, 4f, 4f, shadowColor);
+        ShadowHelper.applySettings(mHeader);
     }
 
     public void bind(String suggestion) {

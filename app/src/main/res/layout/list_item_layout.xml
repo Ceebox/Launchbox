@@ -7,9 +7,10 @@
     android:paddingVertical="8dp"
     android:minHeight="60dp"
     android:gravity="center_vertical"
+    android:clipChildren="false"
     tools:ignore="UseCompoundDrawables">
 
-    <ImageView
+    <com.chadderbox.launchbox.components.ShadowImageView
         android:id="@+id/item_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
@@ -20,10 +21,6 @@
         android:id="@+id/item_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:shadowColor="@color/text_shadow"
-        android:shadowDx="4"
-        android:shadowDy="4"
-        android:shadowRadius="2"/>
+        android:textSize="16sp" />
 
 </LinearLayout>
