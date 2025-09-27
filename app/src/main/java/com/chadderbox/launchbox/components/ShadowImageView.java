@@ -19,11 +19,14 @@ import com.chadderbox.launchbox.R;
 @SuppressLint("AppCompatCustomView")
 public class ShadowImageView extends ImageView {
 
+    private final Paint mShadowPaint;
     private Bitmap mShadowBitmap;
-    private Paint mShadowPaint;
     private float mShadowRadius = 2f;
     private float mShadowDx = 4f;
     private float mShadowDy = 4f;
+    private Bitmap mOriginalBitmap;
+    private Rect mImageBounds;
+    private Rect mShadowBounds;
 
     public ShadowImageView(Context context) {
         this(context, null, 0);
@@ -35,7 +38,24 @@ public class ShadowImageView extends ImageView {
 
     public ShadowImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+
+        mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mShadowPaint.setColor(ContextCompat.getColor(getContext(), R.color.text_shadow));
+        mShadowPaint.setMaskFilter(new BlurMaskFilter(mShadowRadius, BlurMaskFilter.Blur.NORMAL));
+    }
+
+    @Override
+    public void setImageDrawable(Drawable drawable) {
+        super.setImageDrawable(drawable);
+        cacheOriginalBitmap(drawable);
+        regenerateShadow();
+
+        if (getWidth() > 0 && getHeight() > 0 && mOriginalBitmap != null) {
+            calculateBounds(getWidth(), getHeight());
+        }
+
+        requestLayout();
+        invalidate();
     }
 
     public void clearShadowBitmap() {
@@ -48,15 +68,6 @@ public class ShadowImageView extends ImageView {
         mShadowBitmap = null;
     }
 
-    private void init() {
-        // Needed for BlurMaskFilter
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
-
-        mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mShadowPaint.setColor(ContextCompat.getColor(getContext(), R.color.text_shadow));
-        mShadowPaint.setMaskFilter(new BlurMaskFilter(mShadowRadius, BlurMaskFilter.Blur.NORMAL));
-    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -67,107 +78,80 @@ public class ShadowImageView extends ImageView {
         setMeasuredDimension(getMeasuredWidth() + extraX * 2, getMeasuredHeight() + extraY * 2);
     }
 
-    @SuppressLint("DrawAllocation")
     @Override
     protected void onDraw(Canvas canvas) {
-        var drawable = getDrawable();
-        if (drawable == null) {
+        if (mOriginalBitmap == null || mShadowBitmap == null) {
             super.onDraw(canvas);
             return;
         }
 
-        Bitmap originalBitmap;
-        if (drawable instanceof BitmapDrawable) {
-            originalBitmap = ((BitmapDrawable) drawable).getBitmap();
-        } else {
-            // We don't have it easy here
-            // Render to another bitmap that we can use
-            var width = drawable.getIntrinsicWidth() > 0 ? drawable.getIntrinsicWidth() : getWidth();
-            var height = drawable.getIntrinsicHeight() > 0 ? drawable.getIntrinsicHeight() : getHeight();
+        int extraX = (int)(mShadowRadius + Math.abs(mShadowDx));
+        int extraY = (int)(mShadowRadius + Math.abs(mShadowDy));
 
-            originalBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            var bitmapCanvas = new Canvas(originalBitmap);
-            drawable.setBounds(0, 0, width, height);
-            drawable.draw(bitmapCanvas);
-        }
-
-        if (mShadowBitmap == null || mShadowBitmap.isRecycled()) {
-            generateShadowBitmap(originalBitmap);
-        }
-
-        var saveCount = canvas.save();
-        var extraX = (int)(mShadowRadius + Math.abs(mShadowDx));
-        var extraY = (int)(mShadowRadius + Math.abs(mShadowDy));
+        canvas.save();
         canvas.translate(extraX, extraY);
 
-        var imageBounds = calculateImageBounds(
-            getWidth() - (2 * extraX),
-            getHeight() - (2 * extraY),
-            originalBitmap.getWidth(),
-            originalBitmap.getHeight()
-        );
+        canvas.drawBitmap(mShadowBitmap, null, mShadowBounds, mShadowPaint);
+        canvas.drawBitmap(mOriginalBitmap, null, mImageBounds, null);
 
-        @SuppressLint("DrawAllocation") Rect shadowBounds = new Rect(
-            imageBounds.left + (int) mShadowDx,
-            imageBounds.top + (int) mShadowDy,
-            imageBounds.right + (int) mShadowDx,
-            imageBounds.bottom + (int) mShadowDy
-        );
-
-        canvas.drawBitmap(mShadowBitmap, null, shadowBounds, mShadowPaint);
-        canvas.drawBitmap(originalBitmap, null, imageBounds, null);
-
-        canvas.restoreToCount(saveCount);
+        canvas.restore();
     }
 
     @Override
-    public void setImageDrawable(Drawable drawable) {
-        super.setImageDrawable(drawable);
-        clearShadowBitmap();
-        invalidate();
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        if (mOriginalBitmap == null) return;
+
+        calculateBounds(w, h);
     }
 
-    private void generateShadowBitmap(Bitmap original) {
-        if (mShadowBitmap != null && !mShadowBitmap.isRecycled()) {
-            mShadowBitmap.recycle();
+    private void calculateBounds(int w, int h) {
+        var extraX = (int)(mShadowRadius + Math.abs(mShadowDx));
+        var extraY = (int)(mShadowRadius + Math.abs(mShadowDy));
+
+        mImageBounds = calculateImageBounds(
+            w - (2 * extraX),
+            h - (2 * extraY),
+            mOriginalBitmap.getWidth(),
+            mOriginalBitmap.getHeight()
+        );
+
+        mShadowBounds = new Rect(
+            mImageBounds.left + (int)mShadowDx,
+            mImageBounds.top + (int)mShadowDy,
+            mImageBounds.right + (int)mShadowDx,
+            mImageBounds.bottom + (int)mShadowDy
+        );
+    }
+
+    private void cacheOriginalBitmap(Drawable drawable) {
+        if (drawable == null) {
+            mOriginalBitmap = null;
+            return;
+        }
+
+        if (drawable instanceof BitmapDrawable) {
+            mOriginalBitmap = ((BitmapDrawable) drawable).getBitmap();
+        } else {
+            var width = Math.max(1, drawable.getIntrinsicWidth());
+            var height = Math.max(1, drawable.getIntrinsicHeight());
+            mOriginalBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(mOriginalBitmap);
+            drawable.setBounds(0, 0, width, height);
+            drawable.draw(c);
+        }
+    }
+
+    private void regenerateShadow() {
+        if (mOriginalBitmap == null) {
+            mShadowBitmap = null;
+            return;
         }
 
         mShadowPaint.setMaskFilter(new BlurMaskFilter(mShadowRadius, BlurMaskFilter.Blur.NORMAL));
-        mShadowBitmap = original.extractAlpha(mShadowPaint, null);
+        mShadowBitmap = mOriginalBitmap.extractAlpha(mShadowPaint, null);
         mShadowPaint.setMaskFilter(null);
         mShadowPaint.setColor(ContextCompat.getColor(getContext(), R.color.text_shadow));
-    }
-
-    private Rect calculateImageBounds2(int viewWidth, int viewHeight, int imageWidth, int imageHeight) {
-        // Compute image bounds respecting scaleType and padding (simplified version handles centerCrop, fitCenter etc. needed)
-
-        // For simplicity, handle scaleType CENTER_INSIDE (adjust as needed)
-        float scale;
-        int left, top, right, bottom;
-
-        if (imageWidth <= 0 || imageHeight <= 0) {
-            // Avoid division by zero
-            return new Rect(0, 0, viewWidth, viewHeight);
-        }
-
-        var aspectRatioImage = (float) imageWidth / imageHeight;
-        var aspectRatioView = (float) (viewWidth - getPaddingLeft() - getPaddingRight()) / (viewHeight - getPaddingTop() - getPaddingBottom());
-
-        if (aspectRatioImage > aspectRatioView) {
-            scale = (float) (viewWidth - getPaddingLeft() - getPaddingRight()) / imageWidth;
-        } else {
-            scale = (float) (viewHeight - getPaddingTop() - getPaddingBottom()) / imageHeight;
-        }
-
-        var scaledWidth = (int) (imageWidth * scale);
-        var scaledHeight = (int) (imageHeight * scale);
-
-        left = getPaddingLeft() + (viewWidth - getPaddingLeft() - getPaddingRight() - scaledWidth) / 2;
-        top = getPaddingTop() + (viewHeight - getPaddingTop() - getPaddingBottom() - scaledHeight) / 2;
-        right = left + scaledWidth;
-        bottom = top + scaledHeight;
-
-        return new Rect(left, top, right, bottom);
     }
 
     private Rect calculateImageBounds(int contentWidth, int contentHeight, int imageWidth, int imageHeight) {
@@ -175,8 +159,8 @@ public class ShadowImageView extends ImageView {
             return new Rect(0, 0, contentWidth, contentHeight);
         }
 
-        float aspectRatioImage = (float) imageWidth / imageHeight;
-        float aspectRatioView = (float) contentWidth / contentHeight;
+        var aspectRatioImage = (float) imageWidth / imageHeight;
+        var aspectRatioView = (float) contentWidth / contentHeight;
 
         float scale;
         if (aspectRatioImage > aspectRatioView) {
@@ -185,30 +169,14 @@ public class ShadowImageView extends ImageView {
             scale = (float) contentHeight / imageHeight;
         }
 
-        int scaledWidth = (int) (imageWidth * scale);
-        int scaledHeight = (int) (imageHeight * scale);
+        var scaledWidth = (int) (imageWidth * scale);
+        var scaledHeight = (int) (imageHeight * scale);
 
-        int left = (contentWidth - scaledWidth) / 2;
-        int top = (contentHeight - scaledHeight) / 2;
-        int right = left + scaledWidth;
-        int bottom = top + scaledHeight;
+        var left = (contentWidth - scaledWidth) / 2;
+        var top = (contentHeight - scaledHeight) / 2;
+        var right = left + scaledWidth;
+        var bottom = top + scaledHeight;
 
         return new Rect(left, top, right, bottom);
-    }
-
-    public void setShadowRadius(float radius) {
-        mShadowRadius = radius;
-        mShadowPaint.setMaskFilter(new BlurMaskFilter(mShadowRadius, BlurMaskFilter.Blur.NORMAL));
-        mShadowBitmap = null;
-        requestLayout();
-        invalidate();
-    }
-
-    public void setShadowOffset(float dx, float dy) {
-        mShadowDx = dx;
-        mShadowDy = dy;
-        mShadowBitmap = null;
-        requestLayout();
-        invalidate();
     }
 }
