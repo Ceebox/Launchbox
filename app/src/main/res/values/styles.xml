@@ -7,6 +7,8 @@
     </style>
 
     <style name="Base.Theme.Launcherbox" parent="android:Theme.Material.Wallpaper.NoTitleBar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
