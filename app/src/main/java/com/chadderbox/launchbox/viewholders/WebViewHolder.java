@@ -6,19 +6,16 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.WebItem;
 import com.chadderbox.launchbox.utils.TintHelper;
 
-public final class WebViewHolder extends RecyclerView.ViewHolder {
-    private final TextView mTextView;
-
+public final class WebViewHolder
+    extends ViewHolderItemBase {
     public WebViewHolder(@NonNull View itemView) {
         super(itemView);
-        mTextView = itemView.findViewById(R.id.item_name);
 
         itemView.setOnClickListener(v -> {
             var tag = v.getTag();
@@ -46,6 +43,6 @@ public final class WebViewHolder extends RecyclerView.ViewHolder {
         final var icon = (ImageView)itemView.findViewById(R.id.item_icon);
         final var drawable = AppCompatResources.getDrawable(context, R.drawable.ic_browse);
         icon.setImageDrawable(TintHelper.tryTintIcon(context, drawable));
-        mTextView.setText(context.getString(R.string.search_the_web_for, query));
+        mText.setText(context.getString(R.string.search_the_web_for, query));
     }
 }

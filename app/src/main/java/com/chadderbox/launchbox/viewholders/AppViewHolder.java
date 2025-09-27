@@ -1,16 +1,11 @@
 package com.chadderbox.launchbox.viewholders;
 
-import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.components.ShadowImageView;
@@ -25,8 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class AppViewHolder
-    extends RecyclerView.ViewHolder
-    implements SharedPreferences.OnSharedPreferenceChangeListener {
+    extends ViewHolderItemBase {
 
     private static final ExecutorService mIconExecutor = Executors.newCachedThreadPool();
     private static final Handler mMainHandler = new Handler(Looper.getMainLooper());
@@ -41,7 +35,7 @@ public final class AppViewHolder
         mIcon = itemView.findViewById(R.id.item_icon);
         mLabel = itemView.findViewById(R.id.item_name);
 
-        ShadowHelper.applySettings(mLabel);
+        ShadowHelper.applySettings(mLabel.getContext(), mLabel.getPaint());
 
         itemView.setOnClickListener(v -> {
             var tag = v.getTag();
@@ -75,6 +69,15 @@ public final class AppViewHolder
         loadIcon();
     }
 
+    @Override
+    protected void whenSharedPreferencesChanged(String key) {
+        super.whenSharedPreferencesChanged(key);
+
+        if (SettingsManager.KEY_ICON_PACK.equals(key)) {
+            loadIcon();
+        }
+    }
+
     private void loadIcon() {
         // Clear the shadow bitmap in case we're getting re-used
         mIcon.clearShadowBitmap();
@@ -92,13 +95,6 @@ public final class AppViewHolder
                 }
             });
         });
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (SettingsManager.KEY_ICON_PACK.equals(key)) {
-            loadIcon();
-        }
     }
 
     public ShadowImageView getIcon() {

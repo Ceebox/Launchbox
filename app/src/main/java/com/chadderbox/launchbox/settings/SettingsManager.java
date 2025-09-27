@@ -17,6 +17,7 @@ public final class SettingsManager {
     public static final String KEY_LEFT_HANDED = "left_handed";
     public static final String KEY_FONT = "font";
     public static final String KEY_FONT_SIZE = "font_size";
+    public static final String KEY_SHADOW_STRENGTH = "shadow_strength";
     public static final String KEY_THEME = "theme";
     public static final String KEY_WALLPAPER = "wallpaper";
     public static final String KEY_WALLPAPER_DIM_AMOUNT = "wallpaper_dim_amount";
@@ -92,12 +93,20 @@ public final class SettingsManager {
         return sPrefs.getString(KEY_FONT, "System Default");
     }
 
-    public static void setFontSize(int fontName) {
-        sPrefs.edit().putInt(KEY_FONT_SIZE, fontName).apply();
+    public static void setFontSize(int newSize) {
+        sPrefs.edit().putInt(KEY_FONT_SIZE, newSize).apply();
     }
 
     public static int getFontSize() {
         return sPrefs.getInt(KEY_FONT_SIZE, 16);
+    }
+
+    public static void setShadowStrength(int newStrength) {
+        sPrefs.edit().putInt(KEY_SHADOW_STRENGTH, newStrength).apply();
+    }
+
+    public static int getShadowStrength() {
+        return sPrefs.getInt(KEY_SHADOW_STRENGTH, 3);
     }
 
     public static void setTheme(int mode) {

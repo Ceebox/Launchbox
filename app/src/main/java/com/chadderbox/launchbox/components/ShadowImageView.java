@@ -2,6 +2,7 @@ package com.chadderbox.launchbox.components;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -15,13 +16,16 @@ import android.graphics.Rect;
 import androidx.core.content.ContextCompat;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.settings.SettingsManager;
 
 @SuppressLint("AppCompatCustomView")
-public class ShadowImageView extends ImageView {
+public class ShadowImageView
+    extends ImageView
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final Paint mShadowPaint;
     private Bitmap mShadowBitmap;
-    private float mShadowRadius = 2f;
+    private final float mShadowRadius = 2f;
     private float mShadowDx = 4f;
     private float mShadowDy = 4f;
     private Bitmap mOriginalBitmap;
@@ -39,9 +43,15 @@ public class ShadowImageView extends ImageView {
     public ShadowImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
+        SettingsManager.registerChangeListener(this);
+
         mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mShadowPaint.setColor(ContextCompat.getColor(getContext(), R.color.text_shadow));
         mShadowPaint.setMaskFilter(new BlurMaskFilter(mShadowRadius, BlurMaskFilter.Blur.NORMAL));
+
+        var shadowStrength = SettingsManager.getShadowStrength();
+        mShadowDx = shadowStrength;
+        mShadowDy = shadowStrength;
     }
 
     @Override
@@ -85,13 +95,17 @@ public class ShadowImageView extends ImageView {
             return;
         }
 
-        int extraX = (int)(mShadowRadius + Math.abs(mShadowDx));
-        int extraY = (int)(mShadowRadius + Math.abs(mShadowDy));
+        var extraX = (int)(mShadowRadius + Math.abs(mShadowDx));
+        var extraY = (int)(mShadowRadius + Math.abs(mShadowDy));
 
         canvas.save();
         canvas.translate(extraX, extraY);
 
-        canvas.drawBitmap(mShadowBitmap, null, mShadowBounds, mShadowPaint);
+        // Don't draw the shadow if we don't have one!
+        if (mShadowDx != 0 || mShadowDy != 0) {
+            canvas.drawBitmap(mShadowBitmap, null, mShadowBounds, mShadowPaint);
+        }
+
         canvas.drawBitmap(mOriginalBitmap, null, mImageBounds, null);
 
         canvas.restore();
@@ -100,7 +114,9 @@ public class ShadowImageView extends ImageView {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        if (mOriginalBitmap == null) return;
+        if (mOriginalBitmap == null) {
+            return;
+        }
 
         calculateBounds(w, h);
     }
@@ -136,7 +152,7 @@ public class ShadowImageView extends ImageView {
             var width = Math.max(1, drawable.getIntrinsicWidth());
             var height = Math.max(1, drawable.getIntrinsicHeight());
             mOriginalBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(mOriginalBitmap);
+            var c = new Canvas(mOriginalBitmap);
             drawable.setBounds(0, 0, width, height);
             drawable.draw(c);
         }
@@ -178,5 +194,15 @@ public class ShadowImageView extends ImageView {
         var bottom = top + scaledHeight;
 
         return new Rect(left, top, right, bottom);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (SettingsManager.KEY_SHADOW_STRENGTH.equals(key)) {
+            var shadowStrength = SettingsManager.getShadowStrength();
+            mShadowDx = shadowStrength;
+            mShadowDy = shadowStrength;
+            invalidate();
+        }
     }
 }

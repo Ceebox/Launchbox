@@ -1,26 +1,32 @@
 package com.chadderbox.launchbox.utils;
 
+import android.content.Context;
+import android.graphics.Paint;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.settings.SettingsManager;
 
 public final class ShadowHelper {
 
     private ShadowHelper() { }
 
-    public static void setShadow(TextView paint, float radius, float dx, float dy, int colourResource) {
+    public static void setShadow(Paint paint, float radius, float dx, float dy, int colourResource) {
         paint.setShadowLayer(radius, dx, dy, colourResource);
     }
 
-    public static void applySettings(TextView item) {
-        var shadowRadius = 2f;
-        var shadowDx = 4f;
-        var shadowDy = 4f;
-        var shadowColor = ContextCompat.getColor(item.getContext(), R.color.text_shadow);
+    public static void applySettings(Context context, Paint paint) {
 
-        setShadow(item, shadowRadius, shadowDx, shadowDy, shadowColor);
+        var shadowRadius = 2f;
+        var shadowStrength = SettingsManager.getShadowStrength();
+        if (shadowStrength == 0) {
+            shadowRadius = 0f;
+        }
+
+        var shadowColor = ContextCompat.getColor(context, R.color.text_shadow);
+        setShadow(paint, shadowRadius, shadowStrength, shadowStrength, shadowColor);
     }
 
 }

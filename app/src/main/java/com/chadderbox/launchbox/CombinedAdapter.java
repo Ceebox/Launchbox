@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -105,18 +106,8 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_HEADER) {
-            var header = new FontTextView(parent.getContext());
-            header.setIsHeading(true);
-            header.setTag(R.id.isHeading, true);
-
-            // When we don't have icons, it looks weird to have everything floating
-            var matchIconPadding = 16;
-            if (SettingsManager.getIconPack().equals("None")) {
-                matchIconPadding = 0;
-            }
-
-            header.setPadding(matchIconPadding, 16, matchIconPadding, 16);
-            return new HeaderViewHolder(header);
+            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
+            return new HeaderViewHolder(view);
         } else if (viewType == TYPE_APP) {
             var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
             return new AppViewHolder(view);

@@ -1,25 +1,33 @@
 package com.chadderbox.launchbox.viewholders;
 
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.utils.ShadowHelper;
+import com.chadderbox.launchbox.components.FontTextView;
+import com.chadderbox.launchbox.settings.SettingsManager;
 
-public final class HeaderViewHolder extends RecyclerView.ViewHolder {
-    private final TextView mHeader;
-    public HeaderViewHolder(@NonNull View itemView) {
-        super(itemView);
-        mHeader = (TextView) itemView;
+public final class HeaderViewHolder
+    extends ViewHolderItemBase {
 
-        ShadowHelper.applySettings(mHeader);
+    public HeaderViewHolder(@NonNull View viewItem) {
+        super(viewItem);
+
+        var icon = itemView.findViewById(R.id.item_icon);
+        icon.setVisibility(View.GONE);
+
+        var text = (FontTextView) mText;
+        text.setIsHeading(true);
+        text.setTag(R.id.isHeading, true);
+
+        // When we don't have icons, it looks weird to have everything floating
+        var matchIconPadding = 16;
+        if (SettingsManager.getIconPack().equals("None")) {
+            matchIconPadding = 0;
+        }
+
+        text.setPadding(matchIconPadding, 16, matchIconPadding, 16);
     }
 
-    public void bind(String suggestion) {
-        mHeader.setText(suggestion);
-    }
 }

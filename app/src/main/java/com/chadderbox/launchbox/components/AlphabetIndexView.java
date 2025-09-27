@@ -22,9 +22,9 @@ import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 
-import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.FontHelper;
+import com.chadderbox.launchbox.utils.ShadowHelper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -303,9 +303,7 @@ public final class AlphabetIndexView
             mPaint.setColor(Color.WHITE);
         }
 
-        // These are copied from list_item_layout
-        var shadowColor = ContextCompat.getColor(context, R.color.text_shadow);
-        mPaint.setShadowLayer(2f, 4f, 4f, shadowColor);
+        ShadowHelper.applySettings(getContext(), mPaint);
     }
 
     private void applyCurrentFont() {
@@ -349,6 +347,10 @@ public final class AlphabetIndexView
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (SettingsManager.KEY_FONT.equals(key)) {
             applyCurrentFont();
+        }
+
+        if (SettingsManager.KEY_SHADOW_STRENGTH.equals(key)) {
+            ShadowHelper.applySettings(getContext(), mPaint);
         }
 
         if (SettingsManager.KEY_LEFT_HANDED.equals(key)) {
