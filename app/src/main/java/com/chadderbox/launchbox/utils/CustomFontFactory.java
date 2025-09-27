@@ -78,6 +78,7 @@ public final class CustomFontFactory
 
             try (var a = context.obtainStyledAttributes(attrs, R.styleable.FontTextView)) {
 
+                // TODO: Fix the override font stuff
                 var isHeading = a.getBoolean(R.styleable.FontTextView_isHeading, false);
                 var overrideFontSize = a.getBoolean(R.styleable.FontTextView_overrideFontSize, false);
 
@@ -91,12 +92,6 @@ public final class CustomFontFactory
 
                 if (isHeading) {
                     textView.setTypeface(textView.getTypeface(), Typeface.BOLD);
-                }
-
-                if (overrideFontSize) {
-                    var pxSize = a.getDimensionPixelSize(0, (int) textView.getTextSize());
-                    var spSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, pxSize, context.getResources().getDisplayMetrics());
-                    textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, spSize);
                 }
             } catch (Exception ignored) { }
         }
