@@ -7,6 +7,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.BlurMaskFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -24,6 +26,7 @@ public class ShadowImageView
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final Paint mShadowPaint;
+    private Paint mTintPaint;
     private Bitmap mShadowBitmap;
     private final float mShadowRadius = 2f;
     private float mShadowDx = 4f;
@@ -48,6 +51,8 @@ public class ShadowImageView
         mShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mShadowPaint.setColor(ContextCompat.getColor(getContext(), R.color.text_shadow));
         mShadowPaint.setMaskFilter(new BlurMaskFilter(mShadowRadius, BlurMaskFilter.Blur.NORMAL));
+
+        setTintPaint();
 
         var shadowStrength = SettingsManager.getShadowStrength();
         mShadowDx = shadowStrength;
@@ -106,7 +111,7 @@ public class ShadowImageView
             canvas.drawBitmap(mShadowBitmap, null, mShadowBounds, mShadowPaint);
         }
 
-        canvas.drawBitmap(mOriginalBitmap, null, mImageBounds, null);
+        canvas.drawBitmap(mOriginalBitmap, null, mImageBounds, mTintPaint);
 
         canvas.restore();
     }
@@ -196,12 +201,33 @@ public class ShadowImageView
         return new Rect(left, top, right, bottom);
     }
 
+    private void setTintPaint() {
+        var tintIconsMode = SettingsManager.getTintIconsMode();
+        switch (tintIconsMode) {
+            case SettingsManager.TINT_ICONS_DISABLED:
+                mTintPaint = null;
+                break;
+            case SettingsManager.TINT_ICONS_MATCH_FONT:
+                mTintPaint = new Paint();
+                mTintPaint.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(getContext(), R.color.text_primary), PorterDuff.Mode.SRC_IN));
+                break;
+            case SettingsManager.TINT_ICONS_PASTEL:
+            case SettingsManager.TINT_ICONS_SYSTEM:
+            default: break;
+        }
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (SettingsManager.KEY_SHADOW_STRENGTH.equals(key)) {
             var shadowStrength = SettingsManager.getShadowStrength();
             mShadowDx = shadowStrength;
             mShadowDy = shadowStrength;
+            invalidate();
+        }
+
+        if (SettingsManager.KEY_TINT_ICONS.equals(key)) {
+            setTintPaint();
             invalidate();
         }
     }

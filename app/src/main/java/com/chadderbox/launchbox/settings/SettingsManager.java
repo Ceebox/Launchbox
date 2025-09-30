@@ -4,6 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 
+import androidx.annotation.IntDef;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,6 +23,7 @@ public final class SettingsManager {
     public static final String KEY_FONT_SIZE = "font_size";
     public static final String KEY_SHADOW_STRENGTH = "shadow_strength";
     public static final String KEY_THEME = "theme";
+    public static final String KEY_TINT_ICONS = "tint_icons";
     public static final String KEY_WALLPAPER = "wallpaper";
     public static final String KEY_WALLPAPER_DIM_AMOUNT = "wallpaper_dim_amount";
     public static final String KEY_NOW_PLAYING_WIDGET = "now_playing_enabled";
@@ -117,6 +122,14 @@ public final class SettingsManager {
         return sPrefs.getInt(KEY_THEME, Configuration.UI_MODE_NIGHT_UNDEFINED);
     }
 
+    public static void setTintIconsMode(@TintIconsMode int tintIconsMode) {
+        sPrefs.edit().putInt(KEY_TINT_ICONS, tintIconsMode).apply();
+    }
+
+    public static @TintIconsMode int getTintIconsMode() {
+        return sPrefs.getInt(KEY_TINT_ICONS, TINT_ICONS_DISABLED);
+    }
+
     public static void setWallpaper(String wallpaper) {
         sPrefs.edit().putString(KEY_WALLPAPER, wallpaper).apply();
     }
@@ -141,4 +154,15 @@ public final class SettingsManager {
         // Disable this initially  because people need to grant access
         return sPrefs.getBoolean(KEY_NOW_PLAYING_WIDGET, false);
     }
+
+    //<editor-fold desc="Parameters">
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({TINT_ICONS_DISABLED, TINT_ICONS_MATCH_FONT, TINT_ICONS_SYSTEM, TINT_ICONS_PASTEL})
+    public @interface TintIconsMode { }
+
+    public static final int TINT_ICONS_DISABLED = 0;
+    public static final int TINT_ICONS_MATCH_FONT = 1;
+    public static final int TINT_ICONS_SYSTEM = 2;
+    public static final int TINT_ICONS_PASTEL = 4;
+    //</editor-fold>
 }
