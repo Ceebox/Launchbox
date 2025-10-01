@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox;
+package com.chadderbox.launchbox.main.adapters;
 
 import android.annotation.SuppressLint;
 
@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+
+import com.chadderbox.launchbox.main.fragments.AppListFragmentBase;
 
 import java.util.ArrayList;
 import java.util.List;

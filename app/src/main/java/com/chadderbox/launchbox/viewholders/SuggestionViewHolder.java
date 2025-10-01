@@ -9,7 +9,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SuggestionItem;
-import com.chadderbox.launchbox.utils.TintHelper;
+import com.chadderbox.launchbox.ui.TintHelper;
 
 public final class SuggestionViewHolder extends ViewHolderItemBase {
 

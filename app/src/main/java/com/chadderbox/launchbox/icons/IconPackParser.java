@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.utils;
+package com.chadderbox.launchbox.icons;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

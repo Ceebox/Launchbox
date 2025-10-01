@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.components;
+package com.chadderbox.launchbox.ui.components;
 
 import android.content.ComponentName;
 import android.content.Context;

@@ -1,24 +1,21 @@
-package com.chadderbox.launchbox;
+package com.chadderbox.launchbox.main.adapters;
 
 import android.annotation.SuppressLint;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.chadderbox.launchbox.components.FontTextView;
+import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SettingItem;
 import com.chadderbox.launchbox.data.SuggestionItem;
 import com.chadderbox.launchbox.data.WebItem;
-import com.chadderbox.launchbox.settings.SettingsManager;
-import com.chadderbox.launchbox.utils.IconPackLoader;
+import com.chadderbox.launchbox.icons.IconPackLoader;
 import com.chadderbox.launchbox.viewholders.AppViewHolder;
 import com.chadderbox.launchbox.viewholders.HeaderViewHolder;
 import com.chadderbox.launchbox.viewholders.SettingViewHolder;

@@ -32,7 +32,7 @@
 
     </LinearLayout>
 
-    <com.chadderbox.launchbox.components.AlphabetIndexView
+    <com.chadderbox.launchbox.ui.components.AlphabetIndexView
         android:id="@+id/alphabet_index"
         android:layout_width="100dp"
         android:layout_height="match_parent"

@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox;
+package com.chadderbox.launchbox.main.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -10,8 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.main.adapters.IAdapterFetcher;
+import com.chadderbox.launchbox.main.viewmodels.AppsViewModel;
 import com.chadderbox.launchbox.utils.AppLoader;
-import com.chadderbox.launchbox.utils.ServiceManager;
+import com.chadderbox.launchbox.core.ServiceManager;
 
 public final class AppsFragment
     extends AppListFragmentBase {
@@ -55,7 +58,7 @@ public final class AppsFragment
     }
 
     @Override
-    void refresh() {
+    public void refresh() {
         if (mViewModel != null) {
             mViewModel.getAppLoader().refreshInstalledApps();
             mViewModel.loadApps();

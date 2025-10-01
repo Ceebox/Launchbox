@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.utils;
+package com.chadderbox.launchbox.wallpaper;
 
 import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;

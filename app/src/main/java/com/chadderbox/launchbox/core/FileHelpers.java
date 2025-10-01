@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.utils;
+package com.chadderbox.launchbox.core;
 
 import android.content.Context;
 import android.net.Uri;

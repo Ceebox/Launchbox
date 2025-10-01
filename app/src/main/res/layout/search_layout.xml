@@ -28,7 +28,7 @@
             android:layout_gravity="center"
             android:layout_margin="16dp"/>
 
-        <com.chadderbox.launchbox.components.FontEditText
+        <com.chadderbox.launchbox.ui.components.FontEditText
             android:id="@+id/search_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

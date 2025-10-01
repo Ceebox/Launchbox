@@ -3,7 +3,7 @@ package com.chadderbox.launchbox.data;
 import android.content.Context;
 import android.content.Intent;
 
-import com.chadderbox.launchbox.MainActivity;
+import com.chadderbox.launchbox.main.MainActivity;
 
 public final class SettingItem extends ListItem {
     private final String mTitle;

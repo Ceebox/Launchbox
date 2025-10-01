@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.utils;
+package com.chadderbox.launchbox.fonts;
 
 import android.app.Activity;
 import android.content.Context;

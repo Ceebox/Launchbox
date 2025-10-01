@@ -2,7 +2,7 @@ package com.chadderbox.launchbox.data;
 
 import android.content.Context;
 
-import com.chadderbox.launchbox.MainActivity;
+import com.chadderbox.launchbox.main.MainActivity;
 
 public final class SuggestionItem extends ListItem {
     private final String mSuggestion;

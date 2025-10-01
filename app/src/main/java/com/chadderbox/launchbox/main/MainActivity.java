@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox;
+package com.chadderbox.launchbox.main;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -29,8 +29,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.chadderbox.launchbox.components.AlphabetIndexView;
-import com.chadderbox.launchbox.components.FontEditText;
+import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
+import com.chadderbox.launchbox.main.adapters.IAdapterFetcher;
+import com.chadderbox.launchbox.main.adapters.MainPagerAdapter;
+import com.chadderbox.launchbox.main.fragments.AppListFragmentBase;
+import com.chadderbox.launchbox.main.fragments.AppsFragment;
+import com.chadderbox.launchbox.main.fragments.FavouritesFragment;
+import com.chadderbox.launchbox.ui.components.AlphabetIndexView;
+import com.chadderbox.launchbox.ui.components.FontEditText;
 import com.chadderbox.launchbox.data.AppInfo;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.SettingItem;
@@ -43,12 +50,12 @@ import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.AppAliasProvider;
 import com.chadderbox.launchbox.utils.AppLoader;
-import com.chadderbox.launchbox.utils.CustomFontFactory;
+import com.chadderbox.launchbox.fonts.CustomFontFactory;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
-import com.chadderbox.launchbox.utils.IconPackLoader;
-import com.chadderbox.launchbox.utils.ServiceManager;
-import com.chadderbox.launchbox.utils.ThemeHelper;
-import com.chadderbox.launchbox.utils.WallpaperManager;
+import com.chadderbox.launchbox.icons.IconPackLoader;
+import com.chadderbox.launchbox.core.ServiceManager;
+import com.chadderbox.launchbox.ui.ThemeHelper;
+import com.chadderbox.launchbox.wallpaper.WallpaperManager;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;

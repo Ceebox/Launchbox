@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox;
+package com.chadderbox.launchbox.main.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -10,9 +10,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.main.adapters.IAdapterFetcher;
+import com.chadderbox.launchbox.main.viewmodels.FavouritesViewModel;
 import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
-import com.chadderbox.launchbox.utils.ServiceManager;
+import com.chadderbox.launchbox.core.ServiceManager;
 
 public final class FavouritesFragment
     extends AppListFragmentBase {
@@ -60,7 +63,7 @@ public final class FavouritesFragment
     }
 
     @Override
-    void refresh() {
+    public void refresh() {
         if (mViewModel != null) {
             mViewModel.loadFavourites();
         }

@@ -7,7 +7,7 @@ import android.widget.Toast;
 import android.app.AlertDialog;
 
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.components.FontTextView;
+import com.chadderbox.launchbox.ui.components.FontTextView;
 import com.chadderbox.launchbox.settings.SettingCategory;
 import com.chadderbox.launchbox.settings.SettingGroup;
 import com.chadderbox.launchbox.settings.SettingsActivity;

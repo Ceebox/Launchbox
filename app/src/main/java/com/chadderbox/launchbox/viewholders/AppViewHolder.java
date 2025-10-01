@@ -8,13 +8,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.components.ShadowImageView;
+import com.chadderbox.launchbox.ui.components.ShadowImageView;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.settings.SettingsManager;
-import com.chadderbox.launchbox.utils.FontHelper;
-import com.chadderbox.launchbox.utils.IconPackLoader;
-import com.chadderbox.launchbox.utils.ShadowHelper;
+import com.chadderbox.launchbox.fonts.FontHelper;
+import com.chadderbox.launchbox.icons.IconPackLoader;
+import com.chadderbox.launchbox.ui.ShadowHelper;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.components.FontTextView;
+import com.chadderbox.launchbox.ui.components.FontTextView;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.utils;
+package com.chadderbox.launchbox.icons;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,6 +11,7 @@ import android.util.LruCache;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.chadderbox.launchbox.settings.SettingsManager;
+import com.chadderbox.launchbox.ui.TintHelper;
 
 public final class IconPackLoader
     implements SharedPreferences.OnSharedPreferenceChangeListener {

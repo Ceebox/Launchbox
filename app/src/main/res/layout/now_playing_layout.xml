@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.chadderbox.launchbox.components.FontTextView
+            <com.chadderbox.launchbox.ui.components.FontTextView
                 android:id="@+id/song_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
                 app:overrideFontSize="true"
                 android:paddingBottom="2dp"/>
 
-            <com.chadderbox.launchbox.components.FontTextView
+            <com.chadderbox.launchbox.ui.components.FontTextView
                 android:id="@+id/song_artist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

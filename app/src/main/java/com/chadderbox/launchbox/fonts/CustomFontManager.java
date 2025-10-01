@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.components;
+package com.chadderbox.launchbox.fonts;
 
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -6,7 +6,6 @@ import android.util.TypedValue;
 import android.widget.TextView;
 
 import com.chadderbox.launchbox.settings.SettingsManager;
-import com.chadderbox.launchbox.utils.FontHelper;
 
 public final class CustomFontManager
     implements SharedPreferences.OnSharedPreferenceChangeListener {

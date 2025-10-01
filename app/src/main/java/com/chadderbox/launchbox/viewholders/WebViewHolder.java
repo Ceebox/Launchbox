@@ -2,7 +2,6 @@ package com.chadderbox.launchbox.viewholders;
 
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -10,7 +9,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.WebItem;
-import com.chadderbox.launchbox.utils.TintHelper;
+import com.chadderbox.launchbox.ui.TintHelper;
 
 public final class WebViewHolder
     extends ViewHolderItemBase {

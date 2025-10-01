@@ -1,8 +1,7 @@
-package com.chadderbox.launchbox.utils;
+package com.chadderbox.launchbox.ui;
 
 import android.content.Context;
 import android.graphics.Paint;
-import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 

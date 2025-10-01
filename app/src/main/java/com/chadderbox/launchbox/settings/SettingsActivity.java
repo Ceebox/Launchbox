@@ -24,8 +24,8 @@ import com.chadderbox.launchbox.settings.options.implementation.ThemeOption;
 import com.chadderbox.launchbox.settings.options.implementation.TintIconsOption;
 import com.chadderbox.launchbox.settings.options.implementation.WallpaperDimOption;
 import com.chadderbox.launchbox.settings.options.implementation.WallpaperOverrideOption;
-import com.chadderbox.launchbox.utils.CustomFontFactory;
-import com.chadderbox.launchbox.utils.ThemeHelper;
+import com.chadderbox.launchbox.fonts.CustomFontFactory;
+import com.chadderbox.launchbox.ui.ThemeHelper;
 
 import java.util.ArrayList;
 

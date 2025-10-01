@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.components;
+package com.chadderbox.launchbox.ui.components;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -23,8 +23,8 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 
 import com.chadderbox.launchbox.settings.SettingsManager;
-import com.chadderbox.launchbox.utils.FontHelper;
-import com.chadderbox.launchbox.utils.ShadowHelper;
+import com.chadderbox.launchbox.fonts.FontHelper;
+import com.chadderbox.launchbox.ui.ShadowHelper;
 
 import java.util.HashMap;
 import java.util.Map;

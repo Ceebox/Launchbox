@@ -14,7 +14,7 @@ import com.chadderbox.launchbox.settings.SettingGroup;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
-import com.chadderbox.launchbox.utils.FileHelpers;
+import com.chadderbox.launchbox.core.FileHelpers;
 
 @SettingCategory(category = SettingGroup.APPEARANCE)
 public final class WallpaperOverrideOption

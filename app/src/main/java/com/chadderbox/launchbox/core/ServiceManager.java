@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.utils;
+package com.chadderbox.launchbox.core;
 
 import android.os.Handler;
 import android.os.Looper;

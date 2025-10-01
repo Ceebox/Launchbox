@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingsManager;
-import com.chadderbox.launchbox.utils.ShadowHelper;
+import com.chadderbox.launchbox.ui.ShadowHelper;
 
 public abstract class ViewHolderItemBase
     extends RecyclerView.ViewHolder

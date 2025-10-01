@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.components;
+package com.chadderbox.launchbox.ui.components;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -8,6 +8,7 @@ import android.widget.EditText;
 import androidx.annotation.Nullable;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.fonts.CustomFontManager;
 
 @SuppressLint("AppCompatCustomView")
 public final class FontEditText extends EditText {

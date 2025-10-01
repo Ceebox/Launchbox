@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.components;
+package com.chadderbox.launchbox.ui.components;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -9,7 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.utils.ThemeHelper;
+import com.chadderbox.launchbox.fonts.CustomFontManager;
+import com.chadderbox.launchbox.ui.ThemeHelper;
 
 @SuppressLint("AppCompatCustomView")
 public final class FontTextView extends TextView {

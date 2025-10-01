@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox;
+package com.chadderbox.launchbox.main.viewmodels;
 
 import android.annotation.SuppressLint;
 import android.app.Application;

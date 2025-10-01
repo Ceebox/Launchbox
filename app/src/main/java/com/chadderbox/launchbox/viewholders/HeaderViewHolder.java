@@ -5,7 +5,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.components.FontTextView;
+import com.chadderbox.launchbox.ui.components.FontTextView;
 import com.chadderbox.launchbox.settings.SettingsManager;
 
 public final class HeaderViewHolder

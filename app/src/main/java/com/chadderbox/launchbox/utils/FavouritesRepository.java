@@ -4,6 +4,7 @@ import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
+import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.settings.SettingsManager;
 
 import java.util.HashSet;

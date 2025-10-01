@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox;
+package com.chadderbox.launchbox.main.viewmodels;
 
 import android.app.Application;
 import android.content.SharedPreferences;
