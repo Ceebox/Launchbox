@@ -81,6 +81,17 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return mItems.get(index);
     }
 
+    public void moveItem(final int fromPosition, final int toPosition) {
+        if (fromPosition < 0 || toPosition < 0 ||
+            fromPosition >= mItems.size() || toPosition >= mItems.size()) {
+            return;
+        }
+
+        var item = mItems.remove(fromPosition);
+        mItems.add(toPosition, item);
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     public void clearItems() {
         mItems.clear();
