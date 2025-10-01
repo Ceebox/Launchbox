@@ -16,7 +16,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-public class SettingsSearchProvider implements ISearchProvider {
+public final class SettingsSearchProvider implements ISearchProvider {
 
     private final Context mContext;
     private final Executor mExecutor = Executors.newSingleThreadExecutor();

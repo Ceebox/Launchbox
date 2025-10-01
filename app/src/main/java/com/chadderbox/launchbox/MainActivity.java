@@ -223,17 +223,10 @@ public final class MainActivity
                 closeSearchSheet();
             }
 
-            // Otherwise take us to the favourites section
-            var firstFragment = findPagerFragment(0);
-            if (mCurrentFragment != firstFragment) {
-                mViewPager.setCurrentItem(0, true);
-                mCurrentFragment = firstFragment;
-
-                // This doesn't really work
-                // TODO: Figure out why?
-                if (mCurrentFragment instanceof AppsFragment appsFragment) {
-                    appsFragment.scrollToPosition(0);
-                }
+            // TODO: Possibly make this customisable?
+            // Otherwise, if we're on the apps section, scroll to the top
+            if (mCurrentFragment instanceof AppsFragment appsFragment) {
+                appsFragment.smoothScrollToPosition(0);
             }
         });
     }
@@ -267,10 +260,9 @@ public final class MainActivity
 
         // Scroll to top when the home button is pressed
         if (Intent.ACTION_MAIN.equals(intent.getAction()) &&
-            intent.hasCategory(Intent.CATEGORY_HOME) &&
-            mCurrentFragment instanceof AppsFragment appsFragment
+            intent.hasCategory(Intent.CATEGORY_HOME)
         ) {
-            appsFragment.smoothScrollToPosition(0);
+            scrollToFavourites();
         }
     }
 
@@ -543,6 +535,18 @@ public final class MainActivity
     private Fragment findPagerFragment(final int position) {
         var itemId = mPagerAdapter.getItemId(position);
         return getSupportFragmentManager().findFragmentByTag("f" + itemId);
+    }
+
+    private void scrollToFavourites() {
+        var firstFragment = findPagerFragment(0);
+        if (mCurrentFragment != firstFragment) {
+            mViewPager.setCurrentItem(0, true);
+            mCurrentFragment = firstFragment;
+
+            if (mCurrentFragment instanceof AppsFragment appsFragment) {
+                appsFragment.scrollToPosition(0);
+            }
+        }
     }
 
     private int getDimColour(float dimAmount) {
