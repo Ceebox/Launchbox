@@ -6,6 +6,7 @@ import android.os.Looper;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.utils.AppLoader;
+import com.chadderbox.launchbox.utils.CancellationToken;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public final class AppSearchProvider implements ISearchProvider {
     }
 
     @Override
-    public void searchAsync(String query, Consumer<List<ListItem>> callback) {
+    public void searchAsync(String query, Consumer<List<ListItem>> callback, CancellationToken cancellationToken) {
         mExecutor.execute(() -> {
             var searchQuery = query.toLowerCase(Locale.getDefault());
 
@@ -48,6 +49,11 @@ public final class AppSearchProvider implements ISearchProvider {
             var fuzzyResults = new ArrayList<ListItem>();
 
             for (var app : apps) {
+
+                if (cancellationToken.isCancelled()) {
+                    return;
+                }
+
                 var labelForSearch = app.getLabel().toLowerCase(Locale.getDefault());
                 var packageForSearch = formatPackageName(app.getPackageName());
 

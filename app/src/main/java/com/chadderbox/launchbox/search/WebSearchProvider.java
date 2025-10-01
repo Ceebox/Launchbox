@@ -5,6 +5,7 @@ import android.os.Looper;
 
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.WebItem;
+import com.chadderbox.launchbox.utils.CancellationToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public final class WebSearchProvider implements ISearchProvider {
     }
 
     @Override
-    public void searchAsync(String query, Consumer<List<ListItem>> callback) {
+    public void searchAsync(String query, Consumer<List<ListItem>> callback, CancellationToken cancellationToken) {
         mExecutor.execute(() -> {
             var result = new ArrayList<ListItem>();
             result.add(new WebItem(query));

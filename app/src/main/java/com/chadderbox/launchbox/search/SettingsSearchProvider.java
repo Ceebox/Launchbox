@@ -7,6 +7,7 @@ import android.os.Looper;
 
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SettingItem;
+import com.chadderbox.launchbox.utils.CancellationToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public class SettingsSearchProvider implements ISearchProvider {
     }
 
     @Override
-    public void searchAsync(String query, Consumer<List<ListItem>> callback) {
+    public void searchAsync(String query, Consumer<List<ListItem>> callback, CancellationToken cancellationToken) {
         mExecutor.execute(() -> {
             var results = new ArrayList<ListItem>();
 
@@ -43,6 +44,11 @@ public class SettingsSearchProvider implements ISearchProvider {
                 var activities = packageManager.queryIntentActivities(intent, 0);
                 var searchQuery = query.toLowerCase(Locale.getDefault());
                 for (var info : activities) {
+
+                    if (cancellationToken.isCancelled()) {
+                        return;
+                    }
+
                     var label = info.loadLabel(packageManager).toString();
                     if (label.toLowerCase(Locale.getDefault()).contains(searchQuery)) {
                         var launchIntent = new Intent();

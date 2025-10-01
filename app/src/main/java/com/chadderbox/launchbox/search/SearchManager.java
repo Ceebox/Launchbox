@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import com.chadderbox.launchbox.data.ListItem;
+import com.chadderbox.launchbox.utils.CancellationToken;
 
 /**
  * Responsible for obtaining the results for various search queries via a {@link ISearchProvider}.
@@ -16,6 +17,7 @@ import com.chadderbox.launchbox.data.ListItem;
 public final class SearchManager {
 
     private final List<ISearchProvider> mSearchProviders;
+    private CancellationToken mCancellationToken;
 
     public SearchManager(List<ISearchProvider> providers) {
         mSearchProviders = new ArrayList<>(providers);
@@ -28,23 +30,33 @@ public final class SearchManager {
             return;
         }
 
+        if (mCancellationToken != null && !mCancellationToken.isCancelled()) {
+            mCancellationToken.cancel();
+        }
+
+        mCancellationToken = new CancellationToken();
+
         var aggregated = new ArrayList<ListItem>();
         var pending = new AtomicInteger(mSearchProviders.size());
         var resultsByProvider = new ConcurrentHashMap<ISearchProvider, List<ListItem>>();
 
         for (var provider : mSearchProviders) {
-            provider.searchAsync(query, results -> {
-                resultsByProvider.put(provider, results);
-                if (pending.decrementAndGet() == 0) {
+            provider.searchAsync(
+                query,
+                results -> {
+                    resultsByProvider.put(provider, results);
+                    if (pending.decrementAndGet() == 0) {
 
-                    // Order by priority
-                    for (var p : mSearchProviders) {
-                        aggregated.addAll(Objects.requireNonNull(resultsByProvider.getOrDefault(p, List.of())));
+                        // Order by priority
+                        for (var p : mSearchProviders) {
+                            aggregated.addAll(Objects.requireNonNull(resultsByProvider.getOrDefault(p, List.of())));
+                        }
+
+                        callback.accept(aggregated);
                     }
-
-                    callback.accept(aggregated);
-                }
-            });
+                },
+                mCancellationToken
+            );
         }
     }
 }

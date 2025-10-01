@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SuggestionItem;
+import com.chadderbox.launchbox.utils.CancellationToken;
 
 import org.json.JSONArray;
 
@@ -33,11 +34,11 @@ public final class WebSuggestionProvider implements ISearchProvider {
     }
 
     @Override
-    public void searchAsync(String query, Consumer<List<ListItem>> callback) {
+    public void searchAsync(String query, Consumer<List<ListItem>> callback, CancellationToken cancellationToken) {
         mExecutor.execute(() -> {
-            List<ListItem> suggestions = new ArrayList<>();
+            var suggestions = new ArrayList<ListItem>();
             try {
-                String endpoint = "https://suggestqueries.google.com/complete/search?client=firefox&q=" +
+                var endpoint = "https://suggestqueries.google.com/complete/search?client=firefox&q=" +
                     java.net.URLEncoder.encode(query, StandardCharsets.UTF_8);
 
                 var conn = (HttpURLConnection) new URL(endpoint).openConnection();
@@ -48,11 +49,17 @@ public final class WebSuggestionProvider implements ISearchProvider {
                 try (var reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
                     var sb = new StringBuilder();
                     String line;
-                    while ((line = reader.readLine()) != null) sb.append(line);
+                    while ((line = reader.readLine()) != null) {
+                        if (cancellationToken.isCancelled()) {
+                            return;
+                        }
+
+                        sb.append(line);
+                    }
 
                     var arr = new JSONArray(sb.toString());
                     var suggestionsArr = arr.getJSONArray(1);
-                    for (int i = 0; i < Math.min(5, suggestionsArr.length()); i++) {
+                    for (var i = 0; i < Math.min(5, suggestionsArr.length()); i++) {
                         suggestions.add(new SuggestionItem(suggestionsArr.getString(i)));
                     }
                 }

@@ -19,7 +19,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.GestureDetector;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -71,7 +70,7 @@ public final class MainActivity
     IAdapterFetcher,
     SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static final long SEARCH_DELAY_MS = 300;
+    private static final long SEARCH_DELAY_MS = 150;
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
@@ -420,7 +419,7 @@ public final class MainActivity
                     mSearchHandler.removeCallbacks(mSearchRunnable);
                 }
 
-                final String query = s.toString();
+                final var query = s.toString();
                 mSearchRunnable = () -> performSearch(query);
                 mSearchHandler.postDelayed(mSearchRunnable, SEARCH_DELAY_MS);
             }
