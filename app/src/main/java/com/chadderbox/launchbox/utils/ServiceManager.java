@@ -1,5 +1,8 @@
 package com.chadderbox.launchbox.utils;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -7,6 +10,7 @@ import java.util.function.Supplier;
 public final class ServiceManager {
 
     private static final Map<Class<?>, Object> sServices = new HashMap<>();
+    private static final Handler sMainHandler = new Handler(Looper.getMainLooper());
 
     private ServiceManager() { }
 
@@ -27,5 +31,9 @@ public final class ServiceManager {
         }
 
         throw new IllegalStateException("Service not found: " + type.getName());
+    }
+
+    public static Handler getMainHandler() {
+        return sMainHandler;
     }
 }

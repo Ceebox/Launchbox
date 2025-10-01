@@ -7,14 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.BlendMode;
-import android.graphics.BlendModeColorFilter;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -25,7 +19,6 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -55,6 +48,7 @@ import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.utils.IconPackLoader;
 import com.chadderbox.launchbox.utils.ServiceManager;
 import com.chadderbox.launchbox.utils.ThemeHelper;
+import com.chadderbox.launchbox.utils.WallpaperManager;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
@@ -73,12 +67,11 @@ public final class MainActivity
     private static final long SEARCH_DELAY_MS = 150;
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
-    private final Handler mSearchHandler = new Handler(Looper.getMainLooper());
     private final HashMap<Class<? extends AppListFragmentBase>, CombinedAdapter> mAdapters = new HashMap<>();
     private AppLoader mAppLoader;
     private AppAliasProvider mAppAliasHelper;
     private SearchManager mSearchManager;
+    private WallpaperManager mWallpaperManager;
     private Runnable mSearchRunnable;
     private AlphabetIndexView mIndexView;
     private MainPagerAdapter mPagerAdapter;
@@ -89,7 +82,6 @@ public final class MainActivity
     private BottomSheetBehavior<View> mSearchSheet;
     private CombinedAdapter mSearchAdapter;
     private Fragment mCurrentFragment;
-    private Drawable mWallpaperDrawable;
 
     private final BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
         @Override
@@ -129,7 +121,7 @@ public final class MainActivity
         CustomFontFactory.initialise(this);
 
         ServiceManager.register(IconPackLoader.class, () -> mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack()));
-        ServiceManager.register(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(mExecutor, mMainHandler));
+        ServiceManager.register(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(mExecutor));
         ServiceManager.register(AppAliasProvider.class, () -> mAppAliasHelper = new AppAliasProvider());
         ServiceManager.register(AppLoader.class, () -> mAppLoader = new AppLoader(this, mAppAliasHelper));
 
@@ -147,7 +139,9 @@ public final class MainActivity
         super.onCreate(savedInstanceState);
         getWindow().setDimAmount(0f);
         setContentView(R.layout.activity_main);
-        loadWallpaperBackground();
+
+        mWallpaperManager = new WallpaperManager(findViewById(R.id.wallpaper_image));
+        mWallpaperManager.applyBackground();
 
         initialiseSearchView();
 
@@ -339,7 +333,7 @@ public final class MainActivity
                             mFavouritesHelper.saveFavourites(currentFavourites);
                             refreshFavouritesFragment();
 
-                            mMainHandler.post(this::refreshAllVisibleFragments);
+                            ServiceManager.getMainHandler().post(this::refreshAllVisibleFragments);
                         });
                         break;
 
@@ -407,13 +401,14 @@ public final class MainActivity
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                var handler = ServiceManager.getMainHandler();
                 if (mSearchRunnable != null) {
-                    mSearchHandler.removeCallbacks(mSearchRunnable);
+                    handler.removeCallbacks(mSearchRunnable);
                 }
 
                 final var query = s.toString();
                 mSearchRunnable = () -> performSearch(query);
-                mSearchHandler.postDelayed(mSearchRunnable, SEARCH_DELAY_MS);
+                handler.postDelayed(mSearchRunnable, SEARCH_DELAY_MS);
             }
 
             @Override
@@ -502,36 +497,6 @@ public final class MainActivity
         });
     }
 
-    /** Either load in the wallpaper, or use a blank one so we can dim it. */
-    private void loadWallpaperBackground() {
-        var wallpaperPath = SettingsManager.getWallpaper();
-        Drawable loadedDrawable = null;
-
-        if (wallpaperPath != null && !wallpaperPath.isEmpty()) {
-            var wallpaperUri = Uri.parse(wallpaperPath);
-            try (var inputStream = getContentResolver().openInputStream(wallpaperUri)) {
-                if (inputStream != null) {
-                    loadedDrawable = Drawable.createFromStream(inputStream, wallpaperUri.toString());
-                }
-            } catch (Exception ignored) { }
-        }
-
-        if (loadedDrawable == null) {
-            loadedDrawable = new ColorDrawable(0xFF000000);
-        }
-
-        mWallpaperDrawable = loadedDrawable;
-        setWallpaperDim();
-    }
-
-    private void setWallpaperDim() {
-        var wallpaperHost = (ImageView) findViewById(R.id.wallpaper_image);
-
-        var drawable = mWallpaperDrawable.mutate();
-        drawable.setColorFilter(new BlendModeColorFilter(getDimColour(SettingsManager.getWallpaperDimAmount()), BlendMode.SRC));
-        wallpaperHost.setImageDrawable(drawable);
-    }
-
     private Fragment findPagerFragment(final int position) {
         var itemId = mPagerAdapter.getItemId(position);
         return getSupportFragmentManager().findFragmentByTag("f" + itemId);
@@ -547,12 +512,6 @@ public final class MainActivity
                 appsFragment.scrollToPosition(0);
             }
         }
-    }
-
-    private int getDimColour(float dimAmount) {
-        dimAmount = Math.max(0f, Math.min(dimAmount, 1f));
-        var alpha = (int) (dimAmount * 255);
-        return alpha << 24;
     }
 
     private void populateAlphabetViewLetters() {
@@ -687,7 +646,7 @@ public final class MainActivity
         if (SettingsManager.KEY_WALLPAPER.equals(key) ||
             SettingsManager.KEY_WALLPAPER_DIM_AMOUNT.equals(key)
         ) {
-            loadWallpaperBackground();
+            mWallpaperManager.applyBackground();
         }
     }
 }

@@ -14,9 +14,9 @@ public final class FavouritesRepository {
     private final ExecutorService mExecutor;
     private final Handler mMainHandler;
 
-    public FavouritesRepository(ExecutorService executor, Handler mainHandler) {
+    public FavouritesRepository(ExecutorService executor) {
         mExecutor = executor;
-        mMainHandler = mainHandler;
+        mMainHandler = ServiceManager.getMainHandler();
     }
 
     public boolean isFavourite(@NonNull String packageName) {
