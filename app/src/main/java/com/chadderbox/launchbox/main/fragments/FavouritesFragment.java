@@ -88,8 +88,8 @@ public final class FavouritesFragment
             requireActivity(),
             new FavouritesViewModel.Factory(
                 requireActivity().getApplication(),
-                ServiceManager.resolve(AppLoader.class),
-                ServiceManager.resolve(FavouritesRepository.class)
+                ServiceManager.getService(AppLoader.class),
+                ServiceManager.getService(FavouritesRepository.class)
             )
         ).get(FavouritesViewModel.class);
 

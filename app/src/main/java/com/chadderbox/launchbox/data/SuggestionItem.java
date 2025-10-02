@@ -17,12 +17,12 @@ public final class SuggestionItem extends ListItem {
     }
 
     @Override
-    public void performOpenAction(Context context) {
+    protected void executeOpenAction(Context context) {
         if (context instanceof MainActivity app) {
             app.openWebQuery(mSuggestion);
         }
     }
 
     @Override
-    public void performHoldAction(Context context) { }
+    protected void executeHoldAction(Context context) { }
 }

@@ -17,12 +17,12 @@ public final class WebItem extends ListItem {
     }
 
     @Override
-    public void performOpenAction(Context context) {
+    protected void executeOpenAction(Context context) {
         if (context instanceof MainActivity app) {
             app.openWebQuery(mQuery);
         }
     }
 
     @Override
-    public void performHoldAction(Context context) { }
+    protected void executeHoldAction(Context context) { }
 }

@@ -17,14 +17,14 @@ public final class AppItem extends ListItem {
     }
 
     @Override
-    public void performOpenAction(Context context) {
+    protected void executeOpenAction(Context context) {
         if (context instanceof MainActivity app) {
             app.launchApp(mAppInfo);
         }
     }
 
     @Override
-    public void performHoldAction(Context context) {
+    protected void executeHoldAction(Context context) {
         if (context instanceof MainActivity app) {
             app.showAppMenu(mAppInfo);
         }

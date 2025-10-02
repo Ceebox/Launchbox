@@ -3,6 +3,7 @@ package com.chadderbox.launchbox.search;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.utils.AppLoader;
@@ -24,9 +25,9 @@ public final class AppSearchProvider implements ISearchProvider {
     private final AppLoader mAppLoader;
     private final FavouritesRepository mFavouritesRepository;
 
-    public AppSearchProvider(AppLoader appLoader, FavouritesRepository favouritesRepository) {
-        mAppLoader = appLoader;
-        mFavouritesRepository = favouritesRepository;
+    public AppSearchProvider() {
+        mAppLoader = ServiceManager.getService(AppLoader.class);
+        mFavouritesRepository = ServiceManager.getService(FavouritesRepository.class);
     }
 
     @Override

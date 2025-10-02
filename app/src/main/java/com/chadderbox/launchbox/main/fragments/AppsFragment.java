@@ -44,7 +44,7 @@ public final class AppsFragment
             requireActivity(),
             new AppsViewModel.Factory(
                 requireActivity().getApplication(),
-                ServiceManager.resolve(AppLoader.class)
+                ServiceManager.getService(AppLoader.class)
             )
         ).get(AppsViewModel.class);
 

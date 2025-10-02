@@ -24,12 +24,12 @@ public final class SettingItem extends ListItem {
     }
 
     @Override
-    public void performOpenAction(Context context) {
+    protected void executeOpenAction(Context context) {
         if (context instanceof MainActivity app) {
             app.openSetting(this);
         }
     }
 
     @Override
-    public void performHoldAction(Context context) { }
+    protected void executeHoldAction(Context context) { }
 }

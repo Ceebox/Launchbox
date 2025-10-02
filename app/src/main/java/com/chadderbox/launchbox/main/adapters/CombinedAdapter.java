@@ -33,10 +33,9 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int TYPE_SUGGESTION = 3;
     private static final int TYPE_SETTING = 4;
 
-    private static final float HEADER_SIZE_MULTIPLIER = 1.5f;
-
     private final List<ListItem> mItems;
     private final IconPackLoader mIconPackLoader;
+    private boolean mActionsEnabled = true;
 
     public CombinedAdapter(
             List<ListItem> items,
@@ -44,6 +43,21 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     ) {
         mItems = items;
         mIconPackLoader = iconPackLoader;
+    }
+
+    public boolean getActionsEnabled() {
+        return mActionsEnabled;
+    }
+
+    public void setActionsEnabled(boolean enabled) {
+        if (mActionsEnabled == enabled) {
+            return;
+        }
+
+        mActionsEnabled = enabled;
+        for (var item : mItems) {
+            item.setActionsEnabled(mActionsEnabled);
+        }
     }
 
     @Override
@@ -101,12 +115,17 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @SuppressLint("NotifyDataSetChanged")
     public void add(ListItem item) {
         mItems.add(item);
+        item.setActionsEnabled(mActionsEnabled);
         this.notifyDataSetChanged();
     }
 
     @SuppressLint("NotifyDataSetChanged")
     public void addAll(Collection<? extends ListItem> items) {
         mItems.addAll(items);
+        for (var item : items) {
+            item.setActionsEnabled(mActionsEnabled);
+        }
+
         this.notifyDataSetChanged();
     }
 

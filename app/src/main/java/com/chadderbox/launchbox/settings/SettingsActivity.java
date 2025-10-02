@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
 import com.chadderbox.launchbox.settings.options.implementation.CharacterHeadingsOption;
 import com.chadderbox.launchbox.settings.options.implementation.FontOption;
@@ -43,6 +44,7 @@ public final class SettingsActivity extends ComponentActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
+        ServiceManager.registerActivity(SettingsActivity.class, this);
         CustomFontFactory.initialise(this);
 
         SettingsManager.initialiseSettingsManager(getApplicationContext());

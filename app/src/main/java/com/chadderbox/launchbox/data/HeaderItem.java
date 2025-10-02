@@ -15,8 +15,8 @@ public final class HeaderItem extends ListItem {
     }
 
     @Override
-    public void performOpenAction(Context context) { }
+    public void executeOpenAction(Context context) { }
 
     @Override
-    public void performHoldAction(Context context) { }
+    protected void executeHoldAction(Context context) { }
 }

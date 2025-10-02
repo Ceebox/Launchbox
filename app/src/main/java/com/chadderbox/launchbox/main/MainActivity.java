@@ -1,7 +1,6 @@
 package com.chadderbox.launchbox.main;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,43 +8,32 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.TextWatcher;
-import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.main.adapters.IAdapterFetcher;
 import com.chadderbox.launchbox.main.adapters.MainPagerAdapter;
+import com.chadderbox.launchbox.main.commands.IDialogCommand;
+import com.chadderbox.launchbox.main.commands.OpenSettingsCommand;
+import com.chadderbox.launchbox.main.commands.RenameCommand;
+import com.chadderbox.launchbox.main.commands.ToggleFavouriteCommand;
+import com.chadderbox.launchbox.main.commands.UninstallCommand;
+import com.chadderbox.launchbox.main.controllers.AlphabetViewController;
+import com.chadderbox.launchbox.main.controllers.FragmentController;
+import com.chadderbox.launchbox.main.controllers.SearchController;
+import com.chadderbox.launchbox.main.controllers.ViewPagerController;
 import com.chadderbox.launchbox.main.fragments.AppListFragmentBase;
 import com.chadderbox.launchbox.main.fragments.AppsFragment;
 import com.chadderbox.launchbox.main.fragments.FavouritesFragment;
-import com.chadderbox.launchbox.ui.components.AlphabetIndexView;
-import com.chadderbox.launchbox.ui.components.FontEditText;
 import com.chadderbox.launchbox.data.AppInfo;
-import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.SettingItem;
-import com.chadderbox.launchbox.search.AppSearchProvider;
-import com.chadderbox.launchbox.search.SearchManager;
-import com.chadderbox.launchbox.search.SettingsSearchProvider;
-import com.chadderbox.launchbox.search.WebSearchProvider;
-import com.chadderbox.launchbox.search.WebSuggestionProvider;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.AppAliasProvider;
@@ -59,8 +47,8 @@ import com.chadderbox.launchbox.wallpaper.WallpaperManager;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -71,24 +59,17 @@ public final class MainActivity
     IAdapterFetcher,
     SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static final long SEARCH_DELAY_MS = 150;
-
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final HashMap<Class<? extends AppListFragmentBase>, CombinedAdapter> mAdapters = new HashMap<>();
     private AppLoader mAppLoader;
     private AppAliasProvider mAppAliasHelper;
-    private SearchManager mSearchManager;
+    private AlphabetViewController mAlphabetController;
     private WallpaperManager mWallpaperManager;
-    private Runnable mSearchRunnable;
-    private AlphabetIndexView mIndexView;
-    private MainPagerAdapter mPagerAdapter;
-    private ViewPager2 mViewPager;
-    private GestureDetector mGestureDetector;
+    private ViewPagerController mViewPagerController;
+    private FragmentController mFragmentController;
+    private SearchController mSearchController;
     private FavouritesRepository mFavouritesHelper;
     private IconPackLoader mIconPackLoader;
-    private BottomSheetBehavior<View> mSearchSheet;
-    private CombinedAdapter mSearchAdapter;
-    private Fragment mCurrentFragment;
 
     private final BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
         @Override
@@ -104,8 +85,8 @@ public final class MainActivity
                 case Intent.ACTION_PACKAGE_REMOVED:
                     // TODO: Probably remove this from favourites and aliases
                 case Intent.ACTION_PACKAGE_CHANGED:
-                    populateAlphabetViewLetters();
-                    refreshAllVisibleFragments();
+                    mAlphabetController.populateAlphabetViewLetters();
+                    mViewPagerController.refreshAllVisibleFragments();
                     break;
             }
         }
@@ -121,27 +102,16 @@ public final class MainActivity
         super.attachBaseContext(ThemeHelper.getContextWithTheme(newBase));
     }
 
-    @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        ServiceManager.registerActivity(MainActivity.class, this);
         CustomFontFactory.initialise(this);
 
-        ServiceManager.register(IconPackLoader.class, () -> mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack()));
-        ServiceManager.register(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(mExecutor));
-        ServiceManager.register(AppAliasProvider.class, () -> mAppAliasHelper = new AppAliasProvider());
-        ServiceManager.register(AppLoader.class, () -> mAppLoader = new AppLoader(this, mAppAliasHelper));
-
-        // TODO: Possibly integrate these into DI, either with an activity part of ServiceManager or separately
-        var appSearchProvider = new AppSearchProvider(mAppLoader, mFavouritesHelper);
-        var searchProviders = List.of(
-            appSearchProvider,
-            new WebSearchProvider(),
-            new WebSuggestionProvider(),
-            new SettingsSearchProvider(getApplicationContext())
-        );
-
-        ServiceManager.register(SearchManager.class, () -> mSearchManager = new SearchManager(searchProviders));
+        ServiceManager.registerService(IconPackLoader.class, () -> mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack()));
+        ServiceManager.registerService(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(mExecutor));
+        ServiceManager.registerService(AppAliasProvider.class, () -> mAppAliasHelper = new AppAliasProvider());
+        ServiceManager.registerService(AppLoader.class, () -> mAppLoader = new AppLoader(this, mAppAliasHelper));
 
         super.onCreate(savedInstanceState);
         getWindow().setDimAmount(0f);
@@ -150,23 +120,9 @@ public final class MainActivity
         mWallpaperManager = new WallpaperManager(findViewById(R.id.wallpaper_image));
         mWallpaperManager.applyBackground();
 
-        initialiseSearchView();
+        mFragmentController = new FragmentController();
 
-        mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            private static final int SWIPE_THRESHOLD = 100;
-            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
-
-            @Override
-            public boolean onFling(MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
-                var diffY = e1.getY() - e2.getY();
-                if (diffY > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                    openSearchSheet();
-                    return true;
-                }
-                return false;
-            }
-        });
-
+        mSearchController = new SearchController(findViewById(R.id.search_sheet));
         var appsAdapter = new CombinedAdapter(
             new ArrayList<>(),
             mIconPackLoader
@@ -186,47 +142,20 @@ public final class MainActivity
             AppsFragment.class
         );
 
-        mPagerAdapter = new MainPagerAdapter(getSupportFragmentManager(), getLifecycle(), fragments);
-
-        refreshFavouritesFragment();
-
-        mViewPager = findViewById(R.id.viewpager);
-        mViewPager.setAdapter(mPagerAdapter);
-        mViewPager.setOffscreenPageLimit(2);
-
-        mViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                mCurrentFragment = findPagerFragment(position);
-            }
-        });
-
-        mIndexView = findViewById(R.id.alphabet_index);
-        populateAlphabetViewLetters();
-        mIndexView.setOnLetterSelectedListener(letter -> {
-            var position = letter == AlphabetIndexView.FAVOURITES_CHARACTER
-                ? 0
-                : mPagerAdapter.getItemCount() - 1;
-
-            mViewPager.setCurrentItem(position);
-
-            var fragment = findPagerFragment(position);
-            if (fragment instanceof AppsFragment appsFragment) {
-                appsFragment.scrollToLetter(letter);
-            }
-        });
+        var pagerAdapter = new MainPagerAdapter(getSupportFragmentManager(), getLifecycle(), fragments);
+        mViewPagerController = new ViewPagerController(pagerAdapter, findViewById(R.id.viewpager));
+        mAlphabetController = new AlphabetViewController(mViewPagerController, findViewById(R.id.alphabet_index));
 
         getOnBackInvokedDispatcher().registerOnBackInvokedCallback(0, () -> {
             // NOTE: Don't call super on this to prevent weird back animation
             // Close the search if we press the back button
-            if (mSearchSheet.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                closeSearchSheet();
+            if (mSearchController.getSheetState() == BottomSheetBehavior.STATE_EXPANDED) {
+                mSearchController.closeSearchSheet();
             }
 
             // TODO: Possibly make this customisable?
             // Otherwise, if we're on the apps section, scroll to the top
-            if (mCurrentFragment instanceof AppsFragment appsFragment) {
+            if (mFragmentController.getCurrentFragment() instanceof AppsFragment appsFragment) {
                 appsFragment.smoothScrollToPosition(0);
             }
         });
@@ -235,7 +164,7 @@ public final class MainActivity
     @Override
     protected void onStart() {
         super.onStart();
-        closeSearchSheet();
+        mSearchController.closeSearchSheet();
     }
 
     @Override
@@ -263,13 +192,13 @@ public final class MainActivity
         if (Intent.ACTION_MAIN.equals(intent.getAction()) &&
             intent.hasCategory(Intent.CATEGORY_HOME)
         ) {
-            scrollToFavourites();
+            mViewPagerController.scrollToFavourites();
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        return mGestureDetector.onTouchEvent(ev) || super.onTouchEvent(ev);
+        return mSearchController.onTouchEvent(ev) || super.onTouchEvent(ev);
     }
 
     @Override
@@ -281,7 +210,7 @@ public final class MainActivity
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            if (mCurrentFragment instanceof AppsFragment appsFragment) {
+            if (mFragmentController.getCurrentFragment() instanceof AppsFragment appsFragment) {
                 appsFragment.smoothScrollToPosition(0);
             }
 
@@ -315,318 +244,39 @@ public final class MainActivity
         startActivity(settingItem.getIntent());
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("ClickableViewAccessibility")
     public void showAppMenu(AppInfo app) {
-        var appName = app.getLabel();
-        var options = new String[] {
-            mFavouritesHelper.isFavourite(app.getPackageName()) ? "Unfavourite " + appName : "Favourite " + appName,
-            "Rename " + app.getLabel(),
-            "Uninstall " + app.getLabel(),
-            "Launcher Settings",
+
+        var isFavourite = mFavouritesHelper.isFavourite(app.getPackageName());
+
+        //TODO: Conditionally add the EnterEditMode command here if it is a favourite
+        var commands = new IDialogCommand[] {
+            new ToggleFavouriteCommand(app, isFavourite),
+            new RenameCommand(app),
+            new UninstallCommand(app),
+            new OpenSettingsCommand()
         };
+
+        var options = Arrays.stream(commands).map(IDialogCommand::getName).toArray(String[]::new);
 
         new android.app.AlertDialog.Builder(this, R.style.Theme_Launcherbox_Dialog)
             .setTitle(app.getLabel())
-            .setItems(options, (dialog, which) -> {
-                switch (which) {
-                    case 0: // Toggle favourites
-                        mFavouritesHelper.loadFavouritesAsync(currentFavourites -> {
-                            if (currentFavourites.contains(app.getPackageName())) {
-                                currentFavourites.remove(app.getPackageName());
-                            } else {
-                                currentFavourites.add(app.getPackageName());
-                            }
-
-                            mFavouritesHelper.saveFavourites(currentFavourites);
-                            refreshFavouritesFragment();
-
-                            ServiceManager.getMainHandler().post(this::refreshAllVisibleFragments);
-                        });
-                        break;
-
-                    case 1: // Rename (alias)
-                        showAliasDialog(app);
-                        break;
-
-                    case 2: // Uninstall
-                        var packageUri = Uri.parse("package:" + app.getPackageName());
-                        Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageUri);
-                        uninstallIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
-                        uninstallIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(uninstallIntent);
-                        break;
-
-                    case 3: // Launcher Settings
-                        var settingsIntent = new Intent(this, SettingsActivity.class);
-                        startActivity(settingsIntent);
-                        break;
-                }
-            })
+            .setItems(options, (dialog, which) -> commands[which].execute())
             .show();
     }
 
-    private void refreshUi() {
+    // TODO: This is bad! We shouldn't need this!
+    public ViewPagerController getViewPagerController() {
+        return mViewPagerController;
+    }
+
+    public FragmentController getFragmentController() {
+        return mFragmentController;
+    }
+
+    public void refreshUi() {
         mAppLoader.refreshInstalledApps();
-        refreshAllVisibleFragments();
-    }
-
-    private void refreshFavouritesFragment() {
-        mPagerAdapter.updateVisibility(fragment -> {
-            if (fragment instanceof FavouritesFragment) {
-                return mFavouritesHelper.hasFavourites();
-            }
-
-            return true;
-        });
-    }
-
-
-    private void refreshAllVisibleFragments() {
-        for (int i = 0; i < mPagerAdapter.getItemCount(); i++) {
-            var fragment = findPagerFragment(i);
-            if (fragment instanceof AppListFragmentBase base) {
-                base.refresh();
-            }
-        }
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    private void initialiseSearchView() {
-        var sheet = findViewById(R.id.search_sheet);
-        mSearchSheet = BottomSheetBehavior.from(sheet);
-        mSearchSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-        var searchResultsView = (RecyclerView) sheet.findViewById(R.id.search_results);
-        searchResultsView.setLayoutManager(new LinearLayoutManager(this));
-        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), mIconPackLoader);
-        searchResultsView.setAdapter(mSearchAdapter);
-
-        var searchInput = (EditText) sheet.findViewById(R.id.search_input);
-        searchInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                var handler = ServiceManager.getMainHandler();
-                if (mSearchRunnable != null) {
-                    handler.removeCallbacks(mSearchRunnable);
-                }
-
-                final var query = s.toString();
-                mSearchRunnable = () -> performSearch(query);
-                handler.postDelayed(mSearchRunnable, SEARCH_DELAY_MS);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-
-        searchInput.setOnEditorActionListener((v, actionId, event) -> {
-            boolean handled = false;
-
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH ||
-                (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN)) {
-
-                if (mSearchAdapter.getItemCount() > 0) {
-                    mSearchAdapter.getItem(0).performOpenAction(this);
-                    closeSearchSheet();
-                }
-
-                handled = true;
-            }
-
-            return handled;
-        });
-
-        // Start hidden
-        mSearchSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-        mSearchSheet.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    var input = (EditText) findViewById(R.id.search_input);
-                    input.requestFocus();
-                }
-
-                // Prevent weird "peeking", it kinda stays open
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    mSearchSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-                    // Stop the pesky keyboard staying open
-                    var input = (EditText) findViewById(R.id.search_input);
-                    var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-                }
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
-        });
-
-        // Hacks to try and get swipe detection working
-        var root = findViewById(R.id.root_coordinator);
-        root.setOnTouchListener((v, event) -> mGestureDetector.onTouchEvent(event));
-    }
-
-    public void openSearchSheet() {
-        mSearchSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
-    }
-
-    public void closeSearchSheet() {
-        mSearchSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-        var input = (EditText) findViewById(R.id.search_input);
-        input.clearFocus();
-        input.setText("");
-        var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private void performSearch(String query) {
-        if (query.trim().isEmpty()) {
-            mSearchAdapter.clearItems();
-            mSearchAdapter.notifyDataSetChanged();
-            return;
-        }
-
-        mSearchManager.searchAsync(query, results -> {
-            mSearchAdapter.clearItems();
-            if (!results.isEmpty()) {
-                mSearchAdapter.addAll(results);
-            } else {
-                mSearchAdapter.add(new HeaderItem("No results"));
-            }
-
-            mSearchAdapter.notifyDataSetChanged();
-        });
-    }
-
-    private Fragment findPagerFragment(final int position) {
-        var itemId = mPagerAdapter.getItemId(position);
-        return getSupportFragmentManager().findFragmentByTag("f" + itemId);
-    }
-
-    private void scrollToFavourites() {
-        var firstFragment = findPagerFragment(0);
-        if (mCurrentFragment != firstFragment) {
-            mViewPager.setCurrentItem(0, true);
-            mCurrentFragment = firstFragment;
-
-            if (mCurrentFragment instanceof AppsFragment appsFragment) {
-                appsFragment.scrollToPosition(0);
-            }
-        }
-    }
-
-    private void populateAlphabetViewLetters() {
-        if (SettingsManager.getShowOnlyInstalled()) {
-            mIndexView.setLetters(getAlphabetViewLetters());
-        } else {
-            mIndexView.setLetters(AlphabetIndexView.LETTERS);
-        }
-    }
-
-    private String getAlphabetViewLetters() {
-        var chars = new HashSet<Character>();
-        var apps = mAppLoader.getInstalledApps();
-
-        for (var app : apps) {
-            var label = app.getLabel();
-            if (label == null || label.isEmpty()) {
-                continue;
-            }
-
-            var character = label.charAt(0);
-            if (Character.isLetter(character)) {
-                character = Character.toUpperCase(character);
-            } else if (Character.isDigit(character)) {
-                character = AlphabetIndexView.NUMBER_CHARACTER;
-            } else {
-                continue;
-            }
-
-            chars.add(character);
-        }
-
-        var newChars = chars.stream().sorted().toList();
-        var result = new StringBuilder();
-        result.append(AlphabetIndexView.FAVOURITES_CHARACTER);
-        for (var character : newChars) {
-            result.append(character);
-        }
-
-        return result.toString();
-    }
-
-    private void showAliasDialog(AppInfo app) {
-        var textEditor = new FontEditText(this);
-        textEditor.setHint(app.getName());
-        textEditor.setLayoutParams(new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ));
-
-        var padding = (int) (16 * getResources().getDisplayMetrics().density);
-        textEditor.setMinWidth((int) (240 * getResources().getDisplayMetrics().density));
-        textEditor.setPadding(padding, padding, padding, padding);
-        textEditor.setSingleLine(true);
-
-        // Make this single line and prevent adding a new line
-        textEditor.setMaxLines(1);
-        textEditor.setLines(1);
-        textEditor.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        textEditor.setImeOptions(EditorInfo.IME_ACTION_DONE);
-
-        var layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(padding, padding, padding, padding);
-        layout.addView(textEditor);
-
-        var aliasDialog = new android.app.AlertDialog.Builder(this, R.style.Theme_Launcherbox_Dialog)
-            .setTitle("Rename " + app.getLabel())
-            .setView(layout)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Ok", (otherDialogInternal, otherWhich) -> {
-                var newAlias = textEditor.getText().toString();
-                mAppAliasHelper.setAlias(app.getPackageName(), newAlias);
-                app.setAlias(newAlias);
-
-                refreshUi();
-            })
-            .create();
-
-        aliasDialog.show();
-
-        // Try to get the keyboard up
-        textEditor.requestFocus();
-        textEditor.post(() -> {
-            var imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
-                imm.showSoftInput(textEditor, InputMethodManager.SHOW_IMPLICIT);
-            }
-        });
-
-        final var positiveButton = aliasDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        positiveButton.setEnabled(false);
-
-        // We don't want to allow this if the text is empty
-        textEditor.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                var input = s.toString().trim();
-                positiveButton.setEnabled(!input.isEmpty());
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void afterTextChanged(Editable s) { }
-        });
+        mViewPagerController.refreshAllVisibleFragments();
     }
 
     @Override
@@ -647,7 +297,7 @@ public final class MainActivity
         }
 
         if (SettingsManager.KEY_SHOW_ONLY_INSTALLED.equals(key)) {
-            populateAlphabetViewLetters();
+            mAlphabetController.populateAlphabetViewLetters();
         }
 
         if (SettingsManager.KEY_WALLPAPER.equals(key) ||
