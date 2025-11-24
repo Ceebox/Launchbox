@@ -13,6 +13,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.ListItem;
+import com.chadderbox.launchbox.main.DragViewMode;
+import com.chadderbox.launchbox.main.fragments.FavouritesFragment;
 import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 
@@ -24,6 +26,7 @@ public class FavouritesViewModel extends AndroidViewModel {
     private final AppLoader mAppLoader;
     private final FavouritesRepository mFavouritesRepository;
     private final MutableLiveData<List<ListItem>> mItems = new MutableLiveData<>();
+    private DragViewMode mCurrentViewMode = DragViewMode.VIEWING;
 
     public FavouritesViewModel(
         @NonNull Application application,
@@ -55,6 +58,26 @@ public class FavouritesViewModel extends AndroidViewModel {
         }
 
         mItems.setValue(list);
+    }
+
+    public void enterEditMode() {
+        if (mCurrentViewMode == DragViewMode.EDITING) {
+            return;
+        }
+
+        mCurrentViewMode = DragViewMode.EDITING;
+    }
+
+    public void exitEditMode() {
+        if (mCurrentViewMode == DragViewMode.VIEWING) {
+            return;
+        }
+
+        mCurrentViewMode = DragViewMode.VIEWING;
+    }
+
+    public boolean isEditMode() {
+        return mCurrentViewMode == DragViewMode.EDITING;
     }
 
     public static class Factory implements ViewModelProvider.Factory {

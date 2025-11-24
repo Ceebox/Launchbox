@@ -1,5 +1,7 @@
 package com.chadderbox.launchbox.main.controllers;
 
+import android.annotation.SuppressLint;
+
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -87,20 +89,26 @@ public final class ViewPagerController {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     public void enterEditMode() {
         for (var i = 0; i < getItemCount(); i++) {
             var fragment = findPagerFragment(i);
             if (fragment instanceof FavouritesFragment favourites) {
                 favourites.enterEditMode();
+
+                // Disable scroll
+                mViewPager.getChildAt(0).setOnTouchListener((v, event) -> true);
             }
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     public void exitEditMode() {
         for (var i = 0; i < getItemCount(); i++) {
             var fragment = findPagerFragment(i);
             if (fragment instanceof FavouritesFragment favourites) {
                 favourites.exitEditMode();
+                mViewPager.getChildAt(0).setOnTouchListener((v, event) -> false);
             }
         }
     }

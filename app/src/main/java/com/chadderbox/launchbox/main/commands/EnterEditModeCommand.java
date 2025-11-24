@@ -8,12 +8,17 @@ public final class EnterEditModeCommand
 
     @Override
     public String getName() {
-        return "Enter Edit Mode";
+        var activity = ServiceManager.getActivity(MainActivity.class);
+        return activity.isEditMode() ? "Exit Edit Mode" : "Enter Edit Mode";
     }
 
     @Override
     public void execute() {
         var activity = ServiceManager.getActivity(MainActivity.class);
-        activity.enterEditMode();
+        if (!activity.isEditMode()) {
+            activity.enterEditMode();
+        } else {
+            activity.exitEditMode();
+        }
     }
 }

@@ -20,4 +20,5 @@
     <string name="system">System</string>
     <string name="pastel">Pastel</string>
     <string name="unknown">Unknown</string>
+    <string name="reorder">Reorder</string>
 </resources>

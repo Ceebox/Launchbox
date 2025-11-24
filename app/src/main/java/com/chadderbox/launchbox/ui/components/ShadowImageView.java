@@ -12,6 +12,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.graphics.Rect;
 
@@ -73,6 +74,18 @@ public class ShadowImageView
         invalidate();
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return performClick();
+    }
+
+    @Override
+    public boolean performClick() {
+        // Allow touch events to propagate to parent
+        super.performClick();
+        return false;
+    }
+
     public void clearShadowBitmap() {
         // This is generally to handle virtualization screwing me
         // At least this isn't WPF!
@@ -81,6 +94,18 @@ public class ShadowImageView
         }
 
         mShadowBitmap = null;
+    }
+
+    public void regenerateShadow() {
+        if (mOriginalBitmap == null || mShadowPaint == null) {
+            mShadowBitmap = null;
+            return;
+        }
+
+        mShadowPaint.setMaskFilter(new BlurMaskFilter(mShadowRadius, BlurMaskFilter.Blur.NORMAL));
+        mShadowBitmap = mOriginalBitmap.extractAlpha(mShadowPaint, null);
+        mShadowPaint.setMaskFilter(null);
+        mShadowPaint.setColor(ContextCompat.getColor(getContext(), R.color.text_shadow));
     }
 
     @Override
@@ -161,18 +186,6 @@ public class ShadowImageView
             drawable.setBounds(0, 0, width, height);
             drawable.draw(c);
         }
-    }
-
-    private void regenerateShadow() {
-        if (mOriginalBitmap == null) {
-            mShadowBitmap = null;
-            return;
-        }
-
-        mShadowPaint.setMaskFilter(new BlurMaskFilter(mShadowRadius, BlurMaskFilter.Blur.NORMAL));
-        mShadowBitmap = mOriginalBitmap.extractAlpha(mShadowPaint, null);
-        mShadowPaint.setMaskFilter(null);
-        mShadowPaint.setColor(ContextCompat.getColor(getContext(), R.color.text_shadow));
     }
 
     private Rect calculateImageBounds(int contentWidth, int contentHeight, int imageWidth, int imageHeight) {

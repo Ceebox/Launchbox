@@ -21,7 +21,7 @@ public class DragCallback extends ItemTouchHelper.Callback {
     @Override
     public boolean isLongPressDragEnabled() {
         // We want this!
-        return true;
+        return false;
     }
 
     @Override

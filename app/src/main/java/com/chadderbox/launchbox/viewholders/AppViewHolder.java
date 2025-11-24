@@ -1,11 +1,14 @@
 package com.chadderbox.launchbox.viewholders;
 
+import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.ui.components.ShadowImageView;
@@ -29,6 +32,7 @@ public final class AppViewHolder
     private final TextView mLabel;
     private IconPackLoader mIconPackLoader;
     private AppItem mAppItem;
+    private ItemTouchHelper mTouchHelper;
 
     public AppViewHolder(@NonNull View itemView) {
         super(itemView);
@@ -57,14 +61,33 @@ public final class AppViewHolder
         SettingsManager.registerChangeListener(this);
     }
 
-    public void bind(AppItem appItem, IconPackLoader iconPackLoader) {
+    @SuppressLint("ClickableViewAccessibility")
+    public void bind(AppItem appItem, IconPackLoader iconPackLoader, ItemTouchHelper touchHelper, boolean isEditMode) {
         mAppItem = appItem;
         mIconPackLoader = iconPackLoader;
+        mTouchHelper = touchHelper;
 
         var app = mAppItem.getAppInfo();
         itemView.setTag(mAppItem);
         mLabel.setText(app.getLabel());
         mLabel.setTypeface(FontHelper.getFont(SettingsManager.getFont()));
+
+        var dragHandle = (ShadowImageView) itemView.findViewById(R.id.drag_handle);
+        dragHandle.setVisibility(isEditMode ? View.VISIBLE : View.GONE);
+
+        if (isEditMode) {
+            dragHandle.regenerateShadow();
+            dragHandle.refreshDrawableState();
+            dragHandle.setOnTouchListener((v, event) -> {
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    if (mTouchHelper != null) {
+                        mTouchHelper.startDrag(this);
+                    }
+                }
+
+                return false;
+            });
+        }
 
         loadIcon();
     }

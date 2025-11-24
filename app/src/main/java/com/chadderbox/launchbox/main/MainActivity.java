@@ -159,6 +159,8 @@ public final class MainActivity
             if (mFragmentController.getCurrentFragment() instanceof AppsFragment appsFragment) {
                 appsFragment.smoothScrollToPosition(0);
             }
+
+            exitEditMode();
         });
     }
 
@@ -247,11 +249,6 @@ public final class MainActivity
 
     @SuppressLint("ClickableViewAccessibility")
     public void showAppMenu(AppInfo app) {
-
-        if (mIsEditMode) {
-            return;
-        }
-
         var isFavourite = mFavouritesHelper.isFavourite(app.getPackageName());
         var onFavouritesScreen = mFragmentController.getCurrentFragment() instanceof FavouritesFragment;
 
@@ -283,12 +280,17 @@ public final class MainActivity
         return mFragmentController;
     }
 
+    public boolean isEditMode() {
+        return mIsEditMode;
+    }
+
     public void enterEditMode() {
         if (mIsEditMode) {
             return;
         }
 
         mIsEditMode = true;
+        mAlphabetController.setVisible(false);
         mViewPagerController.enterEditMode();
     }
 
@@ -298,6 +300,7 @@ public final class MainActivity
         }
 
         mIsEditMode = false;
+        mAlphabetController.setVisible(true);
         mViewPagerController.exitEditMode();
     }
 

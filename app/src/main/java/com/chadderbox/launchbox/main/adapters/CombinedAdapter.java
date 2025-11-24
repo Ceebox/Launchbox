@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
@@ -36,6 +37,8 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private final List<ListItem> mItems;
     private final IconPackLoader mIconPackLoader;
     private boolean mActionsEnabled = true;
+    private boolean mIsEditMode = false;
+    private ItemTouchHelper mTouchHelper;
 
     public CombinedAdapter(
             List<ListItem> items,
@@ -164,7 +167,7 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
         else if (holder instanceof AppViewHolder appHolder) {
             if (item instanceof AppItem appItem) {
-                appHolder.bind(appItem, mIconPackLoader);
+                appHolder.bind(appItem, mIconPackLoader, mTouchHelper, mIsEditMode);
             }
         }
         else if (holder instanceof WebViewHolder webHolder) {
@@ -182,5 +185,13 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 settingHolder.bind(settingItem);
             }
         }
+    }
+
+    public void attachTouchHelper(ItemTouchHelper helper) {
+        mTouchHelper = helper;
+    }
+
+    public void notifyEditModeChanged(boolean isEditMode) {
+        mIsEditMode = isEditMode;
     }
 }

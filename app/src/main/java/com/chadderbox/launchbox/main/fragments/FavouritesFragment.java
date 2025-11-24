@@ -26,7 +26,6 @@ public final class FavouritesFragment
 
     private FavouritesViewModel mViewModel;
     private DragCallback mDragCallback;
-    private ViewMode mCurrentViewMode = ViewMode.VIEWING;
 
     public FavouritesFragment() {
         super(null);
@@ -51,6 +50,7 @@ public final class FavouritesFragment
         mDragCallback = new DragCallback(mAdapter, recyclerView);
         var touchHelper = new ItemTouchHelper(mDragCallback);
         touchHelper.attachToRecyclerView(recyclerView);
+        mAdapter.attachTouchHelper(touchHelper);
 
         recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
@@ -105,22 +105,28 @@ public final class FavouritesFragment
         return root;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void enterEditMode() {
-        if (mCurrentViewMode == ViewMode.EDITING) {
+        if (mViewModel.isEditMode()) {
             return;
         }
 
-        mCurrentViewMode = ViewMode.EDITING;
+        mViewModel.enterEditMode();
         mDragCallback.setEditMode(true);
+        mAdapter.notifyEditModeChanged(true);
+        mAdapter.notifyDataSetChanged();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void exitEditMode() {
-        if (mCurrentViewMode == ViewMode.VIEWING) {
+        if (!mViewModel.isEditMode()) {
             return;
         }
 
-        mCurrentViewMode = ViewMode.EDITING;
-        mDragCallback.setEditMode(true);
+        mViewModel.exitEditMode();
+        mDragCallback.setEditMode(false);
+        mAdapter.notifyEditModeChanged(false);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -128,11 +134,5 @@ public final class FavouritesFragment
         if (mViewModel != null) {
             mViewModel.loadFavourites();
         }
-    }
-
-    private enum ViewMode
-    {
-        VIEWING,
-        EDITING
     }
 }

@@ -1,5 +1,7 @@
 package com.chadderbox.launchbox.main.controllers;
 
+import android.view.View;
+
 import androidx.viewpager.widget.ViewPager;
 
 import com.chadderbox.launchbox.core.ServiceManager;
@@ -74,5 +76,9 @@ public final class AlphabetViewController {
         }
 
         return result.toString();
+    }
+
+    public void setVisible(boolean visible) {
+        mIndexView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 }
