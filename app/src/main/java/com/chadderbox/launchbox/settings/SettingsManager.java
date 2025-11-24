@@ -6,9 +6,13 @@ import android.content.res.Configuration;
 
 import androidx.annotation.IntDef;
 
+import org.json.JSONArray;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public final class SettingsManager {
@@ -50,12 +54,27 @@ public final class SettingsManager {
         return sPrefs.getString(KEY_APP_ALIAS_PREFIX + packageName, null);
     }
 
-    public static void setFavourites(Set<String> newFavourites) {
-        sPrefs.edit().putStringSet(KEY_FAVORITES, newFavourites).apply();
+    public static void setFavourites(List<String> favourites) {
+        var json = new JSONArray();
+        for (var f : favourites) {
+            json.put(f);
+        }
+
+        sPrefs.edit().putString(KEY_FAVORITES, json.toString()).apply();
     }
 
-    public static HashSet<String> getFavourites() {
-        return new HashSet<>(sPrefs.getStringSet(KEY_FAVORITES, new HashSet<>()));
+    public static List<String> getFavourites() {
+        var jsonString = sPrefs.getString(KEY_FAVORITES, "[]");
+        var list = new ArrayList<String>();
+
+        try {
+            var array = new JSONArray(jsonString);
+            for (int i = 0; i < array.length(); i++) {
+                list.add(array.getString(i));
+            }
+        } catch (Exception ignored) {}
+
+        return list;
     }
 
     public static void setCharacterHeadings(boolean hasCharacterHeadings) {

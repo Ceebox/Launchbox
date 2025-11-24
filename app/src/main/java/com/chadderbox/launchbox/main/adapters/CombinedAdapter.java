@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.ListItem;
@@ -17,6 +18,7 @@ import com.chadderbox.launchbox.data.SettingItem;
 import com.chadderbox.launchbox.data.SuggestionItem;
 import com.chadderbox.launchbox.data.WebItem;
 import com.chadderbox.launchbox.icons.IconPackLoader;
+import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.viewholders.AppViewHolder;
 import com.chadderbox.launchbox.viewholders.HeaderViewHolder;
 import com.chadderbox.launchbox.viewholders.SettingViewHolder;
@@ -25,6 +27,7 @@ import com.chadderbox.launchbox.viewholders.WebViewHolder;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -107,6 +110,16 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         var item = mItems.remove(fromPosition);
         mItems.add(toPosition, item);
         notifyItemMoved(fromPosition, toPosition);
+    }
+
+    public void saveFavouritesOrder() {
+        var favourites = ServiceManager.getService(FavouritesRepository.class);
+        var packageNames = mItems.stream()
+            .filter(i -> i instanceof AppItem)
+            .map(i -> ((AppItem) i).getAppInfo().getPackageName())
+            .toList();
+
+        favourites.saveFavourites(packageNames);
     }
 
     @SuppressLint("NotifyDataSetChanged")

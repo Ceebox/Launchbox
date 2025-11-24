@@ -14,11 +14,11 @@ import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.main.DragViewMode;
-import com.chadderbox.launchbox.main.fragments.FavouritesFragment;
 import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class FavouritesViewModel extends AndroidViewModel {
@@ -51,9 +51,17 @@ public class FavouritesViewModel extends AndroidViewModel {
         var list = new ArrayList<ListItem>();
 
         list.add(new HeaderItem("Favourites"));
+
+        var appMap = new HashMap<String, AppItem>();
         for (var app : apps) {
-            if (favourites.contains(app.getPackageName())) {
-                list.add(new AppItem(app));
+            appMap.put(app.getPackageName(), new AppItem(app));
+        }
+
+        // Load favourites in the right order
+        for (var favPkg : favourites) {
+            var appItem = appMap.get(favPkg);
+            if (appItem != null) {
+                list.add(appItem);
             }
         }
 

@@ -7,7 +7,9 @@ import androidx.annotation.NonNull;
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.settings.SettingsManager;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
@@ -28,20 +30,20 @@ public final class FavouritesRepository {
     /**
      * Synchronously load favourites from settings
      */
-    public Set<String> loadFavourites() {
-        return new HashSet<>(SettingsManager.getFavourites());
+    public List<String> loadFavourites() {
+        return new ArrayList<>(SettingsManager.getFavourites());
     }
 
     // This probably needs to go
     public void loadFavouritesAsync(@NonNull SetFavouritesCallback callback) {
         mExecutor.execute(() -> {
             // Copy here to prevent concurrent modification
-            var favourites = new HashSet<>(SettingsManager.getFavourites());
+            var favourites = new ArrayList<>(SettingsManager.getFavourites());
             mMainHandler.post(() -> callback.onResult(favourites));
         });
     }
 
-    public void saveFavourites(@NonNull Set<String> newFavourites) {
+    public void saveFavourites(@NonNull List<String> newFavourites) {
         SettingsManager.setFavourites(newFavourites);
     }
 
@@ -50,6 +52,6 @@ public final class FavouritesRepository {
     }
 
     public interface SetFavouritesCallback {
-        void onResult(Set<String> favorites);
+        void onResult(List<String> favorites);
     }
 }

@@ -89,6 +89,9 @@ public class DragCallback extends ItemTouchHelper.Callback {
 
         mDragging = false;
 
+        // Do this here rather than onMove to avoid doing it repeatedly
+        mAdapter.saveFavouritesOrder();
+
         // Restore parent touch interception after drag
         if (mRecyclerView != null) {
             mRecyclerView.getParent().requestDisallowInterceptTouchEvent(false);
