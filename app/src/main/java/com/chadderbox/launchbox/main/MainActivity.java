@@ -20,6 +20,7 @@ import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.main.adapters.IAdapterFetcher;
 import com.chadderbox.launchbox.main.adapters.MainPagerAdapter;
+import com.chadderbox.launchbox.main.commands.EnterEditModeCommand;
 import com.chadderbox.launchbox.main.commands.IDialogCommand;
 import com.chadderbox.launchbox.main.commands.OpenSettingsCommand;
 import com.chadderbox.launchbox.main.commands.RenameCommand;
@@ -47,7 +48,6 @@ import com.chadderbox.launchbox.wallpaper.WallpaperManager;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -70,6 +70,7 @@ public final class MainActivity
     private SearchController mSearchController;
     private FavouritesRepository mFavouritesHelper;
     private IconPackLoader mIconPackLoader;
+    private boolean mIsEditMode = false;
 
     private final BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
         @Override
@@ -247,21 +248,29 @@ public final class MainActivity
     @SuppressLint("ClickableViewAccessibility")
     public void showAppMenu(AppInfo app) {
 
+        if (mIsEditMode) {
+            return;
+        }
+
         var isFavourite = mFavouritesHelper.isFavourite(app.getPackageName());
+        var onFavouritesScreen = mFragmentController.getCurrentFragment() instanceof FavouritesFragment;
 
         //TODO: Conditionally add the EnterEditMode command here if it is a favourite
-        var commands = new IDialogCommand[] {
+        var commands = new ArrayList<>((List.of(
             new ToggleFavouriteCommand(app, isFavourite),
             new RenameCommand(app),
             new UninstallCommand(app),
             new OpenSettingsCommand()
-        };
+        )));
 
-        var options = Arrays.stream(commands).map(IDialogCommand::getName).toArray(String[]::new);
+        if (isFavourite && onFavouritesScreen) {
+            commands.add(new EnterEditModeCommand());
+        }
 
+        var options = commands.stream().map(IDialogCommand::getName).toArray(String[]::new);
         new android.app.AlertDialog.Builder(this, R.style.Theme_Launcherbox_Dialog)
             .setTitle(app.getLabel())
-            .setItems(options, (dialog, which) -> commands[which].execute())
+            .setItems(options, (dialog, which) -> commands.get(which).execute())
             .show();
     }
 
@@ -272,6 +281,24 @@ public final class MainActivity
 
     public FragmentController getFragmentController() {
         return mFragmentController;
+    }
+
+    public void enterEditMode() {
+        if (mIsEditMode) {
+            return;
+        }
+
+        mIsEditMode = true;
+        mViewPagerController.enterEditMode();
+    }
+
+    public void exitEditMode() {
+        if (!mIsEditMode) {
+            return;
+        }
+
+        mIsEditMode = false;
+        mViewPagerController.exitEditMode();
     }
 
     public void refreshUi() {

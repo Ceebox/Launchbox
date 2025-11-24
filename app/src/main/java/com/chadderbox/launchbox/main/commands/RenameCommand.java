@@ -27,7 +27,7 @@ public final class RenameCommand
 
     @Override
     public String getName() {
-        return "Rename" + mAppInfo.getLabel();
+        return "Rename " + mAppInfo.getLabel();
     }
 
     @Override

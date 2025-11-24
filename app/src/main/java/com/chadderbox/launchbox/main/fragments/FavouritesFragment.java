@@ -25,6 +25,8 @@ public final class FavouritesFragment
     extends AppListFragmentBase {
 
     private FavouritesViewModel mViewModel;
+    private DragCallback mDragCallback;
+    private ViewMode mCurrentViewMode = ViewMode.VIEWING;
 
     public FavouritesFragment() {
         super(null);
@@ -37,7 +39,6 @@ public final class FavouritesFragment
         @Nullable ViewGroup container,
         @Nullable Bundle savedInstanceState
     ) {
-
         var root = inflater.inflate(R.layout.fragment_favourites, container, false);
 
         if (getActivity() instanceof IAdapterFetcher fetcher) {
@@ -47,14 +48,14 @@ public final class FavouritesFragment
         var recyclerView = (RecyclerView) root.findViewById(R.id.recyclerview);
         initialiseList(recyclerView);
 
-        var dragCallback = new DragCallback(mAdapter, recyclerView);
-        var touchHelper = new ItemTouchHelper(dragCallback);
+        mDragCallback = new DragCallback(mAdapter, recyclerView);
+        var touchHelper = new ItemTouchHelper(mDragCallback);
         touchHelper.attachToRecyclerView(recyclerView);
 
         recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
             @Override
             public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-                if (dragCallback.isDragging()) {
+                if (mDragCallback.isDragging()) {
                     // While dragging, keep parent (ViewPager) from intercepting
                     rv.getParent().requestDisallowInterceptTouchEvent(true);
                 }
@@ -72,7 +73,7 @@ public final class FavouritesFragment
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
                 case MotionEvent.ACTION_MOVE:
-                    if (dragCallback.isDragging()) {
+                    if (mDragCallback.isDragging()) {
                         v.getParent().requestDisallowInterceptTouchEvent(true);
                     }
                     break;
@@ -104,10 +105,34 @@ public final class FavouritesFragment
         return root;
     }
 
+    public void enterEditMode() {
+        if (mCurrentViewMode == ViewMode.EDITING) {
+            return;
+        }
+
+        mCurrentViewMode = ViewMode.EDITING;
+        mDragCallback.setEditMode(true);
+    }
+
+    public void exitEditMode() {
+        if (mCurrentViewMode == ViewMode.VIEWING) {
+            return;
+        }
+
+        mCurrentViewMode = ViewMode.EDITING;
+        mDragCallback.setEditMode(true);
+    }
+
     @Override
     public void refresh() {
         if (mViewModel != null) {
             mViewModel.loadFavourites();
         }
+    }
+
+    private enum ViewMode
+    {
+        VIEWING,
+        EDITING
     }
 }

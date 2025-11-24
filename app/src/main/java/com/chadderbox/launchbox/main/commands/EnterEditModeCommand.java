@@ -6,10 +6,6 @@ import com.chadderbox.launchbox.main.MainActivity;
 public final class EnterEditModeCommand
     implements IDialogCommand {
 
-    public EnterEditModeCommand() {
-
-    }
-
     @Override
     public String getName() {
         return "Enter Edit Mode";
@@ -18,5 +14,6 @@ public final class EnterEditModeCommand
     @Override
     public void execute() {
         var activity = ServiceManager.getActivity(MainActivity.class);
+        activity.enterEditMode();
     }
 }

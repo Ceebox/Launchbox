@@ -86,4 +86,22 @@ public final class ViewPagerController {
             }
         }
     }
+
+    public void enterEditMode() {
+        for (var i = 0; i < getItemCount(); i++) {
+            var fragment = findPagerFragment(i);
+            if (fragment instanceof FavouritesFragment favourites) {
+                favourites.enterEditMode();
+            }
+        }
+    }
+
+    public void exitEditMode() {
+        for (var i = 0; i < getItemCount(); i++) {
+            var fragment = findPagerFragment(i);
+            if (fragment instanceof FavouritesFragment favourites) {
+                favourites.exitEditMode();
+            }
+        }
+    }
 }
