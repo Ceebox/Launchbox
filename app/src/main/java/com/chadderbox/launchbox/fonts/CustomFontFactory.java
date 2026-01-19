@@ -50,10 +50,38 @@ public final class CustomFontFactory
 
     @Override
     public View onCreateView(@NonNull String name, @NonNull Context context, @NonNull AttributeSet attrs) {
+
+        // Filter out widgets (they won't match the launcher's package name)
+        // If we don't filter these out, widgets break!
+        if (!context.getPackageName().equals(context.getApplicationContext().getPackageName())) {
+            return null;
+        }
+
+        var isStandardView = !name.contains(".");
+        var isAndroidView = name.startsWith("android.") || name.startsWith("androidx.");
+        var isCustomView = name.startsWith("com.chadderbox.");
+
+        // Internal components
+        if (!isStandardView && !isAndroidView && !isCustomView) {
+            return null;
+        }
+
         View view = null;
+        var inflater = LayoutInflater.from(context);
+
         try {
-            view = LayoutInflater.from(context).createView(name, null, attrs);
-        } catch (ClassNotFoundException ignored) { }
+            if (isStandardView) {
+                var prefix = "android.widget.";
+                if (name.equals("View") || name.equals("ViewStub") || name.equals("ViewTreeObserver")) {
+                    prefix = "android.view.";
+                }
+                view = inflater.createView(name, prefix, attrs);
+            } else {
+                view = inflater.createView(name, null, attrs);
+            }
+        } catch (Exception e) {
+            return null;
+        }
 
         if (view instanceof TextView textView) {
 

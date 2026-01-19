@@ -5,6 +5,7 @@ import android.net.Uri;
 
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.data.AppInfo;
+import com.chadderbox.launchbox.dialogs.IDialogCommand;
 import com.chadderbox.launchbox.main.MainActivity;
 
 public final class UninstallCommand

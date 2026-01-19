@@ -7,6 +7,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
@@ -20,12 +21,14 @@ import com.chadderbox.launchbox.main.viewmodels.FavouritesViewModel;
 import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.core.ServiceManager;
+import com.chadderbox.launchbox.widgets.WidgetHostManager;
 
 public final class FavouritesFragment
     extends AppListFragmentBase {
 
     private FavouritesViewModel mViewModel;
     private DragCallback mDragCallback;
+    private WidgetHostManager mWidgetManager;
 
     public FavouritesFragment() {
         super(null);
@@ -39,7 +42,9 @@ public final class FavouritesFragment
         @Nullable Bundle savedInstanceState
     ) {
         var root = inflater.inflate(R.layout.fragment_favourites, container, false);
+        var widgetContainer = (ViewGroup) root.findViewById(R.id.widget_container);
 
+        setupWidgetManager(widgetContainer);
         if (getActivity() instanceof IAdapterFetcher fetcher) {
             mAdapter = fetcher.getAdapter(FavouritesFragment.class);
         }
@@ -105,6 +110,22 @@ public final class FavouritesFragment
         return root;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mWidgetManager != null) {
+            mWidgetManager.startListening();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mWidgetManager != null) {
+            mWidgetManager.stopListening();
+        }
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     public void enterEditMode() {
         if (mViewModel.isEditMode()) {
@@ -134,5 +155,35 @@ public final class FavouritesFragment
         if (mViewModel != null) {
             mViewModel.loadFavourites();
         }
+    }
+
+    private void setupWidgetManager(ViewGroup widgetContainer) {
+        // TODO: Probably move this setup code elsewhere?
+        mWidgetManager = ServiceManager.initialiseService(WidgetHostManager.class, () -> new WidgetHostManager(requireActivity(), widgetContainer));
+        mWidgetManager.loadSavedWidgets();
+
+        var bindWidgetLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == android.app.Activity.RESULT_OK && result.getData() != null) {
+                    var id = result.getData().getIntExtra(android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+                    var info = android.appwidget.AppWidgetManager.getInstance(requireContext()).getAppWidgetInfo(id);
+                    mWidgetManager.startWidgetConfiguration(info, id);
+                }
+            }
+        );
+
+        var configureWidgetLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                mWidgetManager.handleConfigureResult(
+                    result.getResultCode(),
+                    result.getData()
+                );
+            }
+        );
+
+        mWidgetManager.setConfigLauncher(configureWidgetLauncher);
+        mWidgetManager.setBindLauncher(bindWidgetLauncher);
     }
 }

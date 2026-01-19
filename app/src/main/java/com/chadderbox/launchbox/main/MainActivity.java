@@ -17,11 +17,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.dialogs.CommandService;
 import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.main.adapters.IAdapterFetcher;
 import com.chadderbox.launchbox.main.adapters.MainPagerAdapter;
 import com.chadderbox.launchbox.main.commands.EnterEditModeCommand;
-import com.chadderbox.launchbox.main.commands.IDialogCommand;
 import com.chadderbox.launchbox.main.commands.OpenSettingsCommand;
 import com.chadderbox.launchbox.main.commands.RenameCommand;
 import com.chadderbox.launchbox.main.commands.ToggleFavouriteCommand;
@@ -45,6 +45,8 @@ import com.chadderbox.launchbox.icons.IconPackLoader;
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.ui.ThemeHelper;
 import com.chadderbox.launchbox.wallpaper.WallpaperManager;
+import com.chadderbox.launchbox.widgets.WidgetHostManager;
+import com.chadderbox.launchbox.widgets.commands.AddWidgetCommand;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
@@ -113,6 +115,7 @@ public final class MainActivity
         ServiceManager.registerService(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(mExecutor));
         ServiceManager.registerService(AppAliasProvider.class, () -> mAppAliasHelper = new AppAliasProvider());
         ServiceManager.registerService(AppLoader.class, () -> mAppLoader = new AppLoader(this, mAppAliasHelper));
+        ServiceManager.registerService(CommandService.class, () -> new CommandService((this)));
 
         super.onCreate(savedInstanceState);
         getWindow().setDimAmount(0f);
@@ -251,24 +254,23 @@ public final class MainActivity
     public void showAppMenu(AppInfo app) {
         var isFavourite = mFavouritesHelper.isFavourite(app.getPackageName());
         var onFavouritesScreen = mFragmentController.getCurrentFragment() instanceof FavouritesFragment;
+        var widgetManager = ServiceManager.getService(WidgetHostManager.class);
+        var commandService = ServiceManager.getService(CommandService.class);
 
         //TODO: Conditionally add the EnterEditMode command here if it is a favourite
         var commands = new ArrayList<>((List.of(
             new ToggleFavouriteCommand(app, isFavourite),
             new RenameCommand(app),
             new UninstallCommand(app),
-            new OpenSettingsCommand()
+            new OpenSettingsCommand(),
+            new AddWidgetCommand(widgetManager)
         )));
 
         if (isFavourite && onFavouritesScreen) {
             commands.add(new EnterEditModeCommand());
         }
 
-        var options = commands.stream().map(IDialogCommand::getName).toArray(String[]::new);
-        new android.app.AlertDialog.Builder(this, R.style.Theme_Launcherbox_Dialog)
-            .setTitle(app.getLabel())
-            .setItems(options, (dialog, which) -> commands.get(which).execute())
-            .show();
+        commandService.showCommandMenu(app.getLabel(), commands);
     }
 
     // TODO: This is bad! We shouldn't need this!

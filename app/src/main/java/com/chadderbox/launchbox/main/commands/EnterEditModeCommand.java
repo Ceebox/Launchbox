@@ -1,6 +1,7 @@
 package com.chadderbox.launchbox.main.commands;
 
 import com.chadderbox.launchbox.core.ServiceManager;
+import com.chadderbox.launchbox.dialogs.IDialogCommand;
 import com.chadderbox.launchbox.main.MainActivity;
 
 public final class EnterEditModeCommand

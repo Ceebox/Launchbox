@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.data.AppInfo;
+import com.chadderbox.launchbox.dialogs.IDialogCommand;
 import com.chadderbox.launchbox.main.MainActivity;
 import com.chadderbox.launchbox.ui.components.FontEditText;
 import com.chadderbox.launchbox.utils.AppAliasProvider;

@@ -2,6 +2,7 @@ package com.chadderbox.launchbox.main.commands;
 
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.data.AppInfo;
+import com.chadderbox.launchbox.dialogs.IDialogCommand;
 import com.chadderbox.launchbox.main.MainActivity;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 

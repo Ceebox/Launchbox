@@ -1,4 +1,4 @@
-package com.chadderbox.launchbox.main.commands;
+package com.chadderbox.launchbox.dialogs;
 
 public interface IDialogCommand {
     String getName();

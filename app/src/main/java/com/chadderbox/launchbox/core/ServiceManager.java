@@ -23,6 +23,16 @@ public final class ServiceManager {
         sServices.put(type, factory.get());
     }
 
+
+    /**
+     * Register and return a service type with a factory.
+     */
+    public static <T> T initialiseService(Class<T> type, Supplier<T> factory) {
+        var service = factory.get();
+        sServices.put(type, service);
+        return service;
+    }
+
     /**
     * Retrieve an instance of a service.
      */
@@ -33,6 +43,13 @@ public final class ServiceManager {
         }
 
         throw new IllegalStateException("Service not found: " + type.getName());
+    }
+
+    /**
+     * If the service manager has an instance of the service
+     */
+    public static boolean hasService(Class<?> type) {
+        return sServices.containsKey(type);
     }
 
     /**
