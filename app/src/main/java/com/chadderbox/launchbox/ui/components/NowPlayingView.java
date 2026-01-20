@@ -80,6 +80,31 @@ public final class NowPlayingView
         mSongTitle.setOnClickListener(v -> openCurrentlyPlayingApp());
         mSongArtist.setOnClickListener(v -> openCurrentlyPlayingApp());
 
+        mBtnPlayPause.setOnClickListener(v -> {
+            var controllerPlaybackState = mController.getPlaybackState();
+            if (controllerPlaybackState != null && controllerPlaybackState.getState() == PlaybackState.STATE_PLAYING) {
+                mController.getTransportControls().pause();
+            } else {
+                mController.getTransportControls().play();
+            }
+        });
+
+        mBtnPrevious.setOnClickListener(v -> {
+            var controllerPlaybackState = mController.getPlaybackState();
+            if (controllerPlaybackState != null &&
+                (controllerPlaybackState.getActions() & PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0) {
+                mController.getTransportControls().skipToPrevious();
+            }
+        });
+
+        mBtnNext.setOnClickListener(v -> {
+            var controllerPlaybackState = mController.getPlaybackState();
+            if (controllerPlaybackState != null &&
+                (controllerPlaybackState.getActions() & PlaybackState.ACTION_SKIP_TO_NEXT) != 0) {
+                mController.getTransportControls().skipToNext();
+            }
+        });
+
         if (mContainer == null) {
             throw new IllegalStateException("NowPlayingView: container not found in layout!");
         }
@@ -165,31 +190,6 @@ public final class NowPlayingView
         } else {
             mBtnPlayPause.setImageResource(R.drawable.ic_play_arrow);
         }
-
-        mBtnPlayPause.setOnClickListener(v -> {
-            var controllerPlaybackState = mController.getPlaybackState();
-            if (controllerPlaybackState != null && controllerPlaybackState.getState() == PlaybackState.STATE_PLAYING) {
-                mController.getTransportControls().pause();
-            } else {
-                mController.getTransportControls().play();
-            }
-        });
-
-        mBtnNext.setOnClickListener(v -> {
-            var controllerPlaybackState = mController.getPlaybackState();
-            if (controllerPlaybackState != null &&
-                (controllerPlaybackState.getActions() & PlaybackState.ACTION_SKIP_TO_NEXT) != 0) {
-                mController.getTransportControls().skipToNext();
-            }
-        });
-
-        mBtnPrevious.setOnClickListener(v -> {
-            var controllerPlaybackState = mController.getPlaybackState();
-            if (controllerPlaybackState != null &&
-                (controllerPlaybackState.getActions() & PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0) {
-                mController.getTransportControls().skipToPrevious();
-            }
-        });
     }
 
     private void openCurrentlyPlayingApp() {
