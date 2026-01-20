@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,7 +31,7 @@ public final class NowPlayingView
     implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private MediaController mController;
-    private LinearLayout mContainer;
+    private ViewGroup mContainer;
     private ImageView mSongArt;
     private TextView mSongTitle, mSongArtist;
     private ImageButton mBtnPrevious, mBtnPlayPause, mBtnNext;

@@ -193,7 +193,7 @@ public final class AlphabetIndexView
                 }
 
                 invalidate();
-                return true;
+                return mShowBubble;
 
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
