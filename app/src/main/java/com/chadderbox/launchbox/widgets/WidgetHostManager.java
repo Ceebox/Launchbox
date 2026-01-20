@@ -7,6 +7,7 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.dialogs.CommandService;
+import com.chadderbox.launchbox.dialogs.IDialogCommand;
 import com.chadderbox.launchbox.ui.components.ResizableWidgetFrame;
 import com.chadderbox.launchbox.widgets.commands.ConfigureWidgetCommand;
 import com.chadderbox.launchbox.widgets.commands.RemoveWidgetCommand;
@@ -26,11 +28,14 @@ import com.chadderbox.launchbox.widgets.data.WidgetDao;
 import com.chadderbox.launchbox.widgets.data.WidgetDatabase;
 import com.chadderbox.launchbox.widgets.data.WidgetItem;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 
 public final class WidgetHostManager {
 
     private static final int APPWIDGET_HOST_ID = 1024;
+    private static final int CELL_DP = 70;
+    private static final int CELL_PADDING_DP = 2;
 
     private final Activity mActivity;
     private final AppWidgetManager mAppWidgetManager;
@@ -162,12 +167,11 @@ public final class WidgetHostManager {
             var newWidthDp = (int) (width / density);
             var newHeightDp = (int) (height / density);
 
-            var options = new Bundle();
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, newWidthDp);
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, newWidthDp);
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newHeightDp);
-            options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, newHeightDp);
-            mAppWidgetManager.updateAppWidgetOptions(appWidgetId, options);
+            var newOptions = new Bundle();
+            newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, newWidthDp);
+            newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newHeightDp);
+
+            mAppWidgetManager.updateAppWidgetOptions(appWidgetId, newOptions);
 
             Executors.newSingleThreadExecutor().execute(() -> {
                 var item = new WidgetItem(appWidgetId, 0, newWidthDp, newHeightDp);
@@ -176,12 +180,15 @@ public final class WidgetHostManager {
         });
 
         resizableFrame.setOnLongClickListener(v -> {
-            var editCommand = new ConfigureWidgetCommand(this, appWidgetInfo, appWidgetId);
-            var removeCommand = new RemoveWidgetCommand(this, resizableFrame, appWidgetId);
+            var commands = new ArrayList<IDialogCommand>();
+            if (canConfigureWidget(appWidgetInfo)) {
+                commands.add(new ConfigureWidgetCommand(this, appWidgetInfo, appWidgetId));
+            }
+
+            commands.add(new RemoveWidgetCommand(this, resizableFrame, appWidgetId));
             ServiceManager.getService(CommandService.class).showCommandMenu(
                 "Edit Widget",
-                editCommand,
-                removeCommand
+                commands
             );
 
             return true;
@@ -306,5 +313,31 @@ public final class WidgetHostManager {
 
     private void restoreWidget(WidgetItem item) {
         createWidgetView(item.appWidgetId, item.widthDp, item.heightDp);
+    }
+
+    private boolean canConfigureWidget(AppWidgetProviderInfo info) {
+        if (info.configure == null) {
+            return false;
+        }
+
+        var pm = mActivity.getPackageManager();
+        var intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
+        intent.setComponent(info.configure);
+
+        var resolveInfo = pm.resolveActivity(intent, 0);
+        if (resolveInfo == null || resolveInfo.activityInfo == null) {
+            return false;
+        }
+
+        var activityInfo = resolveInfo.activityInfo;
+        if (!activityInfo.exported && !activityInfo.packageName.equals(mActivity.getPackageName())) {
+            return false;
+        }
+
+        if (activityInfo.permission != null) {
+            return mActivity.checkSelfPermission(activityInfo.permission) == PackageManager.PERMISSION_GRANTED;
+        }
+
+        return true;
     }
 }
