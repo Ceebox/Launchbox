@@ -26,6 +26,7 @@ import com.chadderbox.launchbox.settings.options.implementation.TintIconsOption;
 import com.chadderbox.launchbox.settings.options.implementation.WallpaperDimOption;
 import com.chadderbox.launchbox.settings.options.implementation.WallpaperOverrideOption;
 import com.chadderbox.launchbox.fonts.CustomFontFactory;
+import com.chadderbox.launchbox.settings.options.implementation.debug.WipeWidgetsOption;
 import com.chadderbox.launchbox.ui.ThemeHelper;
 
 import java.util.ArrayList;
@@ -84,6 +85,7 @@ public final class SettingsActivity extends ComponentActivity {
         mOptions.add(new LeftHandedOption());
         mOptions.add(new ShowOnlyInstalledOption());
         mOptions.add(new CharacterHeadingsOption());
+        mOptions.add(new WipeWidgetsOption());
 
         setupOptions();
     }

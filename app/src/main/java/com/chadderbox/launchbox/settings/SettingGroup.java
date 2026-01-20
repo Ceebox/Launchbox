@@ -5,4 +5,5 @@ public enum SettingGroup {
     ACCESSIBILITY,
     APPEARANCE,
     FUNCTIONALITY,
+    DEBUG
 }

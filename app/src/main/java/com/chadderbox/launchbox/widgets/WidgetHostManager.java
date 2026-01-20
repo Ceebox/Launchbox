@@ -199,6 +199,31 @@ public final class WidgetHostManager {
         });
     }
 
+    public void wipeWidgets() {
+        var widgetIds = new int[mContainer.getChildCount()];
+        for (var i = 0; i < mContainer.getChildCount(); i++) {
+            var child = mContainer.getChildAt(i);
+            var tag = child.getTag();
+
+            if (tag instanceof Integer id) {
+                widgetIds[i] = id;
+            } else {
+                widgetIds[i] = AppWidgetManager.INVALID_APPWIDGET_ID;
+            }
+        }
+
+        mActivity.runOnUiThread(mContainer::removeAllViews);
+        Executors.newSingleThreadExecutor().execute(() -> {
+            for (var id : widgetIds) {
+                if (id != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                    mAppWidgetHost.deleteAppWidgetId(id);
+                }
+            }
+
+            mWidgetDao.wipe();
+        });
+    }
+
     public void handleConfigureResult(int resultCode, @Nullable Intent data) {
         var appWidgetId = (data != null)
             ? data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mPendingWidgetId)

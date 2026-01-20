@@ -21,4 +21,7 @@ public interface WidgetDao {
 
     @Delete
     void delete(WidgetItem widget);
+
+    @Query("DELETE FROM widgets")
+    void wipe();
 }
