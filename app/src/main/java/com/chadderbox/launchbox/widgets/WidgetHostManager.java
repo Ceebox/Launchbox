@@ -9,6 +9,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -24,6 +25,7 @@ import com.chadderbox.launchbox.dialogs.IDialogCommand;
 import com.chadderbox.launchbox.ui.components.ResizableWidgetFrame;
 import com.chadderbox.launchbox.widgets.commands.ConfigureWidgetCommand;
 import com.chadderbox.launchbox.widgets.commands.RemoveWidgetCommand;
+import com.chadderbox.launchbox.widgets.commands.ResizeWidgetCommand;
 import com.chadderbox.launchbox.widgets.data.WidgetDao;
 import com.chadderbox.launchbox.widgets.data.WidgetDatabase;
 import com.chadderbox.launchbox.widgets.data.WidgetItem;
@@ -144,34 +146,45 @@ public final class WidgetHostManager {
             return;
         }
 
+        var metrics = mActivity.getResources().getDisplayMetrics();
+        var density = metrics.density;
+
+        var containerWidth = mContainer.getWidth() > 0 ? mContainer.getWidth() : metrics.widthPixels;
+        var containerHeight = mContainer.getHeight() > 0 ? mContainer.getHeight() : metrics.heightPixels;
+
+        var availableWidthDp = (int) ((containerWidth - mContainer.getPaddingLeft() - mContainer.getPaddingRight()) / density);
+        var availableHeightDp = (int) ((containerHeight - mContainer.getPaddingTop() - mContainer.getPaddingBottom()) / density);
+
         var hostView = mAppWidgetHost.createView(mActivity, appWidgetId, appWidgetInfo);
         hostView.setAppWidget(appWidgetId, appWidgetInfo);
 
         var resizableFrame = new ResizableWidgetFrame(mActivity);
         resizableFrame.setTag(appWidgetId);
 
-        var density = mActivity.getResources().getDisplayMetrics().density;
+        var targetWidth = widthDp > 0 ? widthDp : appWidgetInfo.minWidth;
+        var targetHeight = heightDp > 0 ? heightDp : appWidgetInfo.minHeight;
+
+        var finalWidthDp = Math.max(CELL_DP, Math.min(availableWidthDp, snapToCellDp(targetWidth)));
+        var finalHeightDp = Math.max(CELL_DP, Math.min(availableHeightDp, snapToCellDp(targetHeight)));
+
         var frameParams = new ViewGroup.LayoutParams(
-            widthDp > 0 ? (int) (widthDp * density) : ViewGroup.LayoutParams.MATCH_PARENT,
-            heightDp > 0 ? (int) (heightDp * density) : ViewGroup.LayoutParams.WRAP_CONTENT
+            (int) (finalWidthDp * density),
+            (int) (finalHeightDp * density)
         );
 
         resizableFrame.setLayoutParams(frameParams);
-
         resizableFrame.addView(hostView, new FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         ));
 
+        updateWidgetSizeOptions(appWidgetId, finalWidthDp, finalHeightDp);
+
         resizableFrame.setOnResizeListener((width, height) -> {
-            var newWidthDp = (int) (width / density);
-            var newHeightDp = (int) (height / density);
+            var newWidthDp = Math.min(availableWidthDp, (int) (width / density));
+            var newHeightDp = Math.min(availableHeightDp, (int) (height / density));
 
-            var newOptions = new Bundle();
-            newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, newWidthDp);
-            newOptions.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newHeightDp);
-
-            mAppWidgetManager.updateAppWidgetOptions(appWidgetId, newOptions);
+            updateWidgetSizeOptions(appWidgetId, newWidthDp, newHeightDp);
 
             Executors.newSingleThreadExecutor().execute(() -> {
                 var item = new WidgetItem(appWidgetId, 0, newWidthDp, newHeightDp);
@@ -185,6 +198,7 @@ public final class WidgetHostManager {
                 commands.add(new ConfigureWidgetCommand(this, appWidgetInfo, appWidgetId));
             }
 
+//            commands.add(new ResizeWidgetCommand(this, resizableFrame, appWidgetId));
             commands.add(new RemoveWidgetCommand(this, resizableFrame, appWidgetId));
             ServiceManager.getService(CommandService.class).showCommandMenu(
                 "Edit Widget",
@@ -339,5 +353,20 @@ public final class WidgetHostManager {
         }
 
         return true;
+    }
+
+    private void updateWidgetSizeOptions(int appWidgetId, int widthDp, int heightDp) {
+        var options = new Bundle();
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, widthDp);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, widthDp);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, heightDp);
+        options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp);
+        mAppWidgetManager.updateAppWidgetOptions(appWidgetId, options);
+    }
+
+    private int snapToCellDp(int dp) {
+        var cellWithPadding = CELL_DP + CELL_PADDING_DP;
+        var snapped = ((dp + cellWithPadding / 2) / cellWithPadding) * cellWithPadding;
+        return Math.max(cellWithPadding, snapped);
     }
 }
