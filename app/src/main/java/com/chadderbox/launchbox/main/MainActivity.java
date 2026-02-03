@@ -90,6 +90,7 @@ public final class MainActivity
                 case Intent.ACTION_PACKAGE_CHANGED:
                     mAlphabetController.populateAlphabetViewLetters();
                     mViewPagerController.refreshAllVisibleFragments();
+                    mSearchController.notifyAppsChanged();
                     break;
             }
         }

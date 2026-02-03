@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.chadderbox.launchbox.core.ServiceManager;
+import com.chadderbox.launchbox.data.AppInfo;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.utils.AppLoader;
@@ -19,20 +20,37 @@ import java.util.function.Consumer;
 
 public final class AppSearchProvider implements ISearchProvider {
 
-    private final int LEVENSHTEIN_HEURISTIC = 3;
+    private static final int LEVENSHTEIN_HEURISTIC = 3;
+    private final ExecutorService mExecutor = Executors.newFixedThreadPool(2);
+    private final List<SearchMetadata> mCache = new ArrayList<>();
 
-    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final AppLoader mAppLoader;
     private final FavouritesRepository mFavouritesRepository;
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     public AppSearchProvider() {
         mAppLoader = ServiceManager.getService(AppLoader.class);
         mFavouritesRepository = ServiceManager.getService(FavouritesRepository.class);
+        refreshCache();
+    }
+
+    public void refreshCache() {
+        mExecutor.execute(() -> {
+            var apps = mAppLoader.getInstalledApps();
+            var temp = new ArrayList<SearchMetadata>(apps.size());
+            for (var app : apps) {
+                temp.add(new SearchMetadata(app));
+            }
+
+            synchronized (mCache) {
+                mCache.clear();
+                mCache.addAll(temp);
+            }
+        });
     }
 
     @Override
     public int getPriority() {
-        // Apps have the highest priority
         return 0;
     }
 
@@ -40,64 +58,65 @@ public final class AppSearchProvider implements ISearchProvider {
     public void searchAsync(String query, Consumer<List<ListItem>> callback, CancellationToken cancellationToken) {
         mExecutor.execute(() -> {
             var searchQuery = query.toLowerCase(Locale.getDefault());
-
             var favourites = mFavouritesRepository.loadFavourites();
-            var apps = mAppLoader.getInstalledApps();
 
-            var results = new ArrayList<ListItem>();
-            var favouriteResults = new ArrayList<ListItem>();
-            var normalResults = new ArrayList<ListItem>();
-            var fuzzyResults = new ArrayList<ListItem>();
+            List<SearchMetadata> snapshot;
+            synchronized (mCache) {
+                snapshot = new ArrayList<>(mCache);
+            }
 
-            for (var app : apps) {
+            var favouriteItems = new ArrayList<ListItem>();
+            var normal = new ArrayList<ListItem>();
+            var fuzzy = new ArrayList<ListItem>();
 
+            for (var meta : snapshot) {
                 if (cancellationToken.isCancelled()) {
                     return;
                 }
 
-                var labelForSearch = app.getLabel().toLowerCase(Locale.getDefault());
-                var packageForSearch = formatPackageName(app.getPackageName());
-
-                var matchesLabel = labelForSearch.contains(searchQuery);
-                var matchesPackage = packageForSearch.contains(searchQuery);
-
-                if (matchesLabel || matchesPackage) {
-                    if (favourites.contains(app.getPackageName())) {
-                        favouriteResults.add(new AppItem(app));
+                if (meta.lowerLabel.contains(searchQuery) || meta.lowerPackage.contains(searchQuery)) {
+                    if (favourites.contains(meta.app.getPackageName())) {
+                        favouriteItems.add(new AppItem(meta.app));
                     } else {
-                        normalResults.add(new AppItem(app));
+                        normal.add(new AppItem(meta.app));
                     }
                 } else if (searchQuery.length() > 3 &&
-                    SearchHelpers.calculateLevenshteinDistance(searchQuery, app.getLabel().toLowerCase(Locale.getDefault())) < LEVENSHTEIN_HEURISTIC
-                ) {
-                    // TODO: Possibly do this comparison of after the last "." in the package name?
-                    // NOTE: It may be faster to ignore the search query if it is longer than the longest package name + 2?
-                    fuzzyResults.add(new AppItem(app));
+                    SearchHelpers.calculateLevenshteinDistance(searchQuery, meta.lowerLabel) < LEVENSHTEIN_HEURISTIC) {
+                    fuzzy.add(new AppItem(meta.app));
                 }
             }
 
-            // Show in the order that the user probably wants them
-            results.addAll(favouriteResults);
-            results.addAll(normalResults);
-            results.addAll(fuzzyResults);
+            var results = new ArrayList<ListItem>(favouriteItems.size() + normal.size() + fuzzy.size());
+            results.addAll(favouriteItems);
+            results.addAll(normal);
+            results.addAll(fuzzy);
 
-            new Handler(Looper.getMainLooper()).post(() -> callback.accept(results));
+            mMainHandler.post(() -> {
+                if (!cancellationToken.isCancelled()) {
+                    callback.accept(results);
+                }
+            });
         });
     }
 
     private static String formatPackageName(String packageName) {
-        packageName = packageName.toLowerCase(Locale.getDefault());
-
-        if (packageName.startsWith("com.")) {
-            packageName = packageName.substring(4);
-        }
-        else if (packageName.startsWith("org.")) {
-            packageName = packageName.substring(4);
-        }
-        else if (packageName.startsWith("net.")) {
-            packageName = packageName.substring(4);
+        var lower = packageName.toLowerCase(Locale.getDefault());
+        if (lower.startsWith("com.") || lower.startsWith("org.") || lower.startsWith("net.")) {
+            return lower.substring(4);
         }
 
-        return packageName;
+        return lower;
+    }
+
+    private static class SearchMetadata {
+        final AppInfo app;
+        final String lowerLabel;
+        final String lowerPackage;
+
+        SearchMetadata(AppInfo app) {
+            this.app = app;
+            this.lowerLabel = app.getLabel().toLowerCase(Locale.getDefault());
+            this.lowerPackage = formatPackageName(app.getPackageName());
+        }
     }
 }

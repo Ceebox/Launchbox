@@ -37,6 +37,7 @@ public final class SearchController {
     private final BottomSheetBehavior<View> mSearchSheetBehaviour;
     private final CombinedAdapter mSearchAdapter;
     private final GestureDetector mGestureDetector;
+    private final AppSearchProvider mAppSearchProvider;
     private SearchManager mSearchManager;
     private Runnable mSearchRunnable;
 
@@ -47,9 +48,9 @@ public final class SearchController {
         mSearchSheetBehaviour.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         var activity = ServiceManager.getActivity(MainActivity.class);
-        var appSearchProvider = new AppSearchProvider();
+        mAppSearchProvider = new AppSearchProvider();
         var searchProviders = List.of(
-            appSearchProvider,
+            mAppSearchProvider,
             new WebSearchProvider(),
             new WebSuggestionProvider(),
             new SettingsSearchProvider(activity.getApplicationContext())
@@ -184,6 +185,10 @@ public final class SearchController {
 
             mSearchAdapter.notifyDataSetChanged();
         });
+    }
+
+    public void notifyAppsChanged() {
+        mAppSearchProvider.refreshCache();
     }
 
     public boolean onTouchEvent(MotionEvent ev) {

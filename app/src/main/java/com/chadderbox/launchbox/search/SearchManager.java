@@ -3,8 +3,6 @@ package com.chadderbox.launchbox.search;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -36,27 +34,50 @@ public final class SearchManager {
 
         mCancellationToken = new CancellationToken();
 
-        var aggregated = new ArrayList<ListItem>();
-        var pending = new AtomicInteger(mSearchProviders.size());
-        var resultsByProvider = new ConcurrentHashMap<ISearchProvider, List<ListItem>>();
+        final var currentToken = mCancellationToken;
+        var providerCount = mSearchProviders.size();
+        var resultsBuffer = new ArrayList<List<ListItem>>(providerCount);
+        for (var i = 0; i < providerCount; i++) {
+            resultsBuffer.add(null);
+        }
 
-        for (var provider : mSearchProviders) {
-            provider.searchAsync(
-                query,
-                results -> {
-                    resultsByProvider.put(provider, results);
-                    if (pending.decrementAndGet() == 0) {
+        var finished = new boolean[providerCount];
+        var nextToPublish = new AtomicInteger(0);
+        var aggregatedResults = new ArrayList<ListItem>();
 
-                        // Order by priority
-                        for (var p : mSearchProviders) {
-                            aggregated.addAll(Objects.requireNonNull(resultsByProvider.getOrDefault(p, List.of())));
+        for (int i = 0; i < providerCount; i++) {
+            final int index = i;
+            var provider = mSearchProviders.get(index);
+            provider.searchAsync(query, results -> {
+                synchronized (resultsBuffer) {
+                    if (currentToken.isCancelled()) {
+                        // Don't process these results
+                        return;
+                    }
+
+                    resultsBuffer.set(index, results != null ? results : new ArrayList<>());
+                    finished[index] = true;
+
+                    var updated = false;
+
+                    // Flush results in order
+                    while (nextToPublish.get() < providerCount && finished[nextToPublish.get()]) {
+                        var currentIndex = nextToPublish.get();
+                        List<ListItem> providerResults = resultsBuffer.get(currentIndex);
+
+                        if (providerResults != null) {
+                            aggregatedResults.addAll(providerResults);
                         }
 
-                        callback.accept(aggregated);
+                        nextToPublish.incrementAndGet();
+                        updated = true;
                     }
-                },
-                mCancellationToken
-            );
+
+                    if (updated) {
+                        callback.accept(new ArrayList<>(aggregatedResults));
+                    }
+                }
+            }, currentToken);
         }
     }
 }
