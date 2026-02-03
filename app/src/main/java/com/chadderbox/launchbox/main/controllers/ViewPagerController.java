@@ -74,6 +74,10 @@ public final class ViewPagerController {
             setCurrentItem(0, true);
             fragmentController.setCurrentFragment(firstFragment);
 
+            if (firstFragment instanceof FavouritesFragment favouritesFragment) {
+                favouritesFragment.scrollToPosition(0);
+            }
+
             if (currentFragment instanceof AppsFragment appsFragment) {
                 appsFragment.scrollToPosition(0);
             }
