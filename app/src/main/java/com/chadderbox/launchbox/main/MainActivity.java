@@ -268,18 +268,18 @@ public final class MainActivity
             new ToggleFavouriteCommand(app, isFavourite),
             new RenameCommand(app),
             new UninstallCommand(app),
-            new OpenSettingsCommand(),
-            new AddWidgetCommand(widgetManager)
+            new AddWidgetCommand(widgetManager),
+            new OpenSettingsCommand()
         )));
 
         if (!onFavouritesScreen) {
             // Why hide a favourite app?
             var isHidden = mHiddenAppsHelper.isHidden(packageName);
-            commands.add(new ToggleHideCommand(app, isHidden));
+            commands.add(3, new ToggleHideCommand(app, isHidden));
         }
 
         if (isFavourite && onFavouritesScreen) {
-            commands.add(new EnterEditModeCommand());
+            commands.add(3, new EnterEditModeCommand());
         }
 
         commandService.showCommandMenu(app.getLabel(), commands);
