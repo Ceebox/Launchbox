@@ -27,11 +27,34 @@ public final class FontHelper {
             default: break;
         }
 
-        var f = new File(key);
-        if (f.exists()) {
-            var newTypeface = Typeface.createFromFile(f);
-            sFontCache.put(key, newTypeface);
-            return newTypeface;
+        var fontFile = new File(key);
+        if (!fontFile.exists()) {
+            // Since we don't have an exact match, try to find the font
+            var fontDir = new File("/system/fonts/");
+            var files = fontDir.listFiles();
+            if (files != null) {
+                for (var file : files) {
+                    var name = file.getName().toLowerCase();
+                    var searchKey = key.toLowerCase();
+
+                    if (name.startsWith(searchKey)) {
+                        fontFile = file;
+                        if (name.contains("regular")) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (fontFile.exists()) {
+            try {
+                var newTypeface = Typeface.createFromFile(fontFile);
+                sFontCache.put(key, newTypeface);
+                return newTypeface;
+            } catch (Exception e) {
+                return Typeface.DEFAULT;
+            }
         }
 
         return Typeface.DEFAULT;
