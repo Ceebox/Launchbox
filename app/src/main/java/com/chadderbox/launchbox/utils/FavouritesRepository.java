@@ -18,6 +18,7 @@ public final class FavouritesRepository {
     private final Handler mMainHandler;
 
     public FavouritesRepository(ExecutorService executor) {
+        // TODO: This probably needs moving over to the DB, and combining with hidden
         mExecutor = executor;
         mMainHandler = ServiceManager.getMainHandler();
     }

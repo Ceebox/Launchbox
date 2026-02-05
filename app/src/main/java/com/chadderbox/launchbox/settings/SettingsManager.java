@@ -25,6 +25,7 @@ public final class SettingsManager {
     public static final String KEY_LEFT_HANDED = "left_handed";
     public static final String KEY_FONT = "font";
     public static final String KEY_FONT_SIZE = "font_size";
+    public static final String KEY_HIDDEN = "hidden";
     public static final String KEY_SHADOW_STRENGTH = "shadow_strength";
     public static final String KEY_THEME = "theme";
     public static final String KEY_TINT_ICONS = "tint_icons";
@@ -123,6 +124,29 @@ public final class SettingsManager {
 
     public static int getFontSize() {
         return sPrefs.getInt(KEY_FONT_SIZE, 16);
+    }
+
+    public static List<String> getHidden() {
+        var jsonString = sPrefs.getString(KEY_HIDDEN, "[]");
+        var list = new ArrayList<String>();
+
+        try {
+            var array = new JSONArray(jsonString);
+            for (int i = 0; i < array.length(); i++) {
+                list.add(array.getString(i));
+            }
+        } catch (Exception ignored) {}
+
+        return list;
+    }
+
+    public static void setHidden(List<String> hidden) {
+        var json = new JSONArray();
+        for (var h : hidden) {
+            json.put(h);
+        }
+
+        sPrefs.edit().putString(KEY_HIDDEN, json.toString()).apply();
     }
 
     public static void setShadowStrength(int newStrength) {

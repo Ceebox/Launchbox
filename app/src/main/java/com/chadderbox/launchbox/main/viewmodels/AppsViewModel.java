@@ -11,11 +11,13 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.AppLoader;
+import com.chadderbox.launchbox.utils.HiddenAppsRepository;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,6 +59,7 @@ public class AppsViewModel extends AndroidViewModel
 
         apps.sort((a, b) -> a.getLabel().compareToIgnoreCase(b.getLabel()));
 
+        var hiddenAppHelper = ServiceManager.getService(HiddenAppsRepository.class);
         var list = new ArrayList<ListItem>();
         list.add(new HeaderItem("Apps"));
 
@@ -64,6 +67,12 @@ public class AppsViewModel extends AndroidViewModel
         var hasNumber = false;
         var lastHeading = ' ';
         for (var app : apps) {
+            var packageName = app.getPackageName();
+            if (hiddenAppHelper.isHidden(packageName)) {
+                // Don't display hidden apps here
+                continue;
+            }
+
             var appName = app.getLabel();
             var appCharacter = Character.toUpperCase(appName.charAt(0));
             if (characterHeadings && lastHeading != appCharacter) {

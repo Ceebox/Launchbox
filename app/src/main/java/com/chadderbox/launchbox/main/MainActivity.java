@@ -25,6 +25,7 @@ import com.chadderbox.launchbox.main.commands.EnterEditModeCommand;
 import com.chadderbox.launchbox.main.commands.OpenSettingsCommand;
 import com.chadderbox.launchbox.main.commands.RenameCommand;
 import com.chadderbox.launchbox.main.commands.ToggleFavouriteCommand;
+import com.chadderbox.launchbox.main.commands.ToggleHideCommand;
 import com.chadderbox.launchbox.main.commands.UninstallCommand;
 import com.chadderbox.launchbox.main.controllers.AlphabetViewController;
 import com.chadderbox.launchbox.main.controllers.FragmentController;
@@ -44,6 +45,7 @@ import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.icons.IconPackLoader;
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.ui.ThemeHelper;
+import com.chadderbox.launchbox.utils.HiddenAppsRepository;
 import com.chadderbox.launchbox.wallpaper.WallpaperManager;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;
 import com.chadderbox.launchbox.widgets.commands.AddWidgetCommand;
@@ -71,6 +73,7 @@ public final class MainActivity
     private FragmentController mFragmentController;
     private SearchController mSearchController;
     private FavouritesRepository mFavouritesHelper;
+    private HiddenAppsRepository mHiddenAppsHelper;
     private IconPackLoader mIconPackLoader;
     private boolean mIsEditMode = false;
 
@@ -114,6 +117,7 @@ public final class MainActivity
 
         ServiceManager.registerService(IconPackLoader.class, () -> mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack()));
         ServiceManager.registerService(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(mExecutor));
+        ServiceManager.registerService(HiddenAppsRepository.class, () -> mHiddenAppsHelper = new HiddenAppsRepository());
         ServiceManager.registerService(AppAliasProvider.class, () -> mAppAliasHelper = new AppAliasProvider());
         ServiceManager.registerService(AppLoader.class, () -> mAppLoader = new AppLoader(this, mAppAliasHelper));
         ServiceManager.registerService(CommandService.class, () -> new CommandService((this)));
@@ -253,7 +257,8 @@ public final class MainActivity
 
     @SuppressLint("ClickableViewAccessibility")
     public void showAppMenu(AppInfo app) {
-        var isFavourite = mFavouritesHelper.isFavourite(app.getPackageName());
+        var packageName = app.getPackageName();
+        var isFavourite = mFavouritesHelper.isFavourite(packageName);
         var onFavouritesScreen = mFragmentController.getCurrentFragment() instanceof FavouritesFragment;
         var widgetManager = ServiceManager.getService(WidgetHostManager.class);
         var commandService = ServiceManager.getService(CommandService.class);
@@ -266,6 +271,12 @@ public final class MainActivity
             new OpenSettingsCommand(),
             new AddWidgetCommand(widgetManager)
         )));
+
+        if (!onFavouritesScreen) {
+            // Why hide a favourite app?
+            var isHidden = mHiddenAppsHelper.isHidden(packageName);
+            commands.add(new ToggleHideCommand(app, isHidden));
+        }
 
         if (isFavourite && onFavouritesScreen) {
             commands.add(new EnterEditModeCommand());
