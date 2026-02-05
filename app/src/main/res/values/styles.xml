@@ -74,6 +74,6 @@
 
     <style name="Theme.Launcherbox.Dialog.Animation">
         <item name="android:windowEnterAnimation">@anim/slide_up_in</item>
-        <item name="android:windowExitAnimation">@anim/slide_up_out</item>
+        <item name="android:windowExitAnimation">@anim/slide_down_out</item>
     </style>
 </resources>
