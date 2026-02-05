@@ -36,6 +36,8 @@
         <item name="android:textAppearanceListItem">@style/Theme.Launcherbox.Dialog.Item</item>
         <item name="android:windowBackground">@drawable/dialog_background</item>
         <item name="android:windowAnimationStyle">@style/Theme.Launcherbox.Dialog.Animation</item>
+        <item name="android:windowClipToOutline">true</item>
+        <item name="android:backgroundDimAmount">0.5</item>
 
         <item name="android:windowIsFloating">true</item>
         <item name="colorSurface">@color/color_background</item>
@@ -60,16 +62,18 @@
 
     <style name="Theme.Launcherbox.Dialog.Title" parent="@style/TextAppearance.Material3.TitleLarge">
         <item name="android:textColor">@color/text_primary</item>
-        <item name="android:textFontWeight">700</item>
+        <item name="android:textFontWeight">600</item>
         <item name="android:paddingStart">0dp</item>
         <item name="android:paddingEnd">0dp</item>
         <item name="android:layout_marginStart">0dp</item>
         <item name="android:layout_marginEnd">0dp</item>
     </style>
 
-    <style name="Theme.Launcherbox.Dialog.Item" parent="@style/TextAppearance.Material3.BodyMedium">
+    <style name="Theme.Launcherbox.Dialog.Item" parent="TextAppearance.Material3.BodyLarge">
         <item name="android:textColor">@color/text_secondary</item>
-        <item name="android:textFontWeight">400</item>
+        <item name="android:textFontWeight">450</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:gravity">center_vertical</item>
     </style>
 
     <style name="Theme.Launcherbox.Dialog.Animation">
