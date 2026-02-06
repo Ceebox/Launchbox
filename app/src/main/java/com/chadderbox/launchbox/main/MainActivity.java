@@ -256,7 +256,7 @@ public final class MainActivity
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    public void showAppMenu(View appView, AppInfo app) {
+    public void showAppMenu(AppInfo app) {
         var packageName = app.getPackageName();
         var isFavourite = mFavouritesHelper.isFavourite(packageName);
         var onFavouritesScreen = mFragmentController.getCurrentFragment() instanceof FavouritesFragment;
@@ -282,7 +282,7 @@ public final class MainActivity
             commands.add(3, new EnterEditModeCommand());
         }
 
-        commandService.showCommandPopup(appView, commands);
+        commandService.showCommandDialog(app.getLabel(), commands);
     }
 
     // TODO: This is bad! We shouldn't need this!

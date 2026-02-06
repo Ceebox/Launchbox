@@ -26,7 +26,7 @@ public final class AppItem extends ListItem {
     @Override
     protected void executeHoldAction(View view) {
         if (view.getContext() instanceof MainActivity app) {
-            app.showAppMenu(view, mAppInfo);
+            app.showAppMenu(mAppInfo);
         }
     }
 }
