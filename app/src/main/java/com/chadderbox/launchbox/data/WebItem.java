@@ -1,6 +1,6 @@
 package com.chadderbox.launchbox.data;
 
-import android.content.Context;
+import android.view.View;
 
 import com.chadderbox.launchbox.main.MainActivity;
 
@@ -17,12 +17,12 @@ public final class WebItem extends ListItem {
     }
 
     @Override
-    protected void executeOpenAction(Context context) {
-        if (context instanceof MainActivity app) {
+    protected void executeOpenAction(View view) {
+        if (view.getContext() instanceof MainActivity app) {
             app.openWebQuery(mQuery);
         }
     }
 
     @Override
-    protected void executeHoldAction(Context context) { }
+    protected void executeHoldAction(View view) { }
 }

@@ -1,6 +1,6 @@
 package com.chadderbox.launchbox.data;
 
-import android.content.Context;
+import android.view.View;
 
 public abstract class ListItem {
     private final ListItemType mType;
@@ -10,24 +10,24 @@ public abstract class ListItem {
         mType = type;
     }
 
-    public final void performOpenAction(Context context) {
+    public final void performOpenAction(View view) {
         if (!mActionsEnabled) {
             return;
         }
 
-        executeOpenAction(context);
+        executeOpenAction(view);
     }
 
-    public final void performHoldAction(Context context) {
+    public final void performHoldAction(View view) {
         if (!mActionsEnabled) {
             return;
         }
 
-        executeHoldAction(context);
+        executeHoldAction(view);
     }
 
-    protected abstract void executeOpenAction(Context context);
-    protected abstract  void executeHoldAction(Context context);
+    protected abstract void executeOpenAction(View view);
+    protected abstract void executeHoldAction(View view);
 
     public ListItemType getType() {
         return mType;

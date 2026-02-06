@@ -19,14 +19,14 @@ public final class SettingViewHolder
         itemView.setOnClickListener(v -> {
             var tag = v.getTag();
             if (tag instanceof ListItem item) {
-                item.performOpenAction(v.getContext());
+                item.performOpenAction(v);
             }
         });
 
         itemView.setOnLongClickListener(v -> {
             var tag = v.getTag();
             if (tag instanceof ListItem item) {
-                item.performHoldAction(v.getContext());
+                item.performHoldAction(v);
                 return true;
             }
 

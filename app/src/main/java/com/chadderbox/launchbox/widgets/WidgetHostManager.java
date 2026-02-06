@@ -9,7 +9,6 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -25,7 +24,6 @@ import com.chadderbox.launchbox.dialogs.IDialogCommand;
 import com.chadderbox.launchbox.ui.components.ResizableWidgetFrame;
 import com.chadderbox.launchbox.widgets.commands.ConfigureWidgetCommand;
 import com.chadderbox.launchbox.widgets.commands.RemoveWidgetCommand;
-import com.chadderbox.launchbox.widgets.commands.ResizeWidgetCommand;
 import com.chadderbox.launchbox.widgets.data.WidgetDao;
 import com.chadderbox.launchbox.widgets.data.WidgetDatabase;
 import com.chadderbox.launchbox.widgets.data.WidgetItem;
@@ -200,7 +198,7 @@ public final class WidgetHostManager {
 
 //            commands.add(new ResizeWidgetCommand(this, resizableFrame, appWidgetId));
             commands.add(new RemoveWidgetCommand(this, resizableFrame, appWidgetId));
-            ServiceManager.getService(CommandService.class).showCommandMenu(
+            ServiceManager.getService(CommandService.class).showCommandDialog(
                 "Edit Widget",
                 commands
             );

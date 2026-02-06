@@ -93,7 +93,7 @@ public final class SearchController {
                 (event != null && event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER && event.getAction() == android.view.KeyEvent.ACTION_DOWN)) {
 
                 if (mSearchAdapter.getItemCount() > 0) {
-                    mSearchAdapter.getItem(0).performOpenAction(activity);
+                    mSearchAdapter.getItem(0).performOpenAction(v);
                     closeSearchSheet();
                 }
 

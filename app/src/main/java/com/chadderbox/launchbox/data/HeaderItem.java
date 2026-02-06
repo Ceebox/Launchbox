@@ -1,6 +1,6 @@
 package com.chadderbox.launchbox.data;
 
-import android.content.Context;
+import android.view.View;
 
 public final class HeaderItem extends ListItem {
     private final String mTitle;
@@ -15,8 +15,8 @@ public final class HeaderItem extends ListItem {
     }
 
     @Override
-    public void executeOpenAction(Context context) { }
+    public void executeOpenAction(View view) { }
 
     @Override
-    protected void executeHoldAction(Context context) { }
+    protected void executeHoldAction(View view) { }
 }
