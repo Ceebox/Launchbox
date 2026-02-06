@@ -1,5 +1,6 @@
 package com.chadderbox.launchbox.dialogs;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.view.View;
 
@@ -41,8 +42,10 @@ public final class CommandService {
             .show();
     }
 
+    @SuppressLint("ObsoleteSdkInt")
     private void buildAndShowPopup(View anchor, IDialogCommand[] commands) {
-        var popup = new android.widget.PopupMenu(mContext, anchor);
+        var wrapper = new android.view.ContextThemeWrapper(mContext, R.style.Theme_Launcherbox_Popup);
+        var popup = new android.widget.PopupMenu(wrapper, anchor);
         var menu = popup.getMenu();
 
         for (var i = 0; i < commands.length; i++) {
@@ -53,6 +56,11 @@ public final class CommandService {
             commands[item.getItemId()].execute();
             return true;
         });
+
+        // Smooth positioning
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            popup.setGravity(android.view.Gravity.END);
+        }
 
         popup.show();
     }

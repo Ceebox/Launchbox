@@ -80,4 +80,23 @@
         <item name="android:windowEnterAnimation">@anim/slide_up_in</item>
         <item name="android:windowExitAnimation">@anim/slide_down_out</item>
     </style>
+
+    <!-- I am having issues making this rounded :( -->
+    <style name="Theme.Launcherbox.Popup" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+
+        <item name="android:itemBackground">@android:color/transparent</item>
+        <item name="popupMenuStyle">@style/Widget.Launcherbox.PopupMenu</item>
+        <item name="android:textAppearanceLarge">@style/Theme.Launcherbox.Dialog.Item</item>
+        <item name="android:textAppearanceSmall">@style/Theme.Launcherbox.Dialog.Item</item>
+    </style>
+
+    <style name="Widget.Launcherbox.PopupMenu" parent="Widget.Material3.PopupMenu">
+        <item name="android:popupBackground">@drawable/dialog_background</item>
+        <item name="android:popupAnimationStyle">@style/Theme.Launcherbox.Dialog.Animation</item>
+        <item name="android:popupElevation">8dp</item>
+        <item name="android:dropDownVerticalOffset">4dp</item>
+    </style>
+
 </resources>
