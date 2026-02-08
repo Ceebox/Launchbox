@@ -1,5 +1,7 @@
 package com.chadderbox.launchbox.data;
 
+import android.content.pm.ApplicationInfo;
+
 public final class AppInfo {
     private final String mName;
     private final String mPackageName;
@@ -9,8 +11,10 @@ public final class AppInfo {
     public AppInfo(String name, String packageName, int category, String alias) {
         mName = name;
         mPackageName = packageName;
-        mCategory = category;
         mAlias = alias;
+        mCategory = category == ApplicationInfo.CATEGORY_UNDEFINED ?
+            inferCategory(packageName)
+            : category;
     }
 
     public String getLabel() {
@@ -39,5 +43,14 @@ public final class AppInfo {
 
     public void setAlias(String newAlias) {
         mAlias = newAlias;
+    }
+
+    private static int inferCategory(String packageName) {
+        if (packageName.contains("game")) return ApplicationInfo.CATEGORY_GAME;
+        if (packageName.contains("social") || packageName.contains("messenger")) return ApplicationInfo.CATEGORY_SOCIAL;
+        if (packageName.contains("music") || packageName.contains("audio")) return ApplicationInfo.CATEGORY_AUDIO;
+        if (packageName.contains("video") || packageName.contains("player")) return ApplicationInfo.CATEGORY_VIDEO;
+        if (packageName.contains("map") || packageName.contains("navigation")) return ApplicationInfo.CATEGORY_MAPS;
+        return ApplicationInfo.CATEGORY_UNDEFINED;
     }
 }
