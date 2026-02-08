@@ -176,14 +176,11 @@ public final class SearchController {
         }
 
         mSearchManager.searchAsync(query, results -> {
-            mSearchAdapter.clearItems();
             if (!results.isEmpty()) {
-                mSearchAdapter.addAll(results);
+                mSearchAdapter.updateItems(results);
             } else {
                 mSearchAdapter.add(new HeaderItem("No results"));
             }
-
-            mSearchAdapter.notifyDataSetChanged();
         });
     }
 

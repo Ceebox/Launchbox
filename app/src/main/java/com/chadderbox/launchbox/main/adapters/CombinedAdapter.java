@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -143,6 +144,28 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         this.notifyDataSetChanged();
+    }
+
+    public void updateItems(List<ListItem> newList) {
+        var diffCallback = new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() { return mItems.size(); }
+            @Override
+            public int getNewListSize() { return newList.size(); }
+            @Override
+            public boolean areItemsTheSame(int oldPos, int newPos) {
+                return mItems.get(oldPos).equals(newList.get(newPos));
+            }
+            @Override
+            public boolean areContentsTheSame(int oldPos, int newPos) {
+                return mItems.get(oldPos).hashCode() == newList.get(newPos).hashCode();
+            }
+        };
+
+        var diffResult = DiffUtil.calculateDiff(diffCallback);
+        mItems.clear();
+        mItems.addAll(newList);
+        diffResult.dispatchUpdatesTo(this);
     }
 
     @NonNull
