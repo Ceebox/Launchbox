@@ -24,7 +24,6 @@ import com.chadderbox.launchbox.settings.options.implementation.ShowOnlyInstalle
 import com.chadderbox.launchbox.settings.options.implementation.ThemeOption;
 import com.chadderbox.launchbox.settings.options.implementation.TintIconsOption;
 import com.chadderbox.launchbox.settings.options.implementation.WallpaperDimOption;
-import com.chadderbox.launchbox.settings.options.implementation.WallpaperOverrideOption;
 import com.chadderbox.launchbox.fonts.CustomFontFactory;
 import com.chadderbox.launchbox.settings.options.implementation.debug.WipeWidgetsOption;
 import com.chadderbox.launchbox.ui.ThemeHelper;
@@ -79,7 +78,6 @@ public final class SettingsActivity extends ComponentActivity {
         mOptions.add(new FontSizeOption());
         mOptions.add(new ShadowStrengthOption());
         mOptions.add(new TintIconsOption());
-        mOptions.add(new WallpaperOverrideOption(this));
         mOptions.add(new WallpaperDimOption());
         mOptions.add(new NowPlayingWidgetOption());
         mOptions.add(new LeftHandedOption());
