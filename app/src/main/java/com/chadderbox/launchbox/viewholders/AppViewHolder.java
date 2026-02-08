@@ -25,8 +25,9 @@ import java.util.concurrent.Executors;
 public final class AppViewHolder
     extends ViewHolderItemBase {
 
-    private static final ExecutorService mIconExecutor = Executors.newCachedThreadPool();
-    private static final Handler mMainHandler = new Handler(Looper.getMainLooper());
+    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+    private static final ExecutorService sIconExecutor = Executors.newFixedThreadPool(Math.max(2, Math.min(CPU_COUNT - 1, 4)));
+    private static final Handler sMainHandler = new Handler(Looper.getMainLooper());
 
     private final ShadowImageView mIcon;
     private final TextView mLabel;
@@ -111,9 +112,9 @@ public final class AppViewHolder
         // Clear the shadow bitmap in case we're getting re-used
         mIcon.clearShadowBitmap();
 
-        mIconExecutor.submit(() -> {
+        sIconExecutor.submit(() -> {
             var drawable = mIconPackLoader.loadAppIcon(packageName, category);
-            mMainHandler.post(() -> {
+            sMainHandler.post(() -> {
                 // Verify the same item is still bound, we could have been reused
                 if (itemView.getTag() == mAppItem) {
                     if (drawable != null) {
