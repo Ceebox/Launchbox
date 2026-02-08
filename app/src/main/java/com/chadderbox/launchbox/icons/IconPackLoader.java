@@ -67,7 +67,7 @@ public final class IconPackLoader
         }
     }
 
-    public Drawable loadAppIcon(final String packageName, final int category) {
+    public Drawable loadAppIcon(final String packageName, int category) {
 
         // No icon pack
         if (mIconPackPackage == null || "None".equals(mIconPackPackage)) {
@@ -106,6 +106,10 @@ public final class IconPackLoader
             }
 
             if (icon == null) {
+                if (category == ApplicationInfo.CATEGORY_UNDEFINED) {
+                    category = inferCategory(packageName);
+                }
+
                 var categoryDrawableName = getDrawableNameForCategory(category);
                 if (categoryDrawableName != null) {
                     @SuppressLint("DiscouragedApi")
@@ -128,6 +132,15 @@ public final class IconPackLoader
         sIconCache.put(packageName, icon);
 
         return icon;
+    }
+
+    private static int inferCategory(String packageName) {
+        if (packageName.contains("game")) return ApplicationInfo.CATEGORY_GAME;
+        if (packageName.contains("social") || packageName.contains("messenger")) return ApplicationInfo.CATEGORY_SOCIAL;
+        if (packageName.contains("music") || packageName.contains("audio")) return ApplicationInfo.CATEGORY_AUDIO;
+        if (packageName.contains("video") || packageName.contains("player")) return ApplicationInfo.CATEGORY_VIDEO;
+        if (packageName.contains("map") || packageName.contains("navigation")) return ApplicationInfo.CATEGORY_MAPS;
+        return ApplicationInfo.CATEGORY_UNDEFINED;
     }
 
     private static String getDrawableNameForCategory(int category) {

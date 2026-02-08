@@ -102,10 +102,17 @@ public final class AppViewHolder
     }
 
     private void loadIcon() {
+        var packageName = mAppItem.getAppInfo().getPackageName();
+        var category = mAppItem.getAppInfo().getCategory();
+
+        // Clear the old icon immediately to prevent stale images
+        mIcon.setImageDrawable(null);
+
         // Clear the shadow bitmap in case we're getting re-used
         mIcon.clearShadowBitmap();
+
         mIconExecutor.submit(() -> {
-            var drawable = mIconPackLoader.loadAppIcon(mAppItem.getAppInfo().getPackageName(), mAppItem.getAppInfo().getCategory());
+            var drawable = mIconPackLoader.loadAppIcon(packageName, category);
             mMainHandler.post(() -> {
                 // Verify the same item is still bound, we could have been reused
                 if (itemView.getTag() == mAppItem) {

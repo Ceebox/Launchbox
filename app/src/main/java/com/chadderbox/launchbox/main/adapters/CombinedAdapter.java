@@ -44,8 +44,8 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private ItemTouchHelper mTouchHelper;
 
     public CombinedAdapter(
-            List<ListItem> items,
-            IconPackLoader iconPackLoader
+        List<ListItem> items,
+        IconPackLoader iconPackLoader
     ) {
         mItems = items;
         mIconPackLoader = iconPackLoader;
