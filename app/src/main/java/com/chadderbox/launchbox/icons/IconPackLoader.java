@@ -5,9 +5,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.LruCache;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.chadderbox.launchbox.settings.SettingsManager;
@@ -142,6 +149,46 @@ public final class IconPackLoader
             case ApplicationInfo.CATEGORY_IMAGE -> "category_photos";
             default -> null;
         };
+    }
+
+    public static Drawable getAdaptiveIcon(String packageName, PackageManager packageManager) {
+        try {
+            var appInfo = packageManager.getApplicationInfo(packageName, 0);
+            var icon = packageManager.getApplicationIcon(appInfo);
+
+            if (icon instanceof AdaptiveIconDrawable) {
+                // It's already adaptive, return as is
+                return icon;
+            } else {
+                // Wrap legacy icon to make it look adaptive
+                return wrapLegacyIcon(icon);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Allows correctly rendering an adaptive icon inside a square image
+     * (This is because an adaptive icon extends beyond the visible area for parallax)
+     */
+    public static Bitmap flattenAdaptiveIcon(AdaptiveIconDrawable adaptiveIcon, int size) {
+        var bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        var canvas = new Canvas(bitmap);
+
+        // (Adaptive icons need 25% extra safe zone for layers)
+        adaptiveIcon.setBounds(0, 0, size, size);
+        adaptiveIcon.draw(canvas);
+
+        return bitmap;
+    }
+
+    private static Drawable wrapLegacyIcon(Drawable legacyIcon) {
+        // Create a generic background
+        var background = new ColorDrawable(Color.WHITE);
+
+        // TODO: use a LayerDrawable or a custom AdaptiveIcon wrapper to center the icon inside a shape
+        return new AdaptiveIconDrawable(background, legacyIcon);
     }
 
     @Override
