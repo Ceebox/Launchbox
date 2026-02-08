@@ -14,6 +14,7 @@ import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
 import com.chadderbox.launchbox.settings.options.implementation.CharacterHeadingsOption;
+import com.chadderbox.launchbox.settings.options.implementation.FallbackToDefaultIconsOption;
 import com.chadderbox.launchbox.settings.options.implementation.FontOption;
 import com.chadderbox.launchbox.settings.options.implementation.FontSizeOption;
 import com.chadderbox.launchbox.settings.options.implementation.IconPackOption;
@@ -78,6 +79,7 @@ public final class SettingsActivity extends ComponentActivity {
         mOptions.add(new FontSizeOption());
         mOptions.add(new ShadowStrengthOption());
         mOptions.add(new TintIconsOption());
+        mOptions.add(new FallbackToDefaultIconsOption());
         mOptions.add(new WallpaperDimOption());
         mOptions.add(new NowPlayingWidgetOption());
         mOptions.add(new LeftHandedOption());

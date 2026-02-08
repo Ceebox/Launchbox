@@ -11,10 +11,8 @@ import android.graphics.Color;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.LruCache;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.chadderbox.launchbox.settings.SettingsManager;
@@ -29,6 +27,7 @@ public final class IconPackLoader
     private final IconPackParser mIconPackParser;
     private final PackageManager mPackageManager;
     private String mIconPackPackage;
+    private boolean mFallbackToDefaultIcons;
     private Drawable mDefaultMissingIcon = null;
 
     public IconPackLoader(Context ctx, String iconPackPackage) {
@@ -36,6 +35,8 @@ public final class IconPackLoader
         mIconPackParser = new IconPackParser();
         mPackageManager = ctx.getPackageManager();
         mIconPackPackage = iconPackPackage;
+
+        loadFallbackToDefaultIconsValue();
         loadDefaultMissingIcon();
 
         SettingsManager.registerChangeListener(this);
@@ -88,15 +89,7 @@ public final class IconPackLoader
 
         // Default
         if (mIconPackPackage.equalsIgnoreCase("System Default")) {
-            var cachedSysIcon = sSystemIconCache.get(packageName);
-            if (cachedSysIcon != null) {
-                return cachedSysIcon;
-            }
-            try {
-                var systemIcon = mPackageManager.getApplicationIcon(packageName);
-                sSystemIconCache.put(packageName, systemIcon);
-                return systemIcon;
-            } catch (PackageManager.NameNotFoundException ignored) { }
+            return loadSystemIcon(packageName);
         }
 
         Drawable icon = null;
@@ -127,14 +120,36 @@ public final class IconPackLoader
         }
 
         icon = TintHelper.tryTintIcon(mContext, icon);
-
         if (icon == null && mDefaultMissingIcon != null) {
             icon = mDefaultMissingIcon;
         }
 
-        sIconCache.put(packageName, icon);
+        if (mFallbackToDefaultIcons && icon == null) {
+            // We tried our best
+            return loadSystemIcon(packageName);
+        }
 
+        sIconCache.put(packageName, icon);
         return icon;
+    }
+
+    private Drawable loadSystemIcon(String packageName) {
+        var cachedSysIcon = sSystemIconCache.get(packageName);
+        if (cachedSysIcon != null) {
+            return cachedSysIcon;
+        }
+        try {
+            var systemIcon = mPackageManager.getApplicationIcon(packageName);
+            sSystemIconCache.put(packageName, systemIcon);
+            return systemIcon;
+        } catch (PackageManager.NameNotFoundException ignored) { }
+
+        // You're screwed
+        return null;
+    }
+
+    private void loadFallbackToDefaultIconsValue() {
+        mFallbackToDefaultIcons = SettingsManager.getFallbackToDefaultIcons();
     }
 
     private static String getDrawableNameForCategory(int category) {
@@ -196,6 +211,8 @@ public final class IconPackLoader
         if (SettingsManager.KEY_ICON_PACK.equals(key)) {
             setIconPackPackage(SettingsManager.getIconPack());
             clearCache();
+        } else if (SettingsManager.KEY_FALLBACK_TO_DEFAULT_ICONS.equals(key)) {
+
         }
     }
 }

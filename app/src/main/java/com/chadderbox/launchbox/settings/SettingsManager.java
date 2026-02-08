@@ -23,6 +23,7 @@ public final class SettingsManager {
     public static final String KEY_ICON_PACK = "icon_pack";
     public static final String KEY_SHOW_ONLY_INSTALLED = "show_only_installed";
     public static final String KEY_LEFT_HANDED = "left_handed";
+    public static final String KEY_FALLBACK_TO_DEFAULT_ICONS = "fallback_to_default_icons";
     public static final String KEY_FONT = "font";
     public static final String KEY_FONT_SIZE = "font_size";
     public static final String KEY_HIDDEN = "hidden";
@@ -108,6 +109,14 @@ public final class SettingsManager {
 
     public static boolean getLeftHanded() {
         return sPrefs.getBoolean(KEY_LEFT_HANDED, false);
+    }
+
+    public static boolean getFallbackToDefaultIcons() {
+        return sPrefs.getBoolean(KEY_FALLBACK_TO_DEFAULT_ICONS, false);
+    }
+
+    public static void setFallbackToDefaultIcons(boolean fallback) {
+        sPrefs.edit().putBoolean(KEY_FALLBACK_TO_DEFAULT_ICONS, fallback).apply();
     }
 
     public static void setFont(String fontName) {
