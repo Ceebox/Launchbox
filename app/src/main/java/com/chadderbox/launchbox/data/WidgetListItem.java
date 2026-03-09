@@ -5,7 +5,6 @@ import android.view.View;
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.dialogs.CommandService;
 import com.chadderbox.launchbox.dialogs.IDialogCommand;
-import com.chadderbox.launchbox.main.MainActivity;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;
 import com.chadderbox.launchbox.widgets.commands.RemoveWidgetCommand;
 import com.chadderbox.launchbox.widgets.data.WidgetItem;

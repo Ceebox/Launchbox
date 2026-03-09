@@ -211,7 +211,12 @@ public final class FavouritesFragment extends AppListFragmentBase {
         mWidgetManager.setConfigLauncher(configureWidgetLauncher);
         mWidgetManager.setBindLauncher(bindWidgetLauncher);
 
-        mWidgetManager.getWidgets().observe(ServiceManager.getActivity(MainActivity.class), widgets -> {
+        var activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+
+        mWidgetManager.getWidgets().observe(activity, widgets -> {
             this.refreshCombinedList();
         });
     }
