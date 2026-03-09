@@ -24,6 +24,6 @@ public class ResizeWidgetCommand implements IDialogCommand {
 
     @Override
     public void execute() {
-        mWidgetManager.setWidgetsResizing(true);
+//        mWidgetManager.setWidgetsResizing(true);
     }
 }

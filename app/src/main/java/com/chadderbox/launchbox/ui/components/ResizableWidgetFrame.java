@@ -59,6 +59,8 @@ public class ResizableWidgetFrame extends FrameLayout {
         mHandle.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
+                    // Stop the RecyclerView from stealing the touch event
+                    getParent().requestDisallowInterceptTouchEvent(true);
                     mLastX = event.getRawX();
                     mLastY = event.getRawY();
                     return true;
@@ -77,6 +79,8 @@ public class ResizableWidgetFrame extends FrameLayout {
                     return true;
 
                 case MotionEvent.ACTION_UP:
+                    // Give control back to the parent, otherwise we're stuck
+                    getParent().requestDisallowInterceptTouchEvent(false);
                     if (mListener != null) {
                         mListener.onResized(getWidth(), getHeight());
                     }

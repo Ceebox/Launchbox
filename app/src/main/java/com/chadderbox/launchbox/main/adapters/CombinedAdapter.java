@@ -2,6 +2,7 @@ package com.chadderbox.launchbox.main.adapters;
 
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -18,17 +19,20 @@ import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SettingItem;
 import com.chadderbox.launchbox.data.SuggestionItem;
 import com.chadderbox.launchbox.data.WebItem;
+import com.chadderbox.launchbox.data.WidgetListItem;
 import com.chadderbox.launchbox.icons.IconPackLoader;
+import com.chadderbox.launchbox.ui.components.ResizableWidgetFrame;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.viewholders.AppViewHolder;
 import com.chadderbox.launchbox.viewholders.HeaderViewHolder;
 import com.chadderbox.launchbox.viewholders.SettingViewHolder;
 import com.chadderbox.launchbox.viewholders.SuggestionViewHolder;
 import com.chadderbox.launchbox.viewholders.WebViewHolder;
+import com.chadderbox.launchbox.viewholders.WidgetViewHolder;
+import com.chadderbox.launchbox.widgets.WidgetHostManager;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -37,19 +41,24 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int TYPE_WEB = 2;
     private static final int TYPE_SUGGESTION = 3;
     private static final int TYPE_SETTING = 4;
+    private static final int TYPE_WIDGET = 5;
 
     private final List<ListItem> mItems;
     private final IconPackLoader mIconPackLoader;
+    private final WidgetHostManager mWidgetHostManager;
     private boolean mActionsEnabled = true;
     private boolean mIsEditMode = false;
     private ItemTouchHelper mTouchHelper;
+    private int mDefaultItemHeight = 0;
 
     public CombinedAdapter(
         List<ListItem> items,
-        IconPackLoader iconPackLoader
+        IconPackLoader iconPackLoader,
+        WidgetHostManager widgetManager
     ) {
         mItems = items;
         mIconPackLoader = iconPackLoader;
+        mWidgetHostManager = widgetManager;
     }
 
     public boolean getActionsEnabled() {
@@ -76,6 +85,7 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case WEB -> TYPE_WEB;
             case SUGGESTION -> TYPE_SUGGESTION;
             case SETTING -> TYPE_SETTING;
+            case WIDGET -> TYPE_WIDGET;
         };
     }
 
@@ -129,21 +139,30 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.notifyDataSetChanged();
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void add(ListItem item) {
+        var position = mItems.size();
         mItems.add(item);
         item.setActionsEnabled(mActionsEnabled);
-        this.notifyDataSetChanged();
+        this.notifyItemInserted(position);
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void addAll(Collection<? extends ListItem> items) {
+        var startPosition = mItems.size();
         mItems.addAll(items);
         for (var item : items) {
             item.setActionsEnabled(mActionsEnabled);
         }
 
-        this.notifyDataSetChanged();
+        this.notifyItemRangeInserted(startPosition, items.size());
+    }
+
+    public void prependAll(Collection<? extends  ListItem> items) {
+        mItems.addAll(0, items);
+        for (var item : items) {
+            item.setActionsEnabled(mActionsEnabled);
+        }
+
+        this.notifyItemRangeInserted(0, items.size());
     }
 
     public void updateItems(List<ListItem> newList) {
@@ -171,6 +190,20 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (mDefaultItemHeight == 0) {
+            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
+            view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+            mDefaultItemHeight = view.getMeasuredHeight();
+        }
+
+        if (viewType == TYPE_WIDGET) {
+            var frame = new ResizableWidgetFrame(parent.getContext());
+            frame.setLayoutParams(new RecyclerView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+            return new WidgetViewHolder(frame, mWidgetHostManager);
+        }
+
         if (viewType == TYPE_HEADER) {
             var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
             return new HeaderViewHolder(view);
@@ -200,25 +233,25 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             if (item instanceof HeaderItem headerItem) {
                 headerHolder.bind(headerItem.getHeader());
             }
-        }
-        else if (holder instanceof AppViewHolder appHolder) {
+        } else if (holder instanceof AppViewHolder appHolder) {
             if (item instanceof AppItem appItem) {
                 appHolder.bind(appItem, mIconPackLoader, mTouchHelper, mIsEditMode);
             }
-        }
-        else if (holder instanceof WebViewHolder webHolder) {
+        } else if (holder instanceof WebViewHolder webHolder) {
             if (item instanceof WebItem webItem) {
                 webHolder.bind(webItem);
             }
-        }
-        else if (holder instanceof SuggestionViewHolder suggestionHolder) {
+        } else if (holder instanceof SuggestionViewHolder suggestionHolder) {
             if (item instanceof SuggestionItem suggestionItem) {
                 suggestionHolder.bind(suggestionItem);
             }
-        }
-        else if (holder instanceof SettingViewHolder settingHolder) {
+        } else if (holder instanceof SettingViewHolder settingHolder) {
             if (item instanceof SettingItem settingItem) {
                 settingHolder.bind(settingItem);
+            }
+        } else if (holder instanceof WidgetViewHolder widgetHolder) {
+            if (item instanceof WidgetListItem widgetItem) {
+                widgetHolder.bind(widgetItem, false);
             }
         }
     }

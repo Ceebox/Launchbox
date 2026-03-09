@@ -49,6 +49,8 @@ import com.chadderbox.launchbox.utils.HiddenAppsRepository;
 import com.chadderbox.launchbox.wallpaper.WallpaperManager;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;
 import com.chadderbox.launchbox.widgets.commands.AddWidgetCommand;
+import com.chadderbox.launchbox.data.WidgetListItem;
+import com.chadderbox.launchbox.widgets.data.WidgetDatabase;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
@@ -56,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public final class MainActivity
     extends FragmentActivity
@@ -75,6 +78,7 @@ public final class MainActivity
     private FavouritesRepository mFavouritesHelper;
     private HiddenAppsRepository mHiddenAppsHelper;
     private IconPackLoader mIconPackLoader;
+    private WidgetHostManager mWidgetManager;
     private boolean mIsEditMode = false;
 
     private final BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
@@ -134,14 +138,17 @@ public final class MainActivity
         mSearchController = new SearchController(findViewById(R.id.search_sheet));
         var appsAdapter = new CombinedAdapter(
             new ArrayList<>(),
-            mIconPackLoader
+            mIconPackLoader,
+            null
         );
 
         mAdapters.put(AppsFragment.class, appsAdapter);
 
+        ServiceManager.registerService(WidgetHostManager.class, () -> mWidgetManager = new WidgetHostManager(this));
         var favouritesAdapter = new CombinedAdapter(
             new ArrayList<>(),
-            mIconPackLoader
+            mIconPackLoader,
+            mWidgetManager
         );
 
         mAdapters.put(FavouritesFragment.class, favouritesAdapter);

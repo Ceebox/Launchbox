@@ -5,5 +5,6 @@ public enum ListItemType {
     APP,
     WEB,
     SUGGESTION,
-    SETTING
+    SETTING,
+    WIDGET
 }

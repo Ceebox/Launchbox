@@ -1,5 +1,6 @@
 package com.chadderbox.launchbox.widgets.data;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -10,6 +11,10 @@ import java.util.List;
 
 @Dao
 public interface WidgetDao {
+
+    @Query("SELECT * FROM widgets")
+    LiveData<List<WidgetItem>> getAllLive();
+
     @Query("SELECT * FROM widgets")
     List<WidgetItem> getAll();
 
