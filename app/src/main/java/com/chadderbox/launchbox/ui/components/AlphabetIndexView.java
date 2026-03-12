@@ -22,8 +22,8 @@ import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
 
-import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.fonts.FontHelper;
+import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.ui.ShadowHelper;
 
 import java.util.HashMap;

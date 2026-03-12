@@ -17,7 +17,12 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.core.ServiceManager;
+import com.chadderbox.launchbox.data.AppInfo;
+import com.chadderbox.launchbox.data.SettingItem;
 import com.chadderbox.launchbox.dialogs.CommandService;
+import com.chadderbox.launchbox.fonts.CustomFontFactory;
+import com.chadderbox.launchbox.icons.IconPackLoader;
 import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.main.adapters.IAdapterFetcher;
 import com.chadderbox.launchbox.main.adapters.MainPagerAdapter;
@@ -34,23 +39,16 @@ import com.chadderbox.launchbox.main.controllers.ViewPagerController;
 import com.chadderbox.launchbox.main.fragments.AppListFragmentBase;
 import com.chadderbox.launchbox.main.fragments.AppsFragment;
 import com.chadderbox.launchbox.main.fragments.FavouritesFragment;
-import com.chadderbox.launchbox.data.AppInfo;
-import com.chadderbox.launchbox.data.SettingItem;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
+import com.chadderbox.launchbox.ui.ThemeHelper;
 import com.chadderbox.launchbox.utils.AppAliasProvider;
 import com.chadderbox.launchbox.utils.AppLoader;
-import com.chadderbox.launchbox.fonts.CustomFontFactory;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
-import com.chadderbox.launchbox.icons.IconPackLoader;
-import com.chadderbox.launchbox.core.ServiceManager;
-import com.chadderbox.launchbox.ui.ThemeHelper;
 import com.chadderbox.launchbox.utils.HiddenAppsRepository;
 import com.chadderbox.launchbox.wallpaper.WallpaperManager;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;
 import com.chadderbox.launchbox.widgets.commands.AddWidgetCommand;
-import com.chadderbox.launchbox.data.WidgetListItem;
-import com.chadderbox.launchbox.widgets.data.WidgetDatabase;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
@@ -58,7 +56,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 public final class MainActivity
     extends FragmentActivity

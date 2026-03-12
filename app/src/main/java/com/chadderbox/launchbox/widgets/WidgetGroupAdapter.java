@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.appwidget.AppWidgetProviderInfo;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;

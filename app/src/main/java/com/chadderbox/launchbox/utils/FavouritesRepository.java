@@ -8,9 +8,7 @@ import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.settings.SettingsManager;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 public final class FavouritesRepository {

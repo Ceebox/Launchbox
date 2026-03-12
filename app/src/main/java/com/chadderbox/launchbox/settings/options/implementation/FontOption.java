@@ -1,11 +1,10 @@
 package com.chadderbox.launchbox.settings.options.implementation;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.graphics.fonts.SystemFonts;
 import android.os.Build;
 import android.widget.Toast;
-
-import android.app.AlertDialog;
 
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingCategory;

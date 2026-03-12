@@ -7,9 +7,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.ui.components.AlphabetIndexView;
-import com.chadderbox.launchbox.data.AppItem;
 
 public abstract class AppListFragmentBase extends Fragment {
 

@@ -16,19 +16,17 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.data.ListItem;
-import com.chadderbox.launchbox.main.MainActivity;
+import com.chadderbox.launchbox.data.WidgetListItem;
 import com.chadderbox.launchbox.main.adapters.DragCallback;
 import com.chadderbox.launchbox.main.adapters.IAdapterFetcher;
 import com.chadderbox.launchbox.main.viewmodels.FavouritesViewModel;
 import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
-import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;
-import com.chadderbox.launchbox.data.WidgetListItem;
 import com.chadderbox.launchbox.widgets.data.WidgetDatabase;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 

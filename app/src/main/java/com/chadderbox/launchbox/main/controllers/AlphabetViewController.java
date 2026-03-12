@@ -2,8 +2,6 @@ package com.chadderbox.launchbox.main.controllers;
 
 import android.view.View;
 
-import androidx.viewpager.widget.ViewPager;
-
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.main.fragments.AppsFragment;
 import com.chadderbox.launchbox.settings.SettingsManager;

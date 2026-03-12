@@ -1,7 +1,5 @@
 package com.chadderbox.launchbox.widgets.commands;
 
-import android.appwidget.AppWidgetProviderInfo;
-
 import com.chadderbox.launchbox.dialogs.IDialogCommand;
 import com.chadderbox.launchbox.ui.components.ResizableWidgetFrame;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;

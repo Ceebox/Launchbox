@@ -11,9 +11,7 @@ import org.json.JSONArray;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public final class SettingsManager {
     public static final String PREFS_NAME = "cbxlauncher_prefs";

@@ -1,9 +1,8 @@
 package com.chadderbox.launchbox.settings.options.implementation;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.widget.Toast;
-
-import android.app.AlertDialog;
 
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingCategory;

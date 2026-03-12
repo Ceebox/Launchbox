@@ -11,13 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.ui.components.ShadowImageView;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.ListItem;
-import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.fonts.FontHelper;
 import com.chadderbox.launchbox.icons.IconPackLoader;
+import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.ui.ShadowHelper;
+import com.chadderbox.launchbox.ui.components.ShadowImageView;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

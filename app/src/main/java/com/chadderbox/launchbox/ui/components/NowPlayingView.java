@@ -18,11 +18,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
+import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.utils.NotificationListener;
-import com.chadderbox.launchbox.R;
-
-import androidx.annotation.Nullable;
 
 import java.util.List;
 

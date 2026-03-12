@@ -1,13 +1,13 @@
 package com.chadderbox.launchbox.search;
 
+import com.chadderbox.launchbox.data.ListItem;
+import com.chadderbox.launchbox.utils.CancellationToken;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-
-import com.chadderbox.launchbox.data.ListItem;
-import com.chadderbox.launchbox.utils.CancellationToken;
 
 /**
  * Responsible for obtaining the results for various search queries via a {@link ISearchProvider}.

@@ -1,18 +1,17 @@
 package com.chadderbox.launchbox.settings.options.implementation;
 
+import android.app.AlertDialog;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import android.app.AlertDialog;
-
 import com.chadderbox.launchbox.R;
-import com.chadderbox.launchbox.ui.components.FontTextView;
 import com.chadderbox.launchbox.settings.SettingCategory;
 import com.chadderbox.launchbox.settings.SettingGroup;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
+import com.chadderbox.launchbox.ui.components.FontTextView;
 
 @SettingCategory(category = SettingGroup.APPEARANCE)
 public final class WallpaperDimOption

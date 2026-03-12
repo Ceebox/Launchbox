@@ -1,20 +1,20 @@
 package com.chadderbox.launchbox.settings.options.implementation;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import android.app.AlertDialog;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.core.FileHelpers;
 import com.chadderbox.launchbox.settings.SettingCategory;
 import com.chadderbox.launchbox.settings.SettingGroup;
 import com.chadderbox.launchbox.settings.SettingsActivity;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
-import com.chadderbox.launchbox.core.FileHelpers;
 
 @SettingCategory(category = SettingGroup.APPEARANCE)
 public final class WallpaperOverrideOption

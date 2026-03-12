@@ -2,8 +2,10 @@ package com.chadderbox.launchbox.viewholders;
 
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.chadderbox.launchbox.data.WidgetListItem;
 import com.chadderbox.launchbox.ui.components.ResizableWidgetFrame;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;

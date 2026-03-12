@@ -11,10 +11,10 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.main.adapters.IAdapterFetcher;
 import com.chadderbox.launchbox.main.viewmodels.AppsViewModel;
 import com.chadderbox.launchbox.utils.AppLoader;
-import com.chadderbox.launchbox.core.ServiceManager;
 
 public final class AppsFragment
     extends AppListFragmentBase {

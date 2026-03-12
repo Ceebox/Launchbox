@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.core.ServiceManager;
+import com.chadderbox.launchbox.fonts.CustomFontFactory;
 import com.chadderbox.launchbox.settings.options.ISettingOption;
 import com.chadderbox.launchbox.settings.options.implementation.CharacterHeadingsOption;
 import com.chadderbox.launchbox.settings.options.implementation.FallbackToDefaultIconsOption;
@@ -25,7 +26,6 @@ import com.chadderbox.launchbox.settings.options.implementation.ShowOnlyInstalle
 import com.chadderbox.launchbox.settings.options.implementation.ThemeOption;
 import com.chadderbox.launchbox.settings.options.implementation.TintIconsOption;
 import com.chadderbox.launchbox.settings.options.implementation.WallpaperDimOption;
-import com.chadderbox.launchbox.fonts.CustomFontFactory;
 import com.chadderbox.launchbox.settings.options.implementation.debug.WipeWidgetsOption;
 import com.chadderbox.launchbox.ui.ThemeHelper;
 
