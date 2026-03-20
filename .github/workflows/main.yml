@@ -17,9 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # Shallow fetch to speed up clone speed in CI
-          # If there are issues generating the changelog here, we'll have to crank it
-          fetch-depth: 64
+          fetch-depth: 0
           
       - name: Increment version
         uses: actions/github-script@v7
