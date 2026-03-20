@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.chadderbox.launchbox"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         applicationId = "com.chadderbox.launchbox"
         minSdk = 34
