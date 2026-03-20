@@ -9,7 +9,6 @@ import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.main.MainActivity;
 import com.chadderbox.launchbox.main.adapters.MainPagerAdapter;
 import com.chadderbox.launchbox.main.fragments.AppListFragmentBase;
-import com.chadderbox.launchbox.main.fragments.AppsFragment;
 import com.chadderbox.launchbox.main.fragments.FavouritesFragment;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 
@@ -38,11 +37,11 @@ public final class ViewPagerController {
         });
     }
 
-    public void setCurrentItem(int position) {
+    public void setCurrentItem(final int position) {
         mViewPager.setCurrentItem(position);
     }
 
-    public void setCurrentItem(int position, boolean smoothScroll) {
+    public void setCurrentItem(final int position, final boolean smoothScroll) {
         mViewPager.setCurrentItem(position, smoothScroll);
     }
 
@@ -66,21 +65,17 @@ public final class ViewPagerController {
     }
 
     public void scrollToFavourites() {
-        var firstFragment = findPagerFragment(0);
         var activity = ServiceManager.getActivity(MainActivity.class);
         var fragmentController = activity.getFragmentController();
+        var firstFragment = findPagerFragment(0);
         var currentFragment = fragmentController.getCurrentFragment();
-        if (currentFragment != firstFragment) {
+        if (firstFragment != currentFragment) {
             setCurrentItem(0, true);
             fragmentController.setCurrentFragment(firstFragment);
+        }
 
-            if (firstFragment instanceof FavouritesFragment favouritesFragment) {
-                favouritesFragment.scrollToPosition(0);
-            }
-
-            if (currentFragment instanceof AppsFragment appsFragment) {
-                appsFragment.scrollToPosition(0);
-            }
+        if (firstFragment instanceof AppListFragmentBase appList) {
+            appList.scrollToTop();
         }
     }
 

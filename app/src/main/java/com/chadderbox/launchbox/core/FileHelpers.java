@@ -39,7 +39,7 @@ public final class FileHelpers {
         if (result == null) {
             var path = uri.getPath();
             if (path != null) {
-                int cut = path.lastIndexOf('/');
+                var cut = path.lastIndexOf('/');
                 if (cut != -1) {
                     result = path.substring(cut + 1);
                 } else {

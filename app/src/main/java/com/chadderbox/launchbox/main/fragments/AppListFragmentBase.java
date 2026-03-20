@@ -3,6 +3,7 @@ package com.chadderbox.launchbox.main.fragments;
 import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.ui.components.AlphabetIndexView;
+import com.google.android.material.appbar.AppBarLayout;
 
 public abstract class AppListFragmentBase extends Fragment {
 
@@ -141,6 +143,7 @@ public abstract class AppListFragmentBase extends Fragment {
     }
 
     public void scrollToPosition(int position) {
+        // Handle the actual list bit
         mListView.scrollToPosition(position);
     }
 
@@ -156,6 +159,29 @@ public abstract class AppListFragmentBase extends Fragment {
         // Go a little above half way so it is easier to focus on
         final var offset = (recyclerViewHeight / 3.33f) - (itemHeight / 2f);
         layoutManager.scrollToPositionWithOffset(position, Math.round(offset));
+    }
+
+    public void scrollToTop() {
+        mListView.stopScroll();
+
+        var layoutManager = (LinearLayoutManager) mListView.getLayoutManager();
+        if (layoutManager == null) {
+            return;
+        }
+
+        // We need to consider the padding!
+        layoutManager.scrollToPositionWithOffset(0, mListView.getPaddingTop());
+
+        var root = getView();
+        if (root instanceof CoordinatorLayout coordinator) {
+            for (var i = 0; i < coordinator.getChildCount(); i++) {
+                var child = coordinator.getChildAt(i);
+                if (child instanceof AppBarLayout) {
+                    ((AppBarLayout) child).setExpanded(true, true);
+                    break;
+                }
+            }
+        }
     }
 
     /**

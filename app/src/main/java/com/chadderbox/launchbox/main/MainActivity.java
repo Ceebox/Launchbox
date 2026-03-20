@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.view.WindowCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.chadderbox.launchbox.R;
@@ -124,7 +125,9 @@ public final class MainActivity
         ServiceManager.registerService(CommandService.class, () -> new CommandService((this)));
 
         super.onCreate(savedInstanceState);
-        getWindow().setDimAmount(0f);
+        var window = getWindow();
+        WindowCompat.enableEdgeToEdge(window);
+        window.setDimAmount(0f);
         setContentView(R.layout.activity_main);
 
         mWallpaperManager = new WallpaperManager(findViewById(R.id.wallpaper_image));
