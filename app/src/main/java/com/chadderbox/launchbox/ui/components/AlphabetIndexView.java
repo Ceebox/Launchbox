@@ -105,7 +105,8 @@ public final class AlphabetIndexView
             canvas.save();
 
             // Scale around center of letter
-            var letterScale = mLetterScales.get(LETTERS.charAt(i));
+            var currentChar = LETTERS.charAt(i);
+            var letterScale = mLetterScales.get(currentChar);
             canvas.translate(x, y);
             canvas.scale(letterScale, letterScale);
             canvas.translate(-x, -y);
@@ -118,7 +119,7 @@ public final class AlphabetIndexView
                 mPaint.setFakeBoldText(false);
             }
 
-            canvas.drawText(String.valueOf(mLetters.charAt(i)), x + mLetterPositions.get(LETTERS.charAt(i)), y, mPaint);
+            canvas.drawText(String.valueOf(mLetters.charAt(i)), x + mLetterPositions.get(currentChar), y, mPaint);
             canvas.restore();
         }
 

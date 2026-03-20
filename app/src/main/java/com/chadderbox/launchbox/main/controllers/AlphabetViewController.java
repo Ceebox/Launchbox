@@ -4,6 +4,7 @@ import android.view.View;
 
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.main.fragments.AppsFragment;
+import com.chadderbox.launchbox.main.fragments.FavouritesFragment;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.ui.components.AlphabetIndexView;
 import com.chadderbox.launchbox.utils.AppLoader;
@@ -29,6 +30,9 @@ public final class AlphabetViewController {
             var fragment = mViewPagerController.findPagerFragment(position);
             if (fragment instanceof AppsFragment appsFragment) {
                 appsFragment.scrollToLetter(letter);
+            }
+            else if (fragment instanceof FavouritesFragment favouritesFragment) {
+                favouritesFragment.scrollToTop();
             }
         });
 
