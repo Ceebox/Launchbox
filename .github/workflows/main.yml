@@ -3,6 +3,10 @@ name: Launchbox Main CI with Release
 on:
   workflow_dispatch:
 
+# Temporary while GitHub sort their stuff out, eh!
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-main:
     runs-on: ubuntu-latest
@@ -16,7 +20,7 @@ jobs:
           fetch-depth: 0
           
       - name: Increment version
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         id: increment_version
         with:
           github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
@@ -60,7 +64,7 @@ jobs:
             core.setOutput("version", newValue);
 
       - name: Restore Gradle Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -128,8 +132,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v0.0${{ steps.increment_version.outputs.version }}" -m "Release v0.0${{ steps.increment_version.outputs.version }}"
-          git push origin "v0.0${{ steps.increment_version.outputs.version }}"
+          git tag -a "v0.0.${{ steps.increment_version.outputs.version }}" -m "Release v0.0.${{ steps.increment_version.outputs.version }}"
+          git push origin "v0.0.${{ steps.increment_version.outputs.version }}"
 
       - name: Create GitHub Release and Upload APK
         uses: softprops/action-gh-release@v2
