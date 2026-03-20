@@ -54,7 +54,10 @@ public class WidgetGroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             headerHolder.title.setText((String) item);
         } else if (holder instanceof ItemViewHolder itemHolder) {
             var info = (AppWidgetProviderInfo) item;
-            itemHolder.label.setText(info.label);
+            var context = itemHolder.itemView.getContext();
+            var label = info.loadLabel(context.getPackageManager());
+
+            itemHolder.label.setText(label);
             itemHolder.dims.setText(info.minWidth + " x " + info.minHeight);
             itemHolder.itemView.setOnClickListener(v -> mListener.onSelected(info));
 
