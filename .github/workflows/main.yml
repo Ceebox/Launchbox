@@ -98,11 +98,7 @@ jobs:
           VERSION_CODE: ${{ steps.increment_version.outputs.version }}
           VERSION_NAME: "0.0.${{ steps.increment_version.outputs.version }}"
           KEYSTORE_PATH: ${{ github.workspace }}/app/upload-keystore.jks
-        run: ./gradlew assembleRelease --parallel --build-cache --configuration-cache \
-          -Pandroid.injected.signing.store.file=$KEYSTORE_PATH \
-          -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
-          -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
-          -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --parallel --build-cache --configuration-cache -Pandroid.injected.signing.store.file=$KEYSTORE_PATH -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
 
       - name: List APK files
         run: |
