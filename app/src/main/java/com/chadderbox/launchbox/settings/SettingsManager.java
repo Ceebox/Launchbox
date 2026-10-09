@@ -6,6 +6,8 @@ import android.content.res.Configuration;
 
 import androidx.annotation.IntDef;
 
+import com.chadderbox.launchbox.settings.data.TextAlignmentType;
+
 import org.json.JSONArray;
 
 import java.lang.annotation.Retention;
@@ -26,6 +28,7 @@ public final class SettingsManager {
     public static final String KEY_FONT_SIZE = "font_size";
     public static final String KEY_HIDDEN = "hidden";
     public static final String KEY_SHADOW_STRENGTH = "shadow_strength";
+    public static final String KEY_TEXT_ALIGNMENT = "text_alignment";
     public static final String KEY_THEME = "theme";
     public static final String KEY_TINT_ICONS = "tint_icons";
     public static final String KEY_WALLPAPER = "wallpaper";
@@ -64,8 +67,14 @@ public final class SettingsManager {
     }
 
     public static List<String> getFavourites() {
-        var jsonString = sPrefs.getString(KEY_FAVORITES, "[]");
+        String jsonString = "[]";
         var list = new ArrayList<String>();
+        
+        try {
+            jsonString = sPrefs.getString(KEY_FAVORITES, "[]");
+        } catch (Exception e) {
+            // This throws when there are no favourites, not quite sure why tbh
+        }
 
         try {
             var array = new JSONArray(jsonString);
@@ -201,8 +210,18 @@ public final class SettingsManager {
     }
 
     public static boolean getNowPlayingEnabled() {
-        // Disable this initially  because people need to grant access
+        // Disable this initially because people need to grant access
         return sPrefs.getBoolean(KEY_NOW_PLAYING_WIDGET, false);
+    }
+
+    public static TextAlignmentType getTextAlignment() {
+        return TextAlignmentType.valueOf(
+            sPrefs.getString(KEY_TEXT_ALIGNMENT, TextAlignmentType.LEFT.getValue())
+        );
+    }
+
+    public static void setTextAlignment(TextAlignmentType textAlignment) {
+        sPrefs.edit().putString(KEY_TEXT_ALIGNMENT, textAlignment.getValue()).apply();
     }
 
     //<editor-fold desc="Parameters">

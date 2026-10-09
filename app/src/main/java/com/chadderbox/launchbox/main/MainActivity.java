@@ -47,6 +47,7 @@ import com.chadderbox.launchbox.utils.AppAliasProvider;
 import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.utils.HiddenAppsRepository;
+import com.chadderbox.launchbox.utils.SettingsFavouritesAccessor;
 import com.chadderbox.launchbox.wallpaper.WallpaperManager;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;
 import com.chadderbox.launchbox.widgets.commands.AddWidgetCommand;
@@ -118,7 +119,7 @@ public final class MainActivity
         CustomFontFactory.initialise(this);
 
         ServiceManager.registerService(IconPackLoader.class, () -> mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack()));
-        ServiceManager.registerService(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(mExecutor));
+        ServiceManager.registerService(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(new SettingsFavouritesAccessor()));
         ServiceManager.registerService(HiddenAppsRepository.class, () -> mHiddenAppsHelper = new HiddenAppsRepository());
         ServiceManager.registerService(AppAliasProvider.class, () -> mAppAliasHelper = new AppAliasProvider());
         ServiceManager.registerService(AppLoader.class, () -> mAppLoader = new AppLoader(this, mAppAliasHelper));
