@@ -7,7 +7,7 @@ android {
     compileSdk = 36
     defaultConfig {
         applicationId = "com.chadderbox.launchbox"
-        minSdk = 34
+        minSdk = 36
         targetSdk = 36
         versionCode = 1
 
