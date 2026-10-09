@@ -28,19 +28,19 @@ public final class ToggleFavouriteCommand
     public void execute() {
         var activity = ServiceManager.getActivity(MainActivity.class);
         var favouritesHelper = ServiceManager.getService(FavouritesRepository.class);
-        favouritesHelper.loadFavouritesAsync(currentFavourites -> {
-            if (currentFavourites.contains(mAppInfo.getPackageName())) {
-                currentFavourites.remove(mAppInfo.getPackageName());
-            } else {
-                currentFavourites.add(mAppInfo.getPackageName());
-            }
+        var currentFavourites = favouritesHelper.loadFavourites();
 
-            favouritesHelper.saveFavourites(currentFavourites);
+        if (currentFavourites.contains(mAppInfo.getPackageName())) {
+            currentFavourites.remove(mAppInfo.getPackageName());
+        } else {
+            currentFavourites.add(mAppInfo.getPackageName());
+        }
 
-            var viewPagerController = activity.getViewPagerController();
-            viewPagerController.refreshFavouritesFragment();
+        favouritesHelper.saveFavourites(currentFavourites);
 
-            ServiceManager.getMainHandler().post(viewPagerController::refreshAllVisibleFragments);
-        });
+        var viewPagerController = activity.getViewPagerController();
+        viewPagerController.refreshFavouritesFragment();
+
+        ServiceManager.getMainHandler().post(viewPagerController::refreshAllVisibleFragments);
     }
 }
