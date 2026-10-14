@@ -215,7 +215,7 @@ public final class SettingsManager {
     }
 
     public static TextAlignmentType getTextAlignment() {
-        return TextAlignmentType.valueOf(
+        return TextAlignmentType.valueFrom(
             sPrefs.getString(KEY_TEXT_ALIGNMENT, TextAlignmentType.LEFT.getValue())
         );
     }

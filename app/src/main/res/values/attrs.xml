@@ -2,10 +2,12 @@
 <resources>
     <attr name="isHeading" format="boolean" />
     <attr name="overrideFontSize" format="boolean" />
+    <attr name="overrideAlignment" />
 
     <declare-styleable name="FontTextView">
         <attr name="isHeading" />
         <attr name="overrideFontSize" />
+        <attr name="overrideAlignment" />
     </declare-styleable>
 
     <attr name="fontEditTextStyle" format="reference"/>

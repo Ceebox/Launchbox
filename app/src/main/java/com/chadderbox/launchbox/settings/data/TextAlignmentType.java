@@ -6,7 +6,7 @@ public enum TextAlignmentType {
 
     private final String mValue;
 
-    private TextAlignmentType(String value) {
+    TextAlignmentType(String value) {
         mValue = value;
     }
 
@@ -14,14 +14,14 @@ public enum TextAlignmentType {
         return mValue;
     }
 
-//    public static TextAlignmentType valueOf(String label) {
-//        for (var type : values()) {
-//            if (java.util.Objects.equals(type.getValue(), label)) {
-//                return type;
-//            }
-//        }
-//
-//        // Default
-//        return LEFT;
-//    }
+    public static TextAlignmentType valueFrom(String label) {
+        for (var type : values()) {
+            if (java.util.Objects.equals(type.getValue(), label)) {
+                return type;
+            }
+        }
+
+        // Default
+        return LEFT;
+    }
 }
