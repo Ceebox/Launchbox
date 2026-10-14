@@ -56,8 +56,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public final class MainActivity
     extends FragmentActivity
@@ -65,7 +63,6 @@ public final class MainActivity
     IAdapterFetcher,
     SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final HashMap<Class<? extends AppListFragmentBase>, CombinedAdapter> mAdapters = new HashMap<>();
     private AppLoader mAppLoader;
     private AppAliasProvider mAppAliasHelper;
