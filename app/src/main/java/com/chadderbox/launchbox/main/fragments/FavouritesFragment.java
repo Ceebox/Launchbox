@@ -28,7 +28,7 @@ import com.chadderbox.launchbox.widgets.WidgetHostManager;
 import com.chadderbox.launchbox.widgets.data.WidgetDatabase;
 
 import java.util.List;
-import java.util.concurrent.Executors;
+import com.chadderbox.launchbox.core.AppExecutors;
 
 public final class FavouritesFragment extends AppListFragmentBase {
 
@@ -59,10 +59,11 @@ public final class FavouritesFragment extends AppListFragmentBase {
         setupWidgetManager();
 
         mDragCallback = new DragCallback(mAdapter, recyclerView);
+
+        // TODO: This could be much nicer
         var touchHelper = new ItemTouchHelper(mDragCallback);
         touchHelper.attachToRecyclerView(recyclerView);
         mAdapter.attachTouchHelper(touchHelper);
-
         setupTouchInterception(recyclerView);
 
         mViewModel = new ViewModelProvider(
@@ -139,7 +140,7 @@ public final class FavouritesFragment extends AppListFragmentBase {
 
         mViewModel.enterEditMode();
         mDragCallback.setEditMode(true);
-        mAdapter.notifyEditModeChanged(true);
+        mAdapter.setIsEditing(true);
 //        mWidgetManager.setWidgetsResizing(true);
         mAdapter.notifyDataSetChanged();
     }
@@ -152,7 +153,7 @@ public final class FavouritesFragment extends AppListFragmentBase {
 
         mViewModel.exitEditMode();
         mDragCallback.setEditMode(false);
-        mAdapter.notifyEditModeChanged(false);
+        mAdapter.setIsEditing(false);
 //        mWidgetManager.setWidgetsResizing(false);
         mAdapter.notifyDataSetChanged();
     }
@@ -160,30 +161,31 @@ public final class FavouritesFragment extends AppListFragmentBase {
     @Override
     public void refresh() {
         if (mViewModel != null) {
+            mViewModel.loadFavourites();
             refreshCombinedList();
         }
     }
 
     private void refreshCombinedList() {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppExecutors.getDiskIo().execute(() -> {
             var activity = getActivity();
             if (activity == null) return;
 
             var widgetDao = WidgetDatabase.getDatabase(activity).widgetDao();
             var widgetItems = widgetDao.getAll().stream()
                 .map(WidgetListItem::new)
-                .toList();;
+                .toList();
 
             activity.runOnUiThread(() -> {
-                var fullList = new java.util.ArrayList<com.chadderbox.launchbox.data.ListItem>();
 
                 // Widgets first, then other content
-                fullList.addAll(widgetItems);
-                fullList.addAll(mCurrentApps);
+                var fullList = new java.util.ArrayList<ListItem>(widgetItems);
+                if (mCurrentApps != null) {
+                    fullList.addAll(mCurrentApps);
+                }
 
                 // TODO: Use DiffUtil
-                mAdapter.clearItems();
-                mAdapter.addAll(fullList);
+                mAdapter.updateItems(fullList);
             });
         });
     }

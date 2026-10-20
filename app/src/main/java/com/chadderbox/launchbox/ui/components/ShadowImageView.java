@@ -13,6 +13,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.LruCache;
 import android.view.MotionEvent;
 import android.widget.ImageView;
 
@@ -25,6 +26,8 @@ import com.chadderbox.launchbox.settings.SettingsManager;
 public class ShadowImageView
     extends ImageView
     implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private static final LruCache<Integer, Bitmap> sShadowCache = new LruCache<>(128);
 
     private final Paint mShadowPaint;
     private Paint mTintPaint;
@@ -87,12 +90,6 @@ public class ShadowImageView
     }
 
     public void clearShadowBitmap() {
-        // This is generally to handle virtualization screwing me
-        // At least this isn't WPF!
-        if (mShadowBitmap != null && !mShadowBitmap.isRecycled()) {
-            mShadowBitmap.recycle();
-        }
-
         mShadowBitmap = null;
     }
 
@@ -102,10 +99,23 @@ public class ShadowImageView
             return;
         }
 
+        // Try to fetch it from the cache first
+        var key = System.identityHashCode(mOriginalBitmap);
+        var cached = sShadowCache.get(key);
+        if (cached != null && !cached.isRecycled()) {
+            mShadowBitmap = cached;
+            return;
+        }
+
+        // Generate a new shadowed icon and cache it
         mShadowPaint.setMaskFilter(new BlurMaskFilter(mShadowRadius, BlurMaskFilter.Blur.NORMAL));
         mShadowBitmap = mOriginalBitmap.extractAlpha(mShadowPaint, null);
         mShadowPaint.setMaskFilter(null);
         mShadowPaint.setColor(ContextCompat.getColor(getContext(), R.color.text_shadow));
+
+        if (mShadowBitmap != null) {
+            sShadowCache.put(key, mShadowBitmap);
+        }
     }
 
     @Override
@@ -230,12 +240,19 @@ public class ShadowImageView
         }
     }
 
+    private static void clearGlobalShadowCache() {
+        sShadowCache.evictAll();
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (SettingsManager.KEY_SHADOW_STRENGTH.equals(key)) {
+            clearGlobalShadowCache();
+
             var shadowStrength = SettingsManager.getShadowStrength();
             mShadowDx = shadowStrength;
             mShadowDy = shadowStrength;
+            regenerateShadow();
             invalidate();
         }
 

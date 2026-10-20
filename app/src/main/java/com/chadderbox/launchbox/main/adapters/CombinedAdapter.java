@@ -4,9 +4,9 @@ import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,12 +15,12 @@ import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
+import com.chadderbox.launchbox.data.ItemViewType;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SettingItem;
 import com.chadderbox.launchbox.data.SuggestionItem;
 import com.chadderbox.launchbox.data.WebItem;
 import com.chadderbox.launchbox.data.WidgetListItem;
-import com.chadderbox.launchbox.icons.IconPackLoader;
 import com.chadderbox.launchbox.ui.components.ResizableWidgetFrame;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.viewholders.AppViewHolder;
@@ -31,34 +31,42 @@ import com.chadderbox.launchbox.viewholders.WebViewHolder;
 import com.chadderbox.launchbox.viewholders.WidgetViewHolder;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final int TYPE_HEADER = 0;
-    private static final int TYPE_APP = 1;
-    private static final int TYPE_WEB = 2;
-    private static final int TYPE_SUGGESTION = 3;
-    private static final int TYPE_SETTING = 4;
-    private static final int TYPE_WIDGET = 5;
-
-    private final List<ListItem> mItems;
-    private final IconPackLoader mIconPackLoader;
+    private final AsyncListDiffer<ListItem> mDiffer;
     private final WidgetHostManager mWidgetHostManager;
-    private boolean mActionsEnabled = true;
-    private boolean mIsEditMode = false;
     private ItemTouchHelper mTouchHelper;
+    private boolean mActionsEnabled = true;
+    private boolean mIsEditing = false;
     private int mDefaultItemHeight = 0;
 
     public CombinedAdapter(
         List<ListItem> items,
-        IconPackLoader iconPackLoader,
         WidgetHostManager widgetManager
     ) {
-        mItems = items;
-        mIconPackLoader = iconPackLoader;
+        mDiffer = new AsyncListDiffer<>(this, new DiffUtil.ItemCallback<>() {
+            @Override
+            public boolean areItemsTheSame(@NonNull ListItem oldItem, @NonNull ListItem newItem) {
+                return oldItem.getType() == newItem.getType()
+                    && oldItem.getIdentity().equals(newItem.getIdentity());
+            }
+
+            @Override
+            public boolean areContentsTheSame(@NonNull ListItem oldItem, @NonNull ListItem newItem) {
+                return true;
+            }
+        });
         mWidgetHostManager = widgetManager;
+        mDiffer.submitList(new ArrayList<>(items));
+    }
+
+    private static View inflateView(ViewGroup parent) {
+        return LayoutInflater.from(parent.getContext())
+            .inflate(R.layout.list_item_layout, parent, false);
     }
 
     public boolean getActionsEnabled() {
@@ -71,31 +79,49 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         mActionsEnabled = enabled;
-        for (var item : mItems) {
+        for (var item : mDiffer.getCurrentList()) {
             item.setActionsEnabled(mActionsEnabled);
         }
     }
 
+    public void attachTouchHelper(ItemTouchHelper helper) {
+        mTouchHelper = helper;
+    }
+
+    public ItemTouchHelper getTouchHelper() {
+        return mTouchHelper;
+    }
+
+    public boolean isEditing() {
+        // For future clarification (because this is confusing me)
+        // This is for editing the order of items inside the adapter
+        return mIsEditing;
+    }
+
+    public void setIsEditing(boolean isEditing) {
+        mIsEditing = isEditing;
+    }
+
     @Override
     public int getItemViewType(int position) {
-        var item = mItems.get(position);
+        var item = mDiffer.getCurrentList().get(position);
         return switch (item.getType()) {
-            case HEADER -> TYPE_HEADER;
-            case APP -> TYPE_APP;
-            case WEB -> TYPE_WEB;
-            case SUGGESTION -> TYPE_SUGGESTION;
-            case SETTING -> TYPE_SETTING;
-            case WIDGET -> TYPE_WIDGET;
+            case HEADER -> ItemViewType.HEADER.getId();
+            case APP -> ItemViewType.APP.getId();
+            case WEB -> ItemViewType.WEB.getId();
+            case SUGGESTION -> ItemViewType.SUGGESTION.getId();
+            case SETTING -> ItemViewType.SETTING.getId();
+            case WIDGET -> ItemViewType.WIDGET.getId();
         };
     }
 
     @Override
     public int getItemCount() {
-        return mItems.size();
+        return mDiffer.getCurrentList().size();
     }
 
     public boolean isEmpty() {
-        for (var item : mItems) {
+        for (var item : mDiffer.getCurrentList()) {
             if (!(item instanceof HeaderItem)) {
                 return false;
             }
@@ -105,27 +131,28 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public List<ListItem> getItems() {
-        return mItems;
+        return mDiffer.getCurrentList();
     }
 
     public ListItem getItem(int index) {
-        return mItems.get(index);
+        return mDiffer.getCurrentList().get(index);
     }
 
     public void moveItem(final int fromPosition, final int toPosition) {
+        var updatedItems = new ArrayList<>(mDiffer.getCurrentList());
         if (fromPosition < 0 || toPosition < 0 ||
-            fromPosition >= mItems.size() || toPosition >= mItems.size()) {
+            fromPosition >= updatedItems.size() || toPosition >= updatedItems.size()) {
             return;
         }
 
-        var item = mItems.remove(fromPosition);
-        mItems.add(toPosition, item);
-        notifyItemMoved(fromPosition, toPosition);
+        var item = updatedItems.remove(fromPosition);
+        updatedItems.add(toPosition, item);
+        mDiffer.submitList(updatedItems);
     }
 
     public void saveFavouritesOrder() {
         var favourites = ServiceManager.getService(FavouritesRepository.class);
-        var packageNames = mItems.stream()
+        var packageNames = mDiffer.getCurrentList().stream()
             .filter(i -> i instanceof AppItem)
             .map(i -> ((AppItem) i).getAppInfo().getPackageName())
             .toList();
@@ -135,56 +162,38 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @SuppressLint("NotifyDataSetChanged")
     public void clearItems() {
-        mItems.clear();
-        this.notifyDataSetChanged();
+        mDiffer.submitList(new ArrayList<>());
     }
 
     public void add(ListItem item) {
-        var position = mItems.size();
-        mItems.add(item);
+        var updatedItems = new ArrayList<>(mDiffer.getCurrentList());
+        updatedItems.add(item);
         item.setActionsEnabled(mActionsEnabled);
-        this.notifyItemInserted(position);
+        mDiffer.submitList(updatedItems);
     }
 
     public void addAll(Collection<? extends ListItem> items) {
-        var startPosition = mItems.size();
-        mItems.addAll(items);
+        var updatedItems = new ArrayList<>(mDiffer.getCurrentList());
+        updatedItems.addAll(items);
         for (var item : items) {
             item.setActionsEnabled(mActionsEnabled);
         }
 
-        this.notifyItemRangeInserted(startPosition, items.size());
+        mDiffer.submitList(updatedItems);
     }
 
     public void prependAll(Collection<? extends  ListItem> items) {
-        mItems.addAll(0, items);
+        var updatedItems = new ArrayList<>(mDiffer.getCurrentList());
+        updatedItems.addAll(0, items);
         for (var item : items) {
             item.setActionsEnabled(mActionsEnabled);
         }
 
-        this.notifyItemRangeInserted(0, items.size());
+        mDiffer.submitList(updatedItems);
     }
 
     public void updateItems(List<ListItem> newList) {
-        var diffCallback = new DiffUtil.Callback() {
-            @Override
-            public int getOldListSize() { return mItems.size(); }
-            @Override
-            public int getNewListSize() { return newList.size(); }
-            @Override
-            public boolean areItemsTheSame(int oldPos, int newPos) {
-                return mItems.get(oldPos).equals(newList.get(newPos));
-            }
-            @Override
-            public boolean areContentsTheSame(int oldPos, int newPos) {
-                return mItems.get(oldPos).hashCode() == newList.get(newPos).hashCode();
-            }
-        };
-
-        var diffResult = DiffUtil.calculateDiff(diffCallback);
-        mItems.clear();
-        mItems.addAll(newList);
-        diffResult.dispatchUpdatesTo(this);
+        mDiffer.submitList(new ArrayList<>(newList));
     }
 
     @NonNull
@@ -196,71 +205,39 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             mDefaultItemHeight = view.getMeasuredHeight();
         }
 
-        if (viewType == TYPE_WIDGET) {
+        var type = ItemViewType.fromId(viewType);
+
+        if (type == ItemViewType.WIDGET) {
             var frame = new ResizableWidgetFrame(parent.getContext());
             frame.setLayoutParams(new RecyclerView.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-            return new WidgetViewHolder(frame, mWidgetHostManager);
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ));
+            return new WidgetViewHolder(this, frame, mWidgetHostManager);
         }
 
-        if (viewType == TYPE_HEADER) {
-            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new HeaderViewHolder(view);
-        } else if (viewType == TYPE_APP) {
-            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new AppViewHolder(view);
-        } else if (viewType == TYPE_WEB) {
-            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new WebViewHolder(view);
-        } else if (viewType == TYPE_SUGGESTION) {
-            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new SuggestionViewHolder(view);
-        } else if (viewType == TYPE_SETTING) {
-            var view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_layout, parent, false);
-            return new SettingViewHolder(view);
-        }
-
-        // Idk
-        return new HeaderViewHolder(new TextView(parent.getContext()));
+        var view = inflateView(parent);
+        return switch (type) {
+            case HEADER -> new HeaderViewHolder(this, view);
+            case APP -> new AppViewHolder(this, view);
+            case WEB -> new WebViewHolder(this, view);
+            case SUGGESTION -> new SuggestionViewHolder(this, view);
+            case SETTING -> new SettingViewHolder(this, view);
+            case WIDGET -> throw new AssertionError("Widget handled above");
+        };
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        var item = mItems.get(position);
-
-        if (holder instanceof HeaderViewHolder headerHolder) {
-            if (item instanceof HeaderItem headerItem) {
-                headerHolder.bind(headerItem.getHeader());
-            }
-        } else if (holder instanceof AppViewHolder appHolder) {
-            if (item instanceof AppItem appItem) {
-                appHolder.bind(appItem, mIconPackLoader, mTouchHelper, mIsEditMode);
-            }
-        } else if (holder instanceof WebViewHolder webHolder) {
-            if (item instanceof WebItem webItem) {
-                webHolder.bind(webItem);
-            }
-        } else if (holder instanceof SuggestionViewHolder suggestionHolder) {
-            if (item instanceof SuggestionItem suggestionItem) {
-                suggestionHolder.bind(suggestionItem);
-            }
-        } else if (holder instanceof SettingViewHolder settingHolder) {
-            if (item instanceof SettingItem settingItem) {
-                settingHolder.bind(settingItem);
-            }
-        } else if (holder instanceof WidgetViewHolder widgetHolder) {
-            if (item instanceof WidgetListItem widgetItem) {
-                widgetHolder.bind(widgetItem, false);
-            }
+        switch (mDiffer.getCurrentList().get(position)) {
+            case HeaderItem item -> ((HeaderViewHolder) holder).bind(item);
+            case AppItem item -> ((AppViewHolder) holder).bind(item);
+            case WebItem item -> ((WebViewHolder) holder).bind(item);
+            case SuggestionItem item -> ((SuggestionViewHolder) holder).bind(item);
+            case SettingItem item -> ((SettingViewHolder) holder).bind(item);
+            case WidgetListItem item -> ((WidgetViewHolder) holder).bind(item);
+            default -> throw new IllegalStateException("Unexpected value: " + mDiffer.getCurrentList().get(position));
         }
     }
-
-    public void attachTouchHelper(ItemTouchHelper helper) {
-        mTouchHelper = helper;
-    }
-
-    public void notifyEditModeChanged(boolean isEditMode) {
-        mIsEditMode = isEditMode;
-    }
 }
+

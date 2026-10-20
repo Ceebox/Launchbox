@@ -21,6 +21,8 @@ public final class CustomFontFactory
 
     private static final boolean EXPERIMENT_FORCE_SETTING_FONT_SIZE = false;
 
+    private static CustomFontFactory sInstance;
+
     private Typeface mCurrentTypeface;
     private float mCurrentFontSize;
 
@@ -29,10 +31,17 @@ public final class CustomFontFactory
         updateFontSettings();
     }
 
+    public static synchronized CustomFontFactory getInstance() {
+        if (sInstance == null) {
+            sInstance = new CustomFontFactory();
+        }
+        return sInstance;
+    }
+
     public static void initialise(Activity activity) {
         var inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (inflater != null) {
-            inflater.setFactory2(new CustomFontFactory());
+            inflater.setFactory2(getInstance());
         }
     }
 
@@ -86,13 +95,16 @@ public final class CustomFontFactory
         if (view instanceof TextView textView) {
 
             // We don't want to override the font weight for bold titles, etc
-            var currentWeight = textView.getTypeface().getWeight();
+            var currentTypeface = textView.getTypeface();
+            var currentWeight = currentTypeface != null ? currentTypeface.getWeight() : Typeface.NORMAL;
             var typeface = mCurrentTypeface;
-            if (currentWeight != typeface.getWeight()) {
+            if (typeface != null && currentWeight != typeface.getWeight()) {
                 typeface = Typeface.create(typeface, currentWeight, typeface.isItalic());
             }
 
-            textView.setTypeface(typeface);
+            if (typeface != null) {
+                textView.setTypeface(typeface);
+            }
 
             // At the moment, this generally makes everything look terrible
             if (EXPERIMENT_FORCE_SETTING_FONT_SIZE) {

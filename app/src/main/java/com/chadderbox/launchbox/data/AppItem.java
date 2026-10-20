@@ -17,6 +17,11 @@ public final class AppItem extends ListItem {
     }
 
     @Override
+    public Object getIdentity() {
+        return mAppInfo.getPackageName();
+    }
+
+    @Override
     protected void executeOpenAction(View view) {
         if (view.getContext() instanceof MainActivity app) {
             app.launchApp(mAppInfo);

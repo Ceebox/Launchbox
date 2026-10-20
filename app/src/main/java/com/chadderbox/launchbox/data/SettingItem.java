@@ -19,6 +19,11 @@ public final class SettingItem extends ListItem {
         return mTitle;
     }
 
+    @Override
+    public Object getIdentity() {
+        return mTitle;
+    }
+
     public Intent getIntent() {
         return mIntent;
     }

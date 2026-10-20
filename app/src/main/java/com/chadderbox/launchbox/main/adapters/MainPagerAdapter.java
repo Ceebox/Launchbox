@@ -58,20 +58,15 @@ public final class MainPagerAdapter extends FragmentStateAdapter {
     public void updateVisibility(IFragmentVisiblePredicate predicate) {
         mVisibleFragmentClasses.clear();
         for (var cls : mFragmentClasses) {
-            try {
-                var instance = cls.getConstructor().newInstance();
-                if (predicate.shouldShow(instance)) {
-                    mVisibleFragmentClasses.add(cls);
-                }
-            } catch (Exception e) {
-                // Skip if we can't instantiate it
-                // TODO: Maybe log this?
+            if (predicate.shouldShow(cls)) {
+                mVisibleFragmentClasses.add(cls);
             }
         }
+
         notifyDataSetChanged();
     }
 
     public interface IFragmentVisiblePredicate {
-        boolean shouldShow(AppListFragmentBase fragment);
+        boolean shouldShow(Class<? extends AppListFragmentBase> fragmentClass);
     }
 }

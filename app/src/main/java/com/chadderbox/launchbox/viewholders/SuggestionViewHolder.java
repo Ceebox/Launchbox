@@ -9,12 +9,14 @@ import androidx.appcompat.content.res.AppCompatResources;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SuggestionItem;
+import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.ui.TintHelper;
 
-public final class SuggestionViewHolder extends ViewHolderItemBase {
+public final class SuggestionViewHolder
+    extends ViewHolderItemBase<SuggestionItem> {
 
-    public SuggestionViewHolder(@NonNull View itemView) {
-        super(itemView);
+    public SuggestionViewHolder(@NonNull CombinedAdapter adapter, @NonNull View itemView) {
+        super(adapter, itemView);
 
         itemView.setOnClickListener(v -> {
             var tag = v.getTag();

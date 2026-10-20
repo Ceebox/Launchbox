@@ -47,6 +47,7 @@ import com.chadderbox.launchbox.utils.AppAliasProvider;
 import com.chadderbox.launchbox.utils.AppLoader;
 import com.chadderbox.launchbox.utils.FavouritesRepository;
 import com.chadderbox.launchbox.utils.HiddenAppsRepository;
+import com.chadderbox.launchbox.utils.SettingsFavouritesAccessor;
 import com.chadderbox.launchbox.wallpaper.WallpaperManager;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;
 import com.chadderbox.launchbox.widgets.commands.AddWidgetCommand;
@@ -55,8 +56,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public final class MainActivity
     extends FragmentActivity
@@ -64,7 +63,6 @@ public final class MainActivity
     IAdapterFetcher,
     SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private final HashMap<Class<? extends AppListFragmentBase>, CombinedAdapter> mAdapters = new HashMap<>();
     private AppLoader mAppLoader;
     private AppAliasProvider mAppAliasHelper;
@@ -91,8 +89,8 @@ public final class MainActivity
             switch (action) {
                 case Intent.ACTION_PACKAGE_ADDED:
                 case Intent.ACTION_PACKAGE_REMOVED:
-                    // TODO: Probably remove this from favourites and aliases
                 case Intent.ACTION_PACKAGE_CHANGED:
+                    mAppLoader.refreshInstalledApps();
                     mAlphabetController.populateAlphabetViewLetters();
                     mViewPagerController.refreshAllVisibleFragments();
                     mSearchController.notifyAppsChanged();
@@ -118,7 +116,7 @@ public final class MainActivity
         CustomFontFactory.initialise(this);
 
         ServiceManager.registerService(IconPackLoader.class, () -> mIconPackLoader = new IconPackLoader(getApplicationContext(), SettingsManager.getIconPack()));
-        ServiceManager.registerService(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(mExecutor));
+        ServiceManager.registerService(FavouritesRepository.class, () -> mFavouritesHelper = new FavouritesRepository(new SettingsFavouritesAccessor()));
         ServiceManager.registerService(HiddenAppsRepository.class, () -> mHiddenAppsHelper = new HiddenAppsRepository());
         ServiceManager.registerService(AppAliasProvider.class, () -> mAppAliasHelper = new AppAliasProvider());
         ServiceManager.registerService(AppLoader.class, () -> mAppLoader = new AppLoader(this, mAppAliasHelper));
@@ -138,7 +136,6 @@ public final class MainActivity
         mSearchController = new SearchController(findViewById(R.id.search_sheet));
         var appsAdapter = new CombinedAdapter(
             new ArrayList<>(),
-            mIconPackLoader,
             null
         );
 
@@ -147,7 +144,6 @@ public final class MainActivity
         ServiceManager.registerService(WidgetHostManager.class, () -> mWidgetManager = new WidgetHostManager(this));
         var favouritesAdapter = new CombinedAdapter(
             new ArrayList<>(),
-            mIconPackLoader,
             mWidgetManager
         );
 
@@ -194,6 +190,8 @@ public final class MainActivity
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         registerReceiver(mPackageReceiver, filter);
+
+        refreshUi();
     }
 
     @Override

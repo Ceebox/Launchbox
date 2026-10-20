@@ -7,20 +7,27 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.data.WidgetListItem;
+import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.ui.components.ResizableWidgetFrame;
 import com.chadderbox.launchbox.widgets.WidgetHostManager;
 
-public class WidgetViewHolder extends RecyclerView.ViewHolder {
+public class WidgetViewHolder
+    extends ViewHolderItemBase<WidgetListItem> {
     private final ResizableWidgetFrame mFrame;
     private final WidgetHostManager mWidgetHostManager;
 
-    public WidgetViewHolder(@NonNull ResizableWidgetFrame frame, WidgetHostManager widgetHostManager) {
-        super(frame);
+    public WidgetViewHolder(@NonNull CombinedAdapter adapter, @NonNull ResizableWidgetFrame frame, WidgetHostManager widgetHostManager) {
+        super(adapter, frame);
+
         mFrame = frame;
         mWidgetHostManager = widgetHostManager;
     }
 
-    public void bind(WidgetListItem item, boolean isEditMode) {
+    public void bind(WidgetListItem item) {
+
+        // TODO: Hook up a way to manipulate this again in the future
+        final var isEditMode = false;
+
         mFrame.removeAllViews();
         mFrame.setEditing(isEditMode);
 

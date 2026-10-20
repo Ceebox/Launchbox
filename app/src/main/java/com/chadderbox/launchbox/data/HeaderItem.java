@@ -15,6 +15,11 @@ public final class HeaderItem extends ListItem {
     }
 
     @Override
+    public Object getIdentity() {
+        return mTitle;
+    }
+
+    @Override
     public void executeOpenAction(View view) { }
 
     @Override

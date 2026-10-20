@@ -10,6 +10,8 @@ import com.chadderbox.launchbox.data.SettingItem;
 import com.chadderbox.launchbox.utils.CancellationToken;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
@@ -33,7 +35,9 @@ public final class SettingsSearchProvider implements ISearchProvider {
     @Override
     public void searchAsync(String query, Consumer<List<ListItem>> callback, CancellationToken cancellationToken) {
         mExecutor.execute(() -> {
-            var results = new ArrayList<ListItem>();
+
+            // You can get quite a lot of duplicates here so keep it unique by name
+            var results = new HashMap<String, ListItem>();
 
             try {
                 var packageManager = mContext.getPackageManager();
@@ -55,12 +59,12 @@ public final class SettingsSearchProvider implements ISearchProvider {
                         launchIntent.setClassName(info.activityInfo.packageName, info.activityInfo.name);
                         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                        results.add(new SettingItem(label, launchIntent));
+                        results.put(label, new SettingItem(label, launchIntent));
                     }
                 }
             } catch (Exception ignored) { }
 
-            new Handler(Looper.getMainLooper()).post(() -> callback.accept(results));
+            new Handler(Looper.getMainLooper()).post(() -> callback.accept(results.values().stream().toList()));
         });
     }
 }

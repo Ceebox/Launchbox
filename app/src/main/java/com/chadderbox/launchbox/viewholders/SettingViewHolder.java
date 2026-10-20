@@ -9,12 +9,13 @@ import androidx.appcompat.content.res.AppCompatResources;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.data.SettingItem;
+import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.ui.TintHelper;
 
 public final class SettingViewHolder
-    extends ViewHolderItemBase {
-    public SettingViewHolder(@NonNull View itemView) {
-        super(itemView);
+    extends ViewHolderItemBase<SettingItem> {
+    public SettingViewHolder(@NonNull CombinedAdapter adapter, @NonNull View itemView) {
+        super(adapter, itemView);
 
         itemView.setOnClickListener(v -> {
             var tag = v.getTag();
