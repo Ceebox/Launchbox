@@ -26,7 +26,7 @@ public final class AppViewHolder
     extends ViewHolderItemBase {
 
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    private static final ExecutorService sIconExecutor = Executors.newFixedThreadPool(Math.max(2, Math.min(CPU_COUNT - 1, 4)));
+    private static final ExecutorService sIconExecutor = Executors.newFixedThreadPool(Math.clamp(CPU_COUNT - 1, 2, 4));
     private static final Handler sMainHandler = new Handler(Looper.getMainLooper());
 
     private final ShadowImageView mIcon;
@@ -58,8 +58,6 @@ public final class AppViewHolder
 
             return false;
         });
-
-        SettingsManager.registerChangeListener(this);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -72,6 +70,7 @@ public final class AppViewHolder
         itemView.setTag(mAppItem);
         mLabel.setText(app.getLabel());
         mLabel.setTypeface(FontHelper.getFont(SettingsManager.getFont()));
+        ShadowHelper.applySettings(mLabel.getContext(), mLabel.getPaint());
 
         var dragHandle = (ShadowImageView) itemView.findViewById(R.id.drag_handle);
         dragHandle.setVisibility(isEditMode ? View.VISIBLE : View.GONE);
@@ -91,15 +90,6 @@ public final class AppViewHolder
         }
 
         loadIcon();
-    }
-
-    @Override
-    protected void whenSharedPreferencesChanged(String key) {
-        super.whenSharedPreferencesChanged(key);
-
-        if (SettingsManager.KEY_ICON_PACK.equals(key)) {
-            loadIcon();
-        }
     }
 
     private void loadIcon() {
