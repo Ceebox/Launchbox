@@ -23,6 +23,7 @@ import com.chadderbox.launchbox.settings.options.implementation.LeftHandedOption
 import com.chadderbox.launchbox.settings.options.implementation.NowPlayingWidgetOption;
 import com.chadderbox.launchbox.settings.options.implementation.ShadowStrengthOption;
 import com.chadderbox.launchbox.settings.options.implementation.ShowOnlyInstalledOption;
+import com.chadderbox.launchbox.settings.options.implementation.TextAlignmentOption;
 import com.chadderbox.launchbox.settings.options.implementation.ThemeOption;
 import com.chadderbox.launchbox.settings.options.implementation.TintIconsOption;
 import com.chadderbox.launchbox.settings.options.implementation.WallpaperDimOption;
@@ -77,6 +78,7 @@ public final class SettingsActivity extends ComponentActivity {
         mOptions.add(new IconPackOption());
         mOptions.add(new FontOption());
         mOptions.add(new FontSizeOption());
+        mOptions.add(new TextAlignmentOption());
         mOptions.add(new ShadowStrengthOption());
         mOptions.add(new TintIconsOption());
         mOptions.add(new FallbackToDefaultIconsOption());

@@ -4,11 +4,11 @@ plugins {
 
 android {
     namespace = "com.chadderbox.launchbox"
-    compileSdk = 37
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.chadderbox.launchbox"
         minSdk = 34
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -44,6 +44,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
+    buildFeatures {
+        viewBinding = true
+    }
+    dependenciesInfo {
+        includeInApk = true
+        includeInBundle = true
+    }
+    buildToolsVersion = "36.0.0"
 
     defaultConfig {
         versionCode = (System.getenv("VERSION_CODE") ?: "1").toInt()
