@@ -5,15 +5,17 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.data.HeaderItem;
+import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.ui.ShadowHelper;
 import com.chadderbox.launchbox.ui.components.FontTextView;
 
 public final class HeaderViewHolder
-    extends ViewHolderItemBase {
+    extends ViewHolderItemBase<HeaderItem> {
 
-    public HeaderViewHolder(@NonNull View viewItem) {
-        super(viewItem);
+    public HeaderViewHolder(@NonNull CombinedAdapter adapter, @NonNull View viewItem) {
+        super(adapter, viewItem);
 
         var icon = itemView.findViewById(R.id.item_icon);
         icon.setVisibility(View.GONE);
@@ -31,8 +33,8 @@ public final class HeaderViewHolder
         text.setPadding(matchIconPadding, 16, matchIconPadding, 16);
     }
 
-    public void bind(String text) {
-        mText.setText(text);
+    public void bind(HeaderItem item) {
+        mText.setText(item.getHeader());
         ShadowHelper.applySettings(mText.getContext(), mText.getPaint());
     }
 

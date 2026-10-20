@@ -17,6 +17,11 @@ public final class SuggestionItem extends ListItem {
     }
 
     @Override
+    public Object getIdentity() {
+        return mSuggestion;
+    }
+
+    @Override
     protected void executeOpenAction(View view) {
         if (view.getContext() instanceof MainActivity app) {
             app.openWebQuery(mSuggestion);

@@ -25,6 +25,11 @@ public class WidgetListItem extends ListItem {
     }
 
     @Override
+    public Object getIdentity() {
+        return mWidgetItem.appWidgetId;
+    }
+
+    @Override
     public ListItemType getType() {
         return ListItemType.WIDGET;
     }

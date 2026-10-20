@@ -58,8 +58,7 @@ public final class SearchController {
 
         ServiceManager.registerService(SearchManager.class, () -> mSearchManager = new SearchManager(searchProviders));
 
-        var iconPackLoader = ServiceManager.getService(IconPackLoader.class);
-        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), iconPackLoader, null);
+        mSearchAdapter = new CombinedAdapter(new ArrayList<>(), null);
 
         var searchResultsView = (RecyclerView) searchSheet.findViewById(R.id.search_results);
         searchResultsView.setLayoutManager(new LinearLayoutManager(activity));

@@ -89,8 +89,8 @@ public final class MainActivity
             switch (action) {
                 case Intent.ACTION_PACKAGE_ADDED:
                 case Intent.ACTION_PACKAGE_REMOVED:
-                    // TODO: Probably remove this from favourites and aliases
                 case Intent.ACTION_PACKAGE_CHANGED:
+                    mAppLoader.refreshInstalledApps();
                     mAlphabetController.populateAlphabetViewLetters();
                     mViewPagerController.refreshAllVisibleFragments();
                     mSearchController.notifyAppsChanged();
@@ -136,7 +136,6 @@ public final class MainActivity
         mSearchController = new SearchController(findViewById(R.id.search_sheet));
         var appsAdapter = new CombinedAdapter(
             new ArrayList<>(),
-            mIconPackLoader,
             null
         );
 
@@ -145,7 +144,6 @@ public final class MainActivity
         ServiceManager.registerService(WidgetHostManager.class, () -> mWidgetManager = new WidgetHostManager(this));
         var favouritesAdapter = new CombinedAdapter(
             new ArrayList<>(),
-            mIconPackLoader,
             mWidgetManager
         );
 
@@ -192,6 +190,8 @@ public final class MainActivity
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         filter.addDataScheme("package");
         registerReceiver(mPackageReceiver, filter);
+
+        refreshUi();
     }
 
     @Override

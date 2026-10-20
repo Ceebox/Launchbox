@@ -59,10 +59,11 @@ public final class FavouritesFragment extends AppListFragmentBase {
         setupWidgetManager();
 
         mDragCallback = new DragCallback(mAdapter, recyclerView);
+
+        // TODO: This could be much nicer
         var touchHelper = new ItemTouchHelper(mDragCallback);
         touchHelper.attachToRecyclerView(recyclerView);
         mAdapter.attachTouchHelper(touchHelper);
-
         setupTouchInterception(recyclerView);
 
         mViewModel = new ViewModelProvider(
@@ -139,7 +140,7 @@ public final class FavouritesFragment extends AppListFragmentBase {
 
         mViewModel.enterEditMode();
         mDragCallback.setEditMode(true);
-        mAdapter.notifyEditModeChanged(true);
+        mAdapter.setIsEditing(true);
 //        mWidgetManager.setWidgetsResizing(true);
         mAdapter.notifyDataSetChanged();
     }
@@ -152,7 +153,7 @@ public final class FavouritesFragment extends AppListFragmentBase {
 
         mViewModel.exitEditMode();
         mDragCallback.setEditMode(false);
-        mAdapter.notifyEditModeChanged(false);
+        mAdapter.setIsEditing(false);
 //        mWidgetManager.setWidgetsResizing(false);
         mAdapter.notifyDataSetChanged();
     }
@@ -160,6 +161,7 @@ public final class FavouritesFragment extends AppListFragmentBase {
     @Override
     public void refresh() {
         if (mViewModel != null) {
+            mViewModel.loadFavourites();
             refreshCombinedList();
         }
     }
@@ -183,8 +185,7 @@ public final class FavouritesFragment extends AppListFragmentBase {
                 }
 
                 // TODO: Use DiffUtil
-                mAdapter.clearItems();
-                mAdapter.addAll(fullList);
+                mAdapter.updateItems(fullList);
             });
         });
     }

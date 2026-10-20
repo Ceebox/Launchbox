@@ -33,6 +33,9 @@ public abstract class ListItem {
         return mType;
     }
 
+    /** Stable identity used by list diffing across refreshed item instances. */
+    public abstract Object getIdentity();
+
     public void setActionsEnabled(boolean enabled) {
         mActionsEnabled = enabled;
     }

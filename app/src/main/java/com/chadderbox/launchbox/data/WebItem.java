@@ -17,6 +17,11 @@ public final class WebItem extends ListItem {
     }
 
     @Override
+    public Object getIdentity() {
+        return mQuery;
+    }
+
+    @Override
     protected void executeOpenAction(View view) {
         if (view.getContext() instanceof MainActivity app) {
             app.openWebQuery(mQuery);

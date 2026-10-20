@@ -11,10 +11,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.ListItem;
 import com.chadderbox.launchbox.fonts.FontHelper;
 import com.chadderbox.launchbox.icons.IconPackLoader;
+import com.chadderbox.launchbox.main.adapters.CombinedAdapter;
 import com.chadderbox.launchbox.settings.SettingsManager;
 import com.chadderbox.launchbox.ui.ShadowHelper;
 import com.chadderbox.launchbox.ui.components.ShadowImageView;
@@ -23,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class AppViewHolder
-    extends ViewHolderItemBase {
+    extends ViewHolderItemBase<AppItem> {
 
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     private static final ExecutorService sIconExecutor = Executors.newFixedThreadPool(Math.clamp(CPU_COUNT - 1, 2, 4));
@@ -35,8 +37,9 @@ public final class AppViewHolder
     private AppItem mAppItem;
     private ItemTouchHelper mTouchHelper;
 
-    public AppViewHolder(@NonNull View itemView) {
-        super(itemView);
+    public AppViewHolder(@NonNull CombinedAdapter adapter, @NonNull View itemView) {
+        super(adapter, itemView);
+
         mIcon = itemView.findViewById(R.id.item_icon);
         mLabel = itemView.findViewById(R.id.item_name);
 
@@ -61,12 +64,13 @@ public final class AppViewHolder
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    public void bind(AppItem appItem, IconPackLoader iconPackLoader, ItemTouchHelper touchHelper, boolean isEditMode) {
+    public void bind(AppItem appItem) {
         mAppItem = appItem;
-        mIconPackLoader = iconPackLoader;
-        mTouchHelper = touchHelper;
+        mIconPackLoader = ServiceManager.getService(IconPackLoader.class);
+        mTouchHelper = mAdapter.getTouchHelper();
 
-        var app = mAppItem.getAppInfo();
+        final var isEditMode = mAdapter.isEditing();
+        final var app = mAppItem.getAppInfo();
         itemView.setTag(mAppItem);
         mLabel.setText(app.getLabel());
         mLabel.setTypeface(FontHelper.getFont(SettingsManager.getFont()));
@@ -87,6 +91,8 @@ public final class AppViewHolder
 
                 return false;
             });
+        } else {
+            dragHandle.setOnTouchListener(null);
         }
 
         loadIcon();

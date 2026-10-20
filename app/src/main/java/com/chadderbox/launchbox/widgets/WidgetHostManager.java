@@ -36,12 +36,22 @@ public final class WidgetHostManager {
     private ActivityResultLauncher<Intent> mConfigLauncher;
     private ActivityResultLauncher<Intent> mBindLauncher;
     private int mPendingWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
+    private boolean mIsEditMode = false;
 
     public WidgetHostManager(Activity activity) {
         mActivity = activity;
         mAppWidgetManager = AppWidgetManager.getInstance(activity);
         mAppWidgetHost = new AppWidgetHost(activity, APPWIDGET_HOST_ID);
         mWidgetDao = WidgetDatabase.getDatabase(mActivity).widgetDao();
+    }
+
+    public boolean isEditMode() {
+        return mIsEditMode;
+    }
+
+    public void setEditMode(boolean isEditing) {
+        // The API for this could be better
+        mIsEditMode = isEditing;
     }
 
     public void showCustomWidgetPicker() {

@@ -30,10 +30,11 @@ public final class ToggleFavouriteCommand
         var favouritesHelper = ServiceManager.getService(FavouritesRepository.class);
         var currentFavourites = favouritesHelper.loadFavourites();
 
-        if (currentFavourites.contains(mAppInfo.getPackageName())) {
-            currentFavourites.remove(mAppInfo.getPackageName());
+        final var packageName = mAppInfo.getPackageName();
+        if (currentFavourites.contains(packageName)) {
+            currentFavourites.remove(packageName);
         } else {
-            currentFavourites.add(mAppInfo.getPackageName());
+            currentFavourites.add(packageName);
         }
 
         favouritesHelper.saveFavourites(currentFavourites);

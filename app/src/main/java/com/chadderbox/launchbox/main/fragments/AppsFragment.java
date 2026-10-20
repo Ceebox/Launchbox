@@ -49,9 +49,7 @@ public final class AppsFragment
         ).get(AppsViewModel.class);
 
         mViewModel.getItems().observe(getViewLifecycleOwner(), list -> {
-            mAdapter.clearItems();
-            mAdapter.addAll(list);
-            mAdapter.notifyDataSetChanged();
+            mAdapter.updateItems(list);
         });
 
         return root;
