@@ -50,8 +50,8 @@ public final class ViewPagerController {
     }
 
     public void refreshFavouritesFragment() {
-        mPagerAdapter.updateVisibility(fragment -> {
-            if (fragment instanceof FavouritesFragment) {
+        mPagerAdapter.updateVisibility(fragmentClass -> {
+            if (fragmentClass == FavouritesFragment.class) {
                 return ServiceManager.getService(FavouritesRepository.class).hasFavourites();
             }
 
