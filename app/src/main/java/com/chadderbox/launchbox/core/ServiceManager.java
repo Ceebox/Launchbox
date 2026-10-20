@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -11,7 +12,7 @@ import java.util.function.Supplier;
 public final class ServiceManager {
 
     private static final Map<Class<?>, Object> sServices = new HashMap<>();
-    private static final Map<Class<?>, Activity> sActivities = new HashMap<>();
+    private static final Map<Class<?>, WeakReference<Activity>> sActivities = new HashMap<>();
     private static final Handler sMainHandler = new Handler(Looper.getMainLooper());
 
     private ServiceManager() { }
@@ -56,16 +57,19 @@ public final class ServiceManager {
      * Register an activity.
      */
     public static <T> void registerActivity(Class<T> type, Activity activity) {
-        sActivities.put(type, activity);
+        sActivities.put(type, new WeakReference<>(activity));
     }
 
     /**
      * Retrieve an instance of an activity.
      */
     public static <T> T getActivity(Class<T> type) {
-        var instance = sActivities.get(type);
-        if (instance != null) {
-            return type.cast(instance);
+        var ref = sActivities.get(type);
+        if (ref != null) {
+            var instance = ref.get();
+            if (instance != null) {
+                return type.cast(instance);
+            }
         }
 
         throw new IllegalStateException("Activity not found: " + type.getName());
