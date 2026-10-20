@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -11,7 +12,6 @@ import androidx.annotation.Nullable;
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.fonts.CustomFontManager;
 import com.chadderbox.launchbox.settings.SettingsManager;
-import com.chadderbox.launchbox.settings.data.TextAlignmentType;
 import com.chadderbox.launchbox.ui.ThemeHelper;
 
 @SuppressLint("AppCompatCustomView")
@@ -43,19 +43,19 @@ public final class FontTextView extends TextView {
                 mFontManager.setIsHeading(a.getBoolean(R.styleable.FontTextView_isHeading, false));
             } catch (Exception ignored) { }
 
-//            var overrideAlignment = false;
-//            try (var a = getContext().obtainStyledAttributes(attrs, R.styleable.FontTextView)) {
-//                overrideAlignment = a.getBoolean(R.styleable.FontTextView_overrideAlignment, false);
-//            } catch (Exception ignored) { }
-//
-//            if (overrideAlignment) {
-//                var alignment = switch (SettingsManager.getTextAlignment()) {
-//                    case CENTER -> FontTextView.TEXT_ALIGNMENT_CENTER;
-//                    case null, default -> FontTextView.TEXT_ALIGNMENT_TEXT_START;
-//                };
-//
-//                setTextAlignment(alignment);
-//            }
+            var overrideAlignment = false;
+            try (var a = getContext().obtainStyledAttributes(attrs, R.styleable.FontTextView)) {
+                overrideAlignment = a.getBoolean(R.styleable.FontTextView_overrideAlignment, false);
+            } catch (Exception ignored) { }
+
+            if (overrideAlignment) {
+                var alignment = switch (SettingsManager.getTextAlignment()) {
+                    case LEFT -> Gravity.START;
+                    case CENTER -> Gravity.CENTER_HORIZONTAL;
+                };
+
+                setGravity(alignment);
+            }
 
             var shouldOverride = false;
             try (var a = getContext().obtainStyledAttributes(attrs, R.styleable.FontTextView)) {

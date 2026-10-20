@@ -17,6 +17,11 @@ public final class TextAlignmentOption extends ListDialogOptionBase<TextAlignmen
     }
 
     @Override
+    public String getDialogTitle() {
+        return "Select Alignment";
+    }
+
+    @Override
     public String getSubtitle(SettingsActivity activity) {
         return SettingsManager.getTextAlignment().getValue();
     }

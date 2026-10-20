@@ -10,6 +10,8 @@ import java.util.List;
 
 public abstract class ListDialogOptionBase<T> implements ISettingOption {
 
+    public abstract String getDialogTitle();
+
     public abstract List<DialogOption<T>> getOptions();
 
     public abstract String getOptionSelectedMessage(T selectedItem);
@@ -25,13 +27,14 @@ public abstract class ListDialogOptionBase<T> implements ISettingOption {
             .toArray(String[]::new);
 
         new AlertDialog.Builder(activity, R.style.Theme_Launcherbox_Dialog)
-            .setTitle("Select Theme")
+            .setTitle(getDialogTitle())
             .setItems(displayNames, (dialog, which) -> {
                 @SuppressWarnings("unchecked") final var chosen = (T)items[which];
                 onOptionSelected(chosen);
 
                 Toast.makeText(activity, getOptionSelectedMessage(chosen), Toast.LENGTH_SHORT).show();
 
+                activity.refreshOptions();
                 activity.recreate();
             })
             .setNegativeButton("Cancel", null)
