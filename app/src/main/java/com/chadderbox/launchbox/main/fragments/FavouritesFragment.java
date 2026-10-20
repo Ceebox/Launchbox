@@ -172,14 +172,15 @@ public final class FavouritesFragment extends AppListFragmentBase {
             var widgetDao = WidgetDatabase.getDatabase(activity).widgetDao();
             var widgetItems = widgetDao.getAll().stream()
                 .map(WidgetListItem::new)
-                .toList();;
+                .toList();
 
             activity.runOnUiThread(() -> {
-                var fullList = new java.util.ArrayList<com.chadderbox.launchbox.data.ListItem>();
 
                 // Widgets first, then other content
-                fullList.addAll(widgetItems);
-                fullList.addAll(mCurrentApps);
+                var fullList = new java.util.ArrayList<ListItem>(widgetItems);
+                if (mCurrentApps != null) {
+                    fullList.addAll(mCurrentApps);
+                }
 
                 // TODO: Use DiffUtil
                 mAdapter.clearItems();
