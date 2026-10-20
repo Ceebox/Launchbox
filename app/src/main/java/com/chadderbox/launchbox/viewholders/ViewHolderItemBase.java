@@ -19,9 +19,4 @@ public abstract class ViewHolderItemBase
 
         ShadowHelper.applySettings(mText.getContext(), mText.getPaint());
     }
-
-    public void bind(String text) {
-        mText.setText(text);
-        ShadowHelper.applySettings(mText.getContext(), mText.getPaint());
-    }
 }

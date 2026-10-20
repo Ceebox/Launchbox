@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.chadderbox.launchbox.R;
 import com.chadderbox.launchbox.settings.SettingsManager;
+import com.chadderbox.launchbox.ui.ShadowHelper;
 import com.chadderbox.launchbox.ui.components.FontTextView;
 
 public final class HeaderViewHolder
@@ -28,6 +29,11 @@ public final class HeaderViewHolder
         }
 
         text.setPadding(matchIconPadding, 16, matchIconPadding, 16);
+    }
+
+    public void bind(String text) {
+        mText.setText(text);
+        ShadowHelper.applySettings(mText.getContext(), mText.getPaint());
     }
 
 }
