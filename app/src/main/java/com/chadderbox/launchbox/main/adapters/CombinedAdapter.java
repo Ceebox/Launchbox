@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.core.AppExecutors;
 import com.chadderbox.launchbox.core.ServiceManager;
 import com.chadderbox.launchbox.data.AppItem;
 import com.chadderbox.launchbox.data.HeaderItem;
@@ -166,25 +167,30 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public void updateItems(List<ListItem> newList) {
-        var diffCallback = new DiffUtil.Callback() {
-            @Override
-            public int getOldListSize() { return mItems.size(); }
-            @Override
-            public int getNewListSize() { return newList.size(); }
-            @Override
-            public boolean areItemsTheSame(int oldPos, int newPos) {
-                return mItems.get(oldPos).equals(newList.get(newPos));
-            }
-            @Override
-            public boolean areContentsTheSame(int oldPos, int newPos) {
-                return mItems.get(oldPos).hashCode() == newList.get(newPos).hashCode();
-            }
-        };
+        final var oldList = new java.util.ArrayList<>(mItems);
+        AppExecutors.getDiskIo().execute(() -> {
+            var diffCallback = new DiffUtil.Callback() {
+                @Override
+                public int getOldListSize() { return oldList.size(); }
+                @Override
+                public int getNewListSize() { return newList.size(); }
+                @Override
+                public boolean areItemsTheSame(int oldPos, int newPos) {
+                    return oldList.get(oldPos).equals(newList.get(newPos));
+                }
+                @Override
+                public boolean areContentsTheSame(int oldPos, int newPos) {
+                    return oldList.get(oldPos).hashCode() == newList.get(newPos).hashCode();
+                }
+            };
 
-        var diffResult = DiffUtil.calculateDiff(diffCallback);
-        mItems.clear();
-        mItems.addAll(newList);
-        diffResult.dispatchUpdatesTo(this);
+            var diffResult = DiffUtil.calculateDiff(diffCallback);
+            ServiceManager.getMainHandler().post(() -> {
+                mItems.clear();
+                mItems.addAll(newList);
+                diffResult.dispatchUpdatesTo(this);
+            });
+        });
     }
 
     @NonNull
@@ -264,3 +270,4 @@ public class CombinedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mIsEditMode = isEditMode;
     }
 }
+
