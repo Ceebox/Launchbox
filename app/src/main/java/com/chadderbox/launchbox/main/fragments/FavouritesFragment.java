@@ -28,7 +28,7 @@ import com.chadderbox.launchbox.widgets.WidgetHostManager;
 import com.chadderbox.launchbox.widgets.data.WidgetDatabase;
 
 import java.util.List;
-import java.util.concurrent.Executors;
+import com.chadderbox.launchbox.core.AppExecutors;
 
 public final class FavouritesFragment extends AppListFragmentBase {
 
@@ -165,7 +165,7 @@ public final class FavouritesFragment extends AppListFragmentBase {
     }
 
     private void refreshCombinedList() {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppExecutors.getDiskIo().execute(() -> {
             var activity = getActivity();
             if (activity == null) return;
 

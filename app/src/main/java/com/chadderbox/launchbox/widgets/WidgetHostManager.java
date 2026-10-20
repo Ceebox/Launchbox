@@ -16,12 +16,12 @@ import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chadderbox.launchbox.R;
+import com.chadderbox.launchbox.core.AppExecutors;
 import com.chadderbox.launchbox.widgets.data.WidgetDao;
 import com.chadderbox.launchbox.widgets.data.WidgetDatabase;
 import com.chadderbox.launchbox.widgets.data.WidgetItem;
 
 import java.util.List;
-import java.util.concurrent.Executors;
 
 public final class WidgetHostManager {
 
@@ -70,7 +70,7 @@ public final class WidgetHostManager {
         options.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, heightDp);
         mAppWidgetManager.updateAppWidgetOptions(appWidgetId, options);
 
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppExecutors.getDiskIo().execute(() -> {
             var item = new WidgetItem(appWidgetId, 0, widthDp, heightDp);
             mWidgetDao.update(item);
         });
@@ -114,7 +114,7 @@ public final class WidgetHostManager {
 
     public void deleteWidget(int appWidgetId) {
         mAppWidgetHost.deleteAppWidgetId(appWidgetId);
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppExecutors.getDiskIo().execute(() -> {
             // Mock item so we can delete it, we only need the ID
             // TODO: Make this only need the ID, if possible ;)
             var item = new WidgetItem(appWidgetId, 0, 0, 0);
@@ -123,7 +123,7 @@ public final class WidgetHostManager {
     }
 
     public void wipeWidgets() {
-        Executors.newSingleThreadExecutor().execute(mWidgetDao::wipe);
+        AppExecutors.getDiskIo().execute(mWidgetDao::wipe);
     }
 
     public void startListening() {
@@ -171,7 +171,7 @@ public final class WidgetHostManager {
     }
 
     private void saveNewWidget(int id) {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppExecutors.getDiskIo().execute(() -> {
             mWidgetDao.insert(new WidgetItem(id, 0, -1, -1));
         });
     }
