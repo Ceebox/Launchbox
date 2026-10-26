@@ -7,7 +7,7 @@ appcompat = "1.8.0"
 material = "1.14.0"
 activity = "1.13.0"
 constraintlayout = "2.2.2"
-core = "1.18.0"
+core = "1.19.1"
 roomCommonJvm = "2.8.5"
 
 [libraries]
